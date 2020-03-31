@@ -8,17 +8,19 @@ There will always be a designated scorch mage who, after pyroblast, casts scorch
 
 The simulation starts immediately before the first scorch finishes casting.  Each of the mages is given a normally distributed initial delay with standard deviation 0.4 seconds.  Between casts an additional normally distributed delay of 0.05 seconds is imposed.  The duration of a session is again normally distributed with an average of 120 seconds and a 12 second deviation.  If a fixed encounter duration is imposed rather than a distribution, the selected encounter duration highly influences relative rotation values due to cyclical advantages of spell timing.
 
+A [posted log](https://github.com/ronkuby-mage/fire-spec-simulation/blob/master/log_example.txt) can be reviewed to verify mechanics.  Most of the status information in the logs is shown when a cast damages the boss.  This status information reports the condition after the spell has affected both boss and player.  Logs can be activated by setting the ```_LOG_SIM``` variable to an integer n, where n >= 0 and n < ```_SIM_SIZE```.
+
 ### Spell power equivalency of critical strike rating
 
 With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  Here is the equivalency for 7 mages:
 ![seven mage equivalence](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/sp_equiv_plots/sp_equiv_7_mages_96_25000.png)
-Compared with other simulations (<https://docs.google.com/spreadsheets/d/1dqFuQeNVa403ulrmuW_8Ww-5UszOde0RPMBe2g7t1g4>, <https://github.com/ignitelio/ignite/blob/master/magus2.ipynb>), these results assign lower value to critical strike chance.  A review of the logs shows that when the critical strike chance is moderate to high, ignite ticks can be delayed for an extended period.  For example in the [posted log](https://github.com/ronkuby-mage/fire-spec-simulation/blob/master/log_example.txt)<sup>\*</sup>, an active ignite does not tick between 30.85s and 39.60s, and again from 42.63s to 52.13s.  These delays, along with the limit of 5 ignite stacks (leaving the crit multiplier at only 1.5) could explain the rapidly depreciating value of critical strike rating.  However, an explaination for the descrepancy between this simulation and previous results is not apparent.
-
-\* -- *Most of the status information in the logs is shown when a cast damages the boss.  This status information reports the condition after the spell has affected both boss and player.  Logs can be activated by setting the ```_LOG_SIM``` variable to an integer n, where n >= 0 and n < ```_SIM_SIZE```.*
+Compare with other simulations:
+* [Quasexort](https://docs.google.com/spreadsheets/d/1dqFuQeNVa403ulrmuW_8Ww-5UszOde0RPMBe2g7t1g4)
+* [elio](https://github.com/ignitelio/ignite/blob/master/magus2.ipynb)
 
 ### Alternative rotations
 
-The comparitive average damage from several alternative rotations is plotted [here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/rotation_plots).  In cases of 3 or 4 mages, starting with two scorches yeilds higher DPS than the baseline of a single scorch to start:
+The comparative average damage from several alternative rotations is plotted [here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/rotation_plots).  In cases of 3 or 4 mages, starting with two scorches yields higher DPS than the baseline of a single scorch to start:
 ![two scorches vs one](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/comparison_1.png)
 The superiority of an extra scorch in these conditions is not surprising because otherwise some of the initial crits will not benefit from a full scorch stack.
 
