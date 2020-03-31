@@ -21,15 +21,16 @@ Compare with other simulations:
 ### Alternative rotations
 
 The comparative average damage from several alternative rotations is plotted [here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/rotation_plots).  In cases of 3 or 4 mages, starting with two scorches yields higher DPS than the baseline of a single scorch to start:
-![two scorches vs one](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/comparison_1.png)
+![two scorches vs one](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/two_scorches_700.png)
 The superiority of an extra scorch in these conditions is not surprising because otherwise some of the initial crits will not benefit from a full scorch stack.
 
 Replacing pyroblast with an (approximate) frostbolt + fireball results in up to 1% dps improvement:
-![frostbolt+fireball vs pyroblast](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/comparison_0.png)
+![frostbolt+fireball vs pyroblast](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/frostbolt_700.png)
 The frostbolt is rank 11 and untalented aside from elemental precision.
 
-Casting combustion before scorch is not a good idea:
-![combustion first vs later](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/comparison_2.png)
+Replacing pyroblast with fire blast + fireball results in up to 2% dps improvement:
+![combustion first vs later](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/fire_blast_open_700.png)
+A opening rotation of **```scorch -> fire blast -> combustion -> -> fireball (repeated)```** is the highest tested.
 
 ### DPS by number of mages
 
