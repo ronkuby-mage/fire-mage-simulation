@@ -1,4 +1,4 @@
-log for spell power = 700, crit chance = 45%, hit chance = 96%:
+log for spell power = 700, crit chance = 35%, hit chance = 96%:
     KEY:
       ic = ignite stack size
       it = ignite time remaining
@@ -8,583 +8,543 @@ log for spell power = 700, crit chance = 45%, hit chance = 96%:
       st = scorch time remaining
       cs = combustion stack size (ignore if cl is 0)
       cl = combustion remaining crits
-         (  0.13): player 5 finished casting scorch   
-     657 (  0.13): player 5 scorch    landed  hits for  657 next is pyroblast ic 0 it 0.00 in 0.00 id    0 sc 1 st 30.00 cs  0 cl 3
-         (  0.14): player 2 finished casting scorch   
-    1678 (  0.14): player 2 scorch    landed crits for 1021 next is pyroblast ic 1 it 4.00 in 2.00 id  225 sc 2 st 30.00 cs  0 cl 3
-         (  0.21): player 6 finished casting scorch   
-    2402 (  0.21): player 6 scorch    landed  hits for  724 next is pyroblast ic 1 it 3.93 in 1.93 id  225 sc 3 st 30.00 cs  0 cl 3
-         (  0.44): player 1 finished casting scorch   
-    3483 (  0.44): player 1 scorch    landed crits for 1082 next is pyroblast ic 2 it 4.00 in 1.70 id  463 sc 4 st 30.00 cs  0 cl 3
-         (  0.65): player 4 finished casting scorch   
-    4588 (  0.65): player 4 scorch    landed crits for 1104 next is pyroblast ic 3 it 4.00 in 1.50 id  706 sc 5 st 30.00 cs  0 cl 3
-         (  0.73): player 3 finished casting scorch   
-    5798 (  0.73): player 3 scorch    landed crits for 1210 next is pyroblast ic 4 it 4.00 in 1.41 id  972 sc 5 st 30.00 cs  0 cl 3
-    6915 (  2.14): ignite ticked   1117 damage done
-    8032 (  4.14): ignite ticked   1117 damage done
-    8032 (  4.73): ignite expired
-         (  6.16): player 2 finished casting pyroblast
-         (  6.17): player 5 finished casting pyroblast
-         (  6.30): player 6 finished casting pyroblast
-         (  6.46): player 1 finished casting pyroblast
-         (  6.70): player 4 finished casting pyroblast
-         (  6.76): player 3 finished casting pyroblast
-   11297 (  7.03): player 2 pyroblast landed crits for 3264 next is fireball  ic 1 it 4.00 in 2.00 id  718 sc 5 st 23.70 cs  1 cl 2
-   14489 (  7.05): player 5 pyroblast landed crits for 3192 next is fireball  ic 2 it 4.00 in 1.99 id 1420 sc 5 st 23.68 cs  1 cl 2
-   17767 (  7.18): player 6 pyroblast landed crits for 3279 next is fireball  ic 3 it 4.00 in 1.86 id 2142 sc 5 st 23.55 cs  1 cl 2
-   19838 (  7.33): player 1 pyroblast landed  hits for 2070 next is fireball  ic 3 it 3.85 in 1.70 id 2142 sc 5 st 23.40 cs  1 cl 3
-   22799 (  7.57): player 4 pyroblast landed crits for 2962 next is fireball  ic 4 it 4.00 in 1.46 id 2793 sc 5 st 23.16 cs  1 cl 2
-   24801 (  7.63): player 3 pyroblast landed  hits for 2002 next is fireball  ic 4 it 3.94 in 1.40 id 2793 sc 5 st 23.10 cs  1 cl 3
-   28013 (  9.03): ignite ticked   3212 damage done
-         (  9.18): player 5 finished casting fireball 
-         (  9.18): player 2 finished casting fireball 
-         (  9.38): player 6 finished casting fireball 
-         (  9.49): player 1 finished casting fireball 
-         (  9.76): player 3 finished casting fireball 
-         (  9.77): player 4 finished casting fireball 
-   30851 ( 10.06): player 5 fireball  landed crits for 2838 next is fireball  ic 5 it 4.00 in 0.98 id 3418 sc 5 st 20.67 cs  2 cl 1
-   33769 ( 10.06): player 2 fireball  landed crits for 2918 next is fireball  ic 5 it 4.00 in 0.98 id 3418 sc 5 st 20.67 cs  2 cl 1
-   36708 ( 10.26): player 6 fireball  landed crits for 2939 next is fireball  ic 5 it 4.00 in 0.77 id 3418 sc 5 st 20.47 cs  2 cl 1
-   39741 ( 10.37): player 1 fireball  landed crits for 3033 next is fireball  ic 5 it 4.00 in 0.67 id 3418 sc 5 st 20.37 cs  2 cl 2
-   42662 ( 10.63): player 3 fireball  landed crits for 2921 next is fireball  ic 5 it 4.00 in 0.40 id 3418 sc 5 st 20.10 cs  2 cl 2
-   44503 ( 10.65): player 4 fireball  landed  hits for 1841 next is fireball  ic 5 it 3.99 in 0.39 id 3418 sc 5 st 20.08 cs  2 cl 2
-   48433 ( 11.03): ignite ticked   3930 damage done
-         ( 12.28): player 2 finished casting fireball 
-         ( 12.30): player 5 finished casting fireball 
-         ( 12.39): player 6 finished casting fireball 
-         ( 12.50): player 1 finished casting fireball 
-         ( 12.76): player 3 finished casting fireball 
-         ( 12.79): player 4 finished casting fireball 
-   52363 ( 13.03): ignite ticked   3930 damage done
-   55324 ( 13.15): player 2 fireball  landed crits for 2961 next is fireball  ic 5 it 4.00 in 1.88 id 3418 sc 5 st 17.58 cs  3 cl 0
-   57207 ( 13.17): player 5 fireball  landed  hits for 1883 next is fireball  ic 5 it 3.98 in 1.86 id 3418 sc 5 st 17.56 cs  3 cl 1
-   60011 ( 13.26): player 6 fireball  landed crits for 2803 next is fireball  ic 5 it 4.00 in 1.77 id 3418 sc 5 st 17.47 cs  3 cl 0
-   60011 ( 13.38): player 1 fireball  landed misses         next is fireball  ic 5 it 3.88 in 1.66 id 3418 sc 5 st 17.35 cs  2 cl 2
-   61914 ( 13.38): player 1 fireball  landed  hits for 1903 next is fireball  ic 5 it 3.88 in 1.66 id 3418 sc 5 st 17.35 cs  3 cl 2
-   64919 ( 13.64): player 3 fireball  landed crits for 3006 next is fireball  ic 5 it 4.00 in 1.40 id 3418 sc 5 st 17.10 cs  3 cl 1
-   67771 ( 13.67): player 4 fireball  landed crits for 2852 next is fireball  ic 5 it 4.00 in 1.37 id 3418 sc 5 st 17.06 cs  3 cl 1
-   71702 ( 15.03): ignite ticked   3930 damage done
-         ( 15.31): player 2 finished casting fireball 
-         ( 15.35): player 5 finished casting fireball 
-         ( 15.40): player 6 finished casting fireball 
-         ( 15.55): player 1 finished casting fireball 
-         ( 15.79): player 3 finished casting fireball 
-         ( 15.83): player 4 finished casting fireball 
-   73578 ( 16.18): player 2 fireball  landed  hits for 1876 next is fireball  ic 5 it 1.48 in 0.85 id 3418 sc 5 st 14.55 cs  4 cl 0
-   76602 ( 16.23): player 5 fireball  landed crits for 3024 next is fireball  ic 5 it 4.00 in 0.81 id 3418 sc 5 st 14.50 cs  4 cl 0
-   78496 ( 16.27): player 6 fireball  landed  hits for 1893 next is fireball  ic 5 it 3.96 in 0.76 id 3418 sc 5 st 14.46 cs  4 cl 0
-   81317 ( 16.42): player 1 fireball  landed crits for 2821 next is fireball  ic 5 it 4.00 in 0.61 id 3418 sc 5 st 14.31 cs  4 cl 1
-   84037 ( 16.67): player 3 fireball  landed crits for 2720 next is fireball  ic 5 it 4.00 in 0.36 id 3418 sc 5 st 14.06 cs  4 cl 0
-   86843 ( 16.70): player 4 fireball  landed crits for 2806 next is fireball  ic 5 it 4.00 in 0.33 id 3418 sc 5 st 14.03 cs  4 cl 0
-   90773 ( 17.03): ignite ticked   3930 damage done
-         ( 18.32): player 2 finished casting fireball 
-         ( 18.38): player 5 finished casting fireball 
-         ( 18.47): player 6 finished casting fireball 
-         ( 18.58): player 1 finished casting fireball 
-         ( 18.81): player 3 finished casting fireball 
-         ( 18.84): player 4 finished casting fireball 
-   94703 ( 19.03): ignite ticked   3930 damage done
-   96680 ( 19.20): player 2 fireball  landed  hits for 1977 next is fireball  ic 5 it 1.50 in 1.83 id 3418 sc 5 st 11.53 cs  5 cl 0
-   98605 ( 19.25): player 5 fireball  landed  hits for 1925 next is fireball  ic 5 it 1.45 in 1.78 id 3418 sc 5 st 11.48 cs  5 cl 0
-   98605 ( 19.35): player 6 fireball  landed misses         next is fireball  ic 5 it 1.35 in 1.69 id 3418 sc 5 st 11.38 cs  4 cl 0
-  100417 ( 19.35): player 6 fireball  landed  hits for 1812 next is fireball  ic 5 it 1.35 in 1.69 id 3418 sc 5 st 11.38 cs  5 cl 0
-  103300 ( 19.45): player 1 fireball  landed crits for 2883 next is fireball  ic 5 it 4.00 in 1.58 id 3418 sc 5 st 11.28 cs  5 cl 0
-  106134 ( 19.68): player 3 fireball  landed crits for 2834 next is fireball  ic 5 it 4.00 in 1.35 id 3418 sc 5 st 11.05 cs  5 cl 0
-  106134 ( 19.72): player 4 fireball  landed misses         next is fireball  ic 5 it 3.96 in 1.31 id 3418 sc 5 st 11.01 cs  4 cl 0
-  106134 ( 19.72): player 4 fireball  landed misses         next is fireball  ic 5 it 3.96 in 1.31 id 3418 sc 5 st 11.01 cs  4 cl 0
-  108022 ( 19.72): player 4 fireball  landed  hits for 1888 next is fireball  ic 5 it 3.96 in 1.31 id 3418 sc 5 st 11.01 cs  5 cl 0
-  111952 ( 21.03): ignite ticked   3930 damage done
-         ( 21.40): player 2 finished casting fireball 
-         ( 21.43): player 5 finished casting fireball 
-         ( 21.48): player 6 finished casting fireball 
-         ( 21.62): player 1 finished casting fireball 
-         ( 21.81): player 3 finished casting fireball 
-         ( 21.86): player 4 finished casting fireball 
-  114757 ( 22.27): player 2 fireball  landed crits for 2805 next is fireball  ic 5 it 4.00 in 0.76 id 3418 sc 5 st  8.46 cs  6 cl 0
-  116586 ( 22.30): player 5 fireball  landed  hits for 1828 next is fireball  ic 5 it 3.97 in 0.73 id 3418 sc 5 st  8.43 cs  6 cl 0
-  118484 ( 22.36): player 6 fireball  landed  hits for 1898 next is fireball  ic 5 it 3.92 in 0.68 id 3418 sc 5 st  8.37 cs  6 cl 0
-  118484 ( 22.49): player 1 fireball  landed misses         next is fireball  ic 5 it 3.78 in 0.54 id 3418 sc 5 st  8.24 cs  5 cl 0
-  120475 ( 22.49): player 1 fireball  landed  hits for 1991 next is fireball  ic 5 it 3.78 in 0.54 id 3418 sc 5 st  8.24 cs  6 cl 0
-  122330 ( 22.69): player 3 fireball  landed  hits for 1855 next is fireball  ic 5 it 3.59 in 0.35 id 3418 sc 5 st  8.04 cs  6 cl 0
-  125078 ( 22.73): player 4 fireball  landed crits for 2749 next is fireball  ic 5 it 4.00 in 0.30 id 3418 sc 5 st  8.00 cs  6 cl 0
-  129009 ( 23.03): ignite ticked   3930 damage done
-         ( 24.43): player 2 finished casting fireball 
-         ( 24.44): player 5 finished casting fireball 
-         ( 24.54): player 6 finished casting fireball 
-         ( 24.68): player 1 finished casting fireball 
-         ( 24.82): player 3 finished casting fireball 
-         ( 24.87): player 4 finished casting fireball 
-  132939 ( 25.03): ignite ticked   3930 damage done
-  134935 ( 25.30): player 2 fireball  landed  hits for 1996 next is fireball  ic 5 it 1.43 in 1.73 id 3418 sc 5 st  5.43 cs  7 cl 0
-  136921 ( 25.32): player 5 fireball  landed  hits for 1986 next is fireball  ic 5 it 1.41 in 1.72 id 3418 sc 5 st  5.41 cs  7 cl 0
-  138890 ( 25.42): player 6 fireball  landed  hits for 1969 next is fireball  ic 5 it 1.31 in 1.61 id 3418 sc 5 st  5.31 cs  7 cl 0
-  138890 ( 25.55): player 1 fireball  landed misses         next is fireball  ic 5 it 1.18 in 1.48 id 3418 sc 5 st  5.18 cs  6 cl 0
-  140917 ( 25.55): player 1 fireball  landed  hits for 2027 next is fireball  ic 5 it 1.18 in 1.48 id 3418 sc 5 st  5.18 cs  7 cl 0
-  143646 ( 25.70): player 3 fireball  landed crits for 2729 next is fireball  ic 5 it 4.00 in 1.34 id 3418 sc 5 st  5.03 cs  7 cl 0
-  146529 ( 25.74): player 4 fireball  landed crits for 2883 next is fireball  ic 5 it 4.00 in 1.29 id 3418 sc 5 st  4.99 cs  7 cl 0
-  150459 ( 27.03): ignite ticked   3930 damage done
-         ( 27.45): player 5 finished casting fireball 
-         ( 27.51): player 2 finished casting fireball 
-         ( 27.63): player 6 finished casting fireball 
-         ( 27.70): player 1 finished casting fireball 
-         ( 27.87): player 4 finished casting fireball 
-         ( 27.97): player 3 finished casting fireball 
-  152429 ( 28.33): player 5 fireball  landed  hits for 1970 next is fireball  ic 5 it 1.42 in 0.71 id 3418 sc 5 st  2.40 cs  8 cl 0
-  154422 ( 28.38): player 2 fireball  landed  hits for 1992 next is fireball  ic 5 it 1.36 in 0.65 id 3418 sc 5 st  2.35 cs  8 cl 0
-  157414 ( 28.51): player 6 fireball  landed crits for 2992 next is fireball  ic 5 it 4.00 in 0.53 id 3418 sc 5 st  2.22 cs  8 cl 0
-  159291 ( 28.58): player 1 fireball  landed  hits for 1877 next is scorch    ic 5 it 3.93 in 0.46 id 3418 sc 5 st  2.16 cs  8 cl 0
-  162233 ( 28.75): player 4 fireball  landed crits for 2943 next is fireball  ic 5 it 4.00 in 0.29 id 3418 sc 5 st  1.98 cs  8 cl 0
-  165138 ( 28.84): player 3 fireball  landed crits for 2905 next is fireball  ic 5 it 4.00 in 0.19 id 3418 sc 5 st  1.89 cs  8 cl 0
-  169068 ( 29.03): ignite ticked   3930 damage done
-         ( 29.21): player 1 finished casting scorch   
-  170214 ( 29.21): player 1 scorch    landed crits for 1146 next is fireball  ic 5 it 4.00 in 1.83 id 3418 sc 5 st 30.00 cs  9 cl 0
-         ( 30.47): player 5 finished casting fireball 
-         ( 30.53): player 2 finished casting fireball 
-         ( 30.64): player 6 finished casting fireball 
-         ( 30.90): player 4 finished casting fireball 
-         ( 30.99): player 3 finished casting fireball 
-  174144 ( 31.03): ignite ticked   3930 damage done
-  176921 ( 31.34): player 5 fireball  landed crits for 2777 next is fireball  ic 5 it 4.00 in 1.69 id 3418 sc 5 st 27.87 cs  9 cl 0
-  179675 ( 31.41): player 2 fireball  landed crits for 2754 next is fireball  ic 5 it 4.00 in 1.62 id 3418 sc 5 st 27.80 cs  9 cl 0
-  182619 ( 31.52): player 6 fireball  landed crits for 2943 next is fireball  ic 5 it 4.00 in 1.51 id 3418 sc 5 st 27.69 cs  9 cl 0
-  184432 ( 31.78): player 4 fireball  landed  hits for 1814 next is fireball  ic 5 it 3.74 in 1.25 id 3418 sc 5 st 27.43 cs  9 cl 0
-  186463 ( 31.87): player 3 fireball  landed  hits for 2031 next is fireball  ic 5 it 3.65 in 1.17 id 3418 sc 5 st 27.34 cs  9 cl 0
-         ( 32.23): player 1 finished casting fireball 
-  190393 ( 33.03): ignite ticked   3930 damage done
-  193393 ( 33.11): player 1 fireball  landed crits for 3000 next is fireball  ic 5 it 4.00 in 1.92 id 3418 sc 5 st 26.10 cs 10 cl 0
-         ( 33.55): player 5 finished casting fireball 
-         ( 33.56): player 2 finished casting fireball 
-         ( 33.67): player 6 finished casting fireball 
-         ( 33.92): player 4 finished casting fireball 
-         ( 34.01): player 3 finished casting fireball 
-  196155 ( 34.43): player 5 fireball  landed crits for 2762 next is fireball  ic 5 it 4.00 in 0.61 id 3418 sc 5 st 24.78 cs 10 cl 0
-  198182 ( 34.43): player 2 fireball  landed  hits for 2027 next is fireball  ic 5 it 4.00 in 0.60 id 3418 sc 5 st 24.78 cs 10 cl 0
-  200170 ( 34.54): player 6 fireball  landed  hits for 1987 next is fireball  ic 5 it 3.89 in 0.49 id 3418 sc 5 st 24.67 cs 10 cl 0
-  202039 ( 34.79): player 4 fireball  landed  hits for 1870 next is fireball  ic 5 it 3.64 in 0.24 id 3418 sc 5 st 24.42 cs 10 cl 0
-  204753 ( 34.88): player 3 fireball  landed crits for 2714 next is fireball  ic 5 it 4.00 in 0.15 id 3418 sc 5 st 24.33 cs 10 cl 0
-  208683 ( 35.03): ignite ticked   3930 damage done
-         ( 35.24): player 1 finished casting fireball 
-  211590 ( 36.12): player 1 fireball  landed crits for 2907 next is fireball  ic 5 it 4.00 in 0.92 id 3418 sc 5 st 23.09 cs 11 cl 0
-         ( 36.56): player 5 finished casting fireball 
-         ( 36.58): player 2 finished casting fireball 
-         ( 36.71): player 6 finished casting fireball 
-         ( 36.99): player 4 finished casting fireball 
-         ( 37.02): player 3 finished casting fireball 
-  215520 ( 37.03): ignite ticked   3930 damage done
-  217341 ( 37.44): player 5 fireball  landed  hits for 1821 next is fireball  ic 5 it 2.68 in 1.60 id 3418 sc 5 st 21.77 cs 11 cl 0
-  219283 ( 37.45): player 2 fireball  landed  hits for 1942 next is fireball  ic 5 it 2.67 in 1.58 id 3418 sc 5 st 21.76 cs 11 cl 0
-  222080 ( 37.58): player 6 fireball  landed crits for 2796 next is fireball  ic 5 it 4.00 in 1.45 id 3418 sc 5 st 21.63 cs 11 cl 0
-  224101 ( 37.87): player 4 fireball  landed  hits for 2022 next is fireball  ic 5 it 3.72 in 1.17 id 3418 sc 5 st 21.34 cs 11 cl 0
-  227011 ( 37.89): player 3 fireball  landed crits for 2910 next is fireball  ic 5 it 4.00 in 1.14 id 3418 sc 5 st 21.31 cs 11 cl 0
-         ( 38.30): player 1 finished casting fireball 
-  230941 ( 39.03): ignite ticked   3930 damage done
-  233875 ( 39.18): player 1 fireball  landed crits for 2934 next is fireball  ic 5 it 4.00 in 1.86 id 3418 sc 5 st 20.03 cs 12 cl 0
-         ( 39.56): player 5 finished casting fireball 
-         ( 39.62): player 2 finished casting fireball 
-         ( 39.71): player 6 finished casting fireball 
-         ( 40.04): player 4 finished casting fireball 
-         ( 40.05): player 3 finished casting fireball 
-  236789 ( 40.44): player 5 fireball  landed crits for 2914 next is fireball  ic 5 it 4.00 in 0.59 id 3418 sc 5 st 18.77 cs 12 cl 0
-  238644 ( 40.50): player 2 fireball  landed  hits for 1855 next is fireball  ic 5 it 3.94 in 0.53 id 3418 sc 5 st 18.71 cs 12 cl 0
-  241352 ( 40.59): player 6 fireball  landed crits for 2708 next is fireball  ic 5 it 4.00 in 0.45 id 3418 sc 5 st 18.62 cs 12 cl 0
-  243207 ( 40.91): player 4 fireball  landed  hits for 1855 next is fireball  ic 5 it 3.67 in 0.12 id 3418 sc 5 st 18.29 cs 12 cl 0
-  245103 ( 40.93): player 3 fireball  landed  hits for 1896 next is fireball  ic 5 it 3.66 in 0.11 id 3418 sc 5 st 18.28 cs 12 cl 0
-  249033 ( 41.03): ignite ticked   3930 damage done
-         ( 41.38): player 1 finished casting fireball 
-  250854 ( 42.26): player 1 fireball  landed  hits for 1821 next is fireball  ic 5 it 2.33 in 0.78 id 3418 sc 5 st 16.95 cs 13 cl 0
-         ( 42.62): player 5 finished casting fireball 
-         ( 42.64): player 2 finished casting fireball 
-         ( 42.73): player 6 finished casting fireball 
-  254784 ( 43.03): ignite ticked   3930 damage done
-         ( 43.08): player 4 finished casting fireball 
-         ( 43.09): player 3 finished casting fireball 
-  257682 ( 43.50): player 5 fireball  landed crits for 2898 next is fireball  ic 5 it 4.00 in 1.53 id 3418 sc 5 st 15.71 cs 13 cl 0
-  259565 ( 43.51): player 2 fireball  landed  hits for 1883 next is fireball  ic 5 it 3.99 in 1.52 id 3418 sc 5 st 15.70 cs 13 cl 0
-  262485 ( 43.61): player 6 fireball  landed crits for 2920 next is fireball  ic 5 it 4.00 in 1.43 id 3418 sc 5 st 15.60 cs 13 cl 0
-  262485 ( 43.96): player 4 fireball  landed misses         next is fireball  ic 5 it 3.65 in 1.08 id 3418 sc 5 st 15.25 cs 12 cl 0
-  265329 ( 43.96): player 4 fireball  landed crits for 2843 next is fireball  ic 5 it 4.00 in 1.08 id 3418 sc 5 st 15.25 cs 13 cl 0
-  268228 ( 43.96): player 3 fireball  landed crits for 2899 next is fireball  ic 5 it 4.00 in 1.07 id 3418 sc 5 st 15.25 cs 13 cl 0
-         ( 44.42): player 1 finished casting fireball 
-  272158 ( 45.03): ignite ticked   3930 damage done
-  274128 ( 45.29): player 1 fireball  landed  hits for 1970 next is fireball  ic 5 it 2.67 in 1.74 id 3418 sc 5 st 13.91 cs 14 cl 0
-         ( 45.64): player 5 finished casting fireball 
-         ( 45.67): player 2 finished casting fireball 
-         ( 45.75): player 6 finished casting fireball 
-         ( 46.10): player 4 finished casting fireball 
-         ( 46.12): player 3 finished casting fireball 
-  277034 ( 46.51): player 5 fireball  landed crits for 2906 next is fireball  ic 5 it 4.00 in 0.52 id 3418 sc 5 st 12.69 cs 14 cl 0
-  279956 ( 46.54): player 2 fireball  landed crits for 2923 next is fireball  ic 5 it 4.00 in 0.49 id 3418 sc 5 st 12.66 cs 14 cl 0
-  281867 ( 46.62): player 6 fireball  landed  hits for 1910 next is fireball  ic 5 it 3.92 in 0.41 id 3418 sc 5 st 12.58 cs 14 cl 0
-  284840 ( 46.97): player 4 fireball  landed crits for 2973 next is fireball  ic 5 it 4.00 in 0.06 id 3418 sc 5 st 12.24 cs 14 cl 0
-  287565 ( 47.00): player 3 fireball  landed crits for 2725 next is fireball  ic 5 it 4.00 in 0.03 id 3418 sc 5 st 12.21 cs 14 cl 0
-  291495 ( 47.03): ignite ticked   3930 damage done
-         ( 47.49): player 1 finished casting fireball 
-  294401 ( 48.36): player 1 fireball  landed crits for 2906 next is fireball  ic 5 it 4.00 in 0.67 id 3418 sc 5 st 10.84 cs 15 cl 0
-         ( 48.66): player 5 finished casting fireball 
-         ( 48.74): player 2 finished casting fireball 
-         ( 48.77): player 6 finished casting fireball 
-  298331 ( 49.03): ignite ticked   3930 damage done
-         ( 49.15): player 4 finished casting fireball 
-         ( 49.25): player 3 finished casting fireball 
-  301191 ( 49.53): player 5 fireball  landed crits for 2860 next is fireball  ic 5 it 4.00 in 1.50 id 3418 sc 5 st  9.67 cs 15 cl 0
-  303114 ( 49.62): player 2 fireball  landed  hits for 1923 next is fireball  ic 5 it 3.92 in 1.42 id 3418 sc 5 st  9.59 cs 15 cl 0
-  305029 ( 49.65): player 6 fireball  landed  hits for 1915 next is fireball  ic 5 it 3.89 in 1.39 id 3418 sc 5 st  9.56 cs 15 cl 0
-  306877 ( 50.02): player 4 fireball  landed  hits for 1847 next is fireball  ic 5 it 3.51 in 1.01 id 3418 sc 5 st  9.19 cs 15 cl 0
-  308778 ( 50.12): player 3 fireball  landed  hits for 1901 next is fireball  ic 5 it 3.41 in 0.91 id 3418 sc 5 st  9.09 cs 15 cl 0
-         ( 50.50): player 1 finished casting fireball 
-  312708 ( 51.03): ignite ticked   3930 damage done
-  315431 ( 51.37): player 1 fireball  landed crits for 2723 next is fireball  ic 5 it 4.00 in 1.66 id 3418 sc 5 st  7.84 cs 16 cl 0
-         ( 51.68): player 5 finished casting fireball 
-         ( 51.78): player 2 finished casting fireball 
-         ( 51.80): player 6 finished casting fireball 
-         ( 52.16): player 4 finished casting fireball 
-         ( 52.27): player 3 finished casting fireball 
-  317320 ( 52.55): player 5 fireball  landed  hits for 1888 next is fireball  ic 5 it 2.82 in 0.48 id 3418 sc 5 st  6.65 cs 16 cl 0
-  320228 ( 52.66): player 2 fireball  landed crits for 2908 next is fireball  ic 5 it 4.00 in 0.38 id 3418 sc 5 st  6.55 cs 16 cl 0
-  322238 ( 52.67): player 6 fireball  landed  hits for 2011 next is fireball  ic 5 it 3.99 in 0.36 id 3418 sc 5 st  6.54 cs 16 cl 0
-  326168 ( 53.03): ignite ticked   3930 damage done
-  328048 ( 53.04): player 4 fireball  landed  hits for 1879 next is fireball  ic 5 it 3.62 in 1.99 id 3418 sc 5 st  6.17 cs 16 cl 0
-  330047 ( 53.15): player 3 fireball  landed  hits for 1999 next is fireball  ic 5 it 3.51 in 1.89 id 3418 sc 5 st  6.06 cs 16 cl 0
-         ( 53.51): player 1 finished casting fireball 
-  332825 ( 54.38): player 1 fireball  landed crits for 2778 next is fireball  ic 5 it 4.00 in 0.65 id 3418 sc 5 st  4.83 cs 17 cl 0
-         ( 54.70): player 5 finished casting fireball 
-         ( 54.82): player 6 finished casting fireball 
-         ( 54.82): player 2 finished casting fireball 
-  336755 ( 55.03): ignite ticked   3930 damage done
-         ( 55.18): player 4 finished casting fireball 
-         ( 55.35): player 3 finished casting fireball 
-  339575 ( 55.57): player 5 fireball  landed crits for 2820 next is fireball  ic 5 it 4.00 in 1.46 id 3418 sc 5 st  3.64 cs 17 cl 0
-  341563 ( 55.69): player 6 fireball  landed  hits for 1988 next is fireball  ic 5 it 3.88 in 1.34 id 3418 sc 5 st  3.52 cs 17 cl 0
-  344409 ( 55.70): player 2 fireball  landed crits for 2846 next is fireball  ic 5 it 4.00 in 1.33 id 3418 sc 5 st  3.51 cs 17 cl 0
-  344409 ( 56.06): player 4 fireball  landed misses         next is fireball  ic 5 it 3.64 in 0.98 id 3418 sc 5 st  3.15 cs 16 cl 0
-  346267 ( 56.06): player 4 fireball  landed  hits for 1858 next is fireball  ic 5 it 3.64 in 0.98 id 3418 sc 5 st  3.15 cs 17 cl 0
-  349090 ( 56.23): player 3 fireball  landed crits for 2823 next is fireball  ic 5 it 4.00 in 0.80 id 3418 sc 5 st  2.98 cs 17 cl 0
-         ( 56.55): player 1 finished casting fireball 
-  353020 ( 57.03): ignite ticked   3930 damage done
-  354834 ( 57.43): player 1 fireball  landed  hits for 1814 next is scorch    ic 5 it 2.80 in 1.61 id 3418 sc 5 st  1.78 cs 18 cl 0
-         ( 57.75): player 5 finished casting fireball 
-         ( 57.83): player 6 finished casting fireball 
-         ( 57.94): player 2 finished casting fireball 
-         ( 58.08): player 1 finished casting scorch   
-  355616 ( 58.08): player 1 scorch    landed  hits for  782 next is fireball  ic 5 it 2.15 in 0.95 id 3418 sc 5 st 30.00 cs 19 cl 0
-         ( 58.18): player 4 finished casting fireball 
-         ( 58.42): player 3 finished casting fireball 
-  357535 ( 58.63): player 5 fireball  landed  hits for 1919 next is fireball  ic 5 it 1.60 in 0.40 id 3418 sc 5 st 29.45 cs 18 cl 0
-  360246 ( 58.71): player 6 fireball  landed crits for 2711 next is fireball  ic 5 it 4.00 in 0.32 id 3418 sc 5 st 29.37 cs 18 cl 0
-  363113 ( 58.81): player 2 fireball  landed crits for 2867 next is fireball  ic 5 it 4.00 in 0.22 id 3418 sc 5 st 29.27 cs 18 cl 0
-  367044 ( 59.03): ignite ticked   3930 damage done
-  369957 ( 59.06): player 4 fireball  landed crits for 2913 next is fireball  ic 5 it 4.00 in 1.98 id 3418 sc 5 st 29.02 cs 18 cl 0
-  372720 ( 59.29): player 3 fireball  landed crits for 2763 next is fireball  ic 5 it 4.00 in 1.74 id 3418 sc 5 st 28.79 cs 18 cl 0
-         ( 60.77): player 5 finished casting fireball 
-         ( 60.87): player 6 finished casting fireball 
-         ( 61.02): player 2 finished casting fireball 
-  376650 ( 61.03): ignite ticked   3930 damage done
-         ( 61.15): player 1 finished casting fireball 
-         ( 61.22): player 4 finished casting fireball 
-         ( 61.43): player 3 finished casting fireball 
-  378512 ( 61.64): player 5 fireball  landed  hits for 1862 next is fireball  ic 5 it 1.65 in 1.39 id 3418 sc 5 st 26.44 cs 19 cl 0
-  380494 ( 61.75): player 6 fireball  landed  hits for 1983 next is fireball  ic 5 it 1.55 in 1.29 id 3418 sc 5 st 26.33 cs 19 cl 0
-  382432 ( 61.89): player 2 fireball  landed  hits for 1937 next is fireball  ic 5 it 1.40 in 1.14 id 3418 sc 5 st 26.19 cs 19 cl 0
-  384392 ( 62.03): player 1 fireball  landed  hits for 1960 next is fireball  ic 5 it 1.27 in 1.01 id 3418 sc 5 st 26.05 cs 20 cl 0
-  386351 ( 62.09): player 4 fireball  landed  hits for 1959 next is fireball  ic 5 it 1.20 in 0.94 id 3418 sc 5 st 25.99 cs 19 cl 0
-  388313 ( 62.31): player 3 fireball  landed  hits for 1962 next is fireball  ic 5 it 0.99 in 0.73 id 3418 sc 5 st 25.78 cs 19 cl 0
-  392243 ( 63.03): ignite ticked   3930 damage done
-  392243 ( 63.29): ignite expired
-         ( 63.78): player 5 finished casting fireball 
-         ( 63.88): player 6 finished casting fireball 
-         ( 64.05): player 2 finished casting fireball 
-         ( 64.16): player 1 finished casting fireball 
-         ( 64.25): player 4 finished casting fireball 
-         ( 64.47): player 3 finished casting fireball 
-  395174 ( 64.65): player 5 fireball  landed crits for 2931 next is fireball  ic 1 it 4.00 in 2.00 id  645 sc 5 st 23.43 cs 20 cl 0
-  397191 ( 64.76): player 6 fireball  landed  hits for 2016 next is fireball  ic 1 it 3.89 in 1.89 id  645 sc 5 st 23.32 cs 20 cl 0
-  399004 ( 64.92): player 2 fireball  landed  hits for 1813 next is fireball  ic 1 it 3.73 in 1.73 id  645 sc 5 st 23.16 cs 20 cl 0
-  400996 ( 65.04): player 1 fireball  landed  hits for 1992 next is fireball  ic 1 it 3.61 in 1.61 id  645 sc 5 st 23.04 cs 21 cl 0
-  402819 ( 65.13): player 4 fireball  landed  hits for 1823 next is fireball  ic 1 it 3.52 in 1.52 id  645 sc 5 st 22.95 cs 20 cl 0
-  404722 ( 65.35): player 3 fireball  landed  hits for 1903 next is fireball  ic 1 it 3.31 in 1.31 id  645 sc 5 st 22.74 cs 20 cl 0
-  405464 ( 66.65): ignite ticked    742 damage done
-         ( 66.79): player 5 finished casting fireball 
-         ( 66.90): player 6 finished casting fireball 
-         ( 67.08): player 2 finished casting fireball 
-         ( 67.20): player 1 finished casting fireball 
-         ( 67.29): player 4 finished casting fireball 
-         ( 67.51): player 3 finished casting fireball 
-  407392 ( 67.66): player 5 fireball  landed  hits for 1928 next is fireball  ic 1 it 0.99 in 0.99 id  645 sc 5 st 20.42 cs 21 cl 0
-  410131 ( 67.78): player 6 fireball  landed crits for 2739 next is fireball  ic 2 it 4.00 in 0.87 id 1247 sc 5 st 20.31 cs 21 cl 0
-  412015 ( 67.95): player 2 fireball  landed  hits for 1885 next is fireball  ic 2 it 3.82 in 0.70 id 1247 sc 5 st 20.13 cs 21 cl 0
-  413982 ( 68.07): player 1 fireball  landed  hits for 1966 next is fireball  ic 2 it 3.70 in 0.58 id 1247 sc 5 st 20.01 cs 22 cl 0
-  415998 ( 68.16): player 4 fireball  landed  hits for 2016 next is fireball  ic 2 it 3.62 in 0.49 id 1247 sc 5 st 19.92 cs 21 cl 0
-  418934 ( 68.38): player 3 fireball  landed crits for 2937 next is fireball  ic 3 it 4.00 in 0.27 id 1894 sc 5 st 19.70 cs 21 cl 0
-  421112 ( 68.65): ignite ticked   2178 damage done
-         ( 69.85): player 5 finished casting fireball 
-         ( 69.96): player 6 finished casting fireball 
-         ( 70.10): player 2 finished casting fireball 
-         ( 70.22): player 1 finished casting fireball 
-         ( 70.35): player 4 finished casting fireball 
-         ( 70.53): player 3 finished casting fireball 
-  423290 ( 70.65): ignite ticked   2178 damage done
-  425219 ( 70.73): player 5 fireball  landed  hits for 1929 next is fireball  ic 3 it 1.65 in 1.92 id 1894 sc 5 st 17.35 cs 22 cl 0
-  428234 ( 70.83): player 6 fireball  landed crits for 3015 next is fireball  ic 4 it 4.00 in 1.82 id 2557 sc 5 st 17.25 cs 22 cl 0
-  430066 ( 70.97): player 2 fireball  landed  hits for 1833 next is fireball  ic 4 it 3.86 in 1.68 id 2557 sc 5 st 17.11 cs 22 cl 0
-  432013 ( 71.09): player 1 fireball  landed  hits for 1946 next is fireball  ic 4 it 3.74 in 1.56 id 2557 sc 5 st 16.99 cs 23 cl 0
-  434019 ( 71.22): player 4 fireball  landed  hits for 2006 next is fireball  ic 4 it 3.61 in 1.43 id 2557 sc 5 st 16.86 cs 22 cl 0
-  436838 ( 71.40): player 3 fireball  landed crits for 2819 next is fireball  ic 5 it 4.00 in 1.25 id 3177 sc 5 st 16.68 cs 22 cl 0
-  440491 ( 72.65): ignite ticked   3653 damage done
-         ( 72.88): player 5 finished casting fireball 
-         ( 72.98): player 6 finished casting fireball 
-         ( 73.11): player 2 finished casting fireball 
-         ( 73.27): player 1 finished casting fireball 
-         ( 73.39): player 4 finished casting fireball 
-         ( 73.57): player 3 finished casting fireball 
-  443469 ( 73.76): player 5 fireball  landed crits for 2978 next is fireball  ic 5 it 4.00 in 0.89 id 3177 sc 5 st 14.32 cs 23 cl 0
-  445456 ( 73.86): player 6 fireball  landed  hits for 1987 next is fireball  ic 5 it 3.90 in 0.79 id 3177 sc 5 st 14.22 cs 23 cl 0
-  447416 ( 73.99): player 2 fireball  landed  hits for 1960 next is fireball  ic 5 it 3.77 in 0.66 id 3177 sc 5 st 14.09 cs 23 cl 0
-  450368 ( 74.15): player 1 fireball  landed crits for 2952 next is fireball  ic 5 it 4.00 in 0.50 id 3177 sc 5 st 13.93 cs 24 cl 0
-  453327 ( 74.26): player 4 fireball  landed crits for 2959 next is fireball  ic 5 it 4.00 in 0.39 id 3177 sc 5 st 13.82 cs 23 cl 0
-  455302 ( 74.44): player 3 fireball  landed  hits for 1975 next is fireball  ic 5 it 3.82 in 0.21 id 3177 sc 5 st 13.64 cs 23 cl 0
-  458955 ( 74.65): ignite ticked   3653 damage done
-         ( 75.91): player 5 finished casting fireball 
-         ( 76.03): player 6 finished casting fireball 
-         ( 76.16): player 2 finished casting fireball 
-         ( 76.33): player 1 finished casting fireball 
-         ( 76.42): player 4 finished casting fireball 
-         ( 76.59): player 3 finished casting fireball 
-  462608 ( 76.65): ignite ticked   3653 damage done
-  464634 ( 76.78): player 5 fireball  landed  hits for 2026 next is fireball  ic 5 it 1.48 in 1.87 id 3177 sc 5 st 11.30 cs 24 cl 0
-  466598 ( 76.91): player 6 fireball  landed  hits for 1964 next is fireball  ic 5 it 1.35 in 1.74 id 3177 sc 5 st 11.17 cs 24 cl 0
-  469600 ( 77.04): player 2 fireball  landed crits for 3002 next is fireball  ic 5 it 4.00 in 1.61 id 3177 sc 5 st 11.05 cs 24 cl 0
-  471548 ( 77.21): player 1 fireball  landed  hits for 1948 next is fireball  ic 5 it 3.83 in 1.44 id 3177 sc 5 st 10.87 cs 25 cl 0
-  474517 ( 77.29): player 4 fireball  landed crits for 2968 next is fireball  ic 5 it 4.00 in 1.36 id 3177 sc 5 st 10.79 cs 24 cl 0
-  476475 ( 77.46): player 3 fireball  landed  hits for 1958 next is fireball  ic 5 it 3.83 in 1.19 id 3177 sc 5 st 10.62 cs 24 cl 0
-  480129 ( 78.65): ignite ticked   3653 damage done
-         ( 78.99): player 5 finished casting fireball 
-         ( 79.05): player 6 finished casting fireball 
-         ( 79.16): player 2 finished casting fireball 
-         ( 79.40): player 1 finished casting fireball 
-         ( 79.45): player 4 finished casting fireball 
-         ( 79.60): player 3 finished casting fireball 
-  482087 ( 79.86): player 5 fireball  landed  hits for 1958 next is fireball  ic 5 it 1.43 in 0.79 id 3177 sc 5 st  8.22 cs 25 cl 0
-  483982 ( 79.92): player 6 fireball  landed  hits for 1895 next is fireball  ic 5 it 1.37 in 0.73 id 3177 sc 5 st  8.16 cs 25 cl 0
-  485874 ( 80.04): player 2 fireball  landed  hits for 1893 next is fireball  ic 5 it 1.26 in 0.61 id 3177 sc 5 st  8.04 cs 25 cl 0
-  488908 ( 80.28): player 1 fireball  landed crits for 3034 next is fireball  ic 5 it 4.00 in 0.37 id 3177 sc 5 st  7.80 cs 26 cl 0
-  491637 ( 80.33): player 4 fireball  landed crits for 2729 next is fireball  ic 5 it 4.00 in 0.32 id 3177 sc 5 st  7.76 cs 25 cl 0
-  493544 ( 80.47): player 3 fireball  landed  hits for 1906 next is fireball  ic 5 it 3.85 in 0.18 id 3177 sc 5 st  7.61 cs 25 cl 0
-  497197 ( 80.65): ignite ticked   3653 damage done
-         ( 81.99): player 5 finished casting fireball 
-         ( 82.05): player 6 finished casting fireball 
-         ( 82.17): player 2 finished casting fireball 
-         ( 82.48): player 4 finished casting fireball 
-         ( 82.53): player 1 finished casting fireball 
-  500850 ( 82.65): ignite ticked   3653 damage done
-         ( 82.67): player 3 finished casting fireball 
-  503639 ( 82.86): player 5 fireball  landed crits for 2788 next is fireball  ic 5 it 4.00 in 1.79 id 3177 sc 5 st  5.22 cs 26 cl 0
-  506456 ( 82.93): player 6 fireball  landed crits for 2817 next is fireball  ic 5 it 4.00 in 1.72 id 3177 sc 5 st  5.15 cs 26 cl 0
-  509371 ( 83.04): player 2 fireball  landed crits for 2915 next is fireball  ic 5 it 4.00 in 1.61 id 3177 sc 5 st  5.04 cs 26 cl 0
-  512362 ( 83.35): player 4 fireball  landed crits for 2991 next is fireball  ic 5 it 4.00 in 1.30 id 3177 sc 5 st  4.73 cs 26 cl 0
-  514369 ( 83.41): player 1 fireball  landed  hits for 2007 next is fireball  ic 5 it 3.94 in 1.24 id 3177 sc 5 st  4.67 cs 27 cl 0
-  516334 ( 83.54): player 3 fireball  landed  hits for 1965 next is fireball  ic 5 it 3.81 in 1.11 id 3177 sc 5 st  4.54 cs 26 cl 0
-  519987 ( 84.65): ignite ticked   3653 damage done
-         ( 84.99): player 5 finished casting fireball 
-         ( 85.18): player 6 finished casting fireball 
-         ( 85.22): player 2 finished casting fireball 
-         ( 85.51): player 4 finished casting fireball 
-         ( 85.53): player 1 finished casting fireball 
-         ( 85.69): player 3 finished casting fireball 
-  523022 ( 85.86): player 5 fireball  landed crits for 3035 next is fireball  ic 5 it 4.00 in 0.79 id 3177 sc 5 st  2.22 cs 27 cl 0
-  525969 ( 86.06): player 6 fireball  landed crits for 2947 next is fireball  ic 5 it 4.00 in 0.59 id 3177 sc 5 st  2.02 cs 27 cl 0
-  528884 ( 86.10): player 2 fireball  landed crits for 2915 next is fireball  ic 5 it 4.00 in 0.55 id 3177 sc 5 st  1.98 cs 27 cl 0
-  530762 ( 86.38): player 4 fireball  landed  hits for 1878 next is fireball  ic 5 it 3.71 in 0.27 id 3177 sc 5 st  1.70 cs 27 cl 0
-  532716 ( 86.41): player 1 fireball  landed  hits for 1954 next is scorch    ic 5 it 3.69 in 0.24 id 3177 sc 5 st  1.67 cs 28 cl 0
-  534661 ( 86.56): player 3 fireball  landed  hits for 1945 next is fireball  ic 5 it 3.54 in 0.09 id 3177 sc 5 st  1.52 cs 27 cl 0
-  538314 ( 86.65): ignite ticked   3653 damage done
-         ( 87.07): player 1 finished casting scorch   
-  539466 ( 87.07): player 1 scorch    landed crits for 1152 next is fireball  ic 5 it 4.00 in 1.58 id 3177 sc 5 st 30.00 cs 29 cl 0
-         ( 88.04): player 5 finished casting fireball 
-         ( 88.18): player 6 finished casting fireball 
-         ( 88.26): player 2 finished casting fireball 
-         ( 88.62): player 4 finished casting fireball 
-  543120 ( 88.65): ignite ticked   3653 damage done
-         ( 88.79): player 3 finished casting fireball 
-  544944 ( 88.92): player 5 fireball  landed  hits for 1825 next is fireball  ic 5 it 2.15 in 1.73 id 3177 sc 5 st 28.15 cs 28 cl 0
-  546929 ( 89.06): player 6 fireball  landed  hits for 1985 next is fireball  ic 5 it 2.01 in 1.59 id 3177 sc 5 st 28.01 cs 28 cl 0
-  548935 ( 89.13): player 2 fireball  landed  hits for 2006 next is fireball  ic 5 it 1.93 in 1.52 id 3177 sc 5 st 27.93 cs 28 cl 0
-  548935 ( 89.50): player 4 fireball  landed misses         next is fireball  ic 5 it 1.57 in 1.15 id 3177 sc 5 st 27.57 cs 27 cl 0
-  550862 ( 89.50): player 4 fireball  landed  hits for 1928 next is fireball  ic 5 it 1.57 in 1.15 id 3177 sc 5 st 27.57 cs 28 cl 0
-  553777 ( 89.67): player 3 fireball  landed crits for 2914 next is fireball  ic 5 it 4.00 in 0.98 id 3177 sc 5 st 27.40 cs 28 cl 0
-         ( 90.11): player 1 finished casting fireball 
-  557430 ( 90.65): ignite ticked   3653 damage done
-  560374 ( 90.98): player 1 fireball  landed crits for 2944 next is fireball  ic 5 it 4.00 in 1.67 id 3177 sc 5 st 26.09 cs 30 cl 0
-         ( 91.11): player 5 finished casting fireball 
-         ( 91.21): player 6 finished casting fireball 
-         ( 91.29): player 2 finished casting fireball 
-         ( 91.64): player 4 finished casting fireball 
-         ( 91.93): player 3 finished casting fireball 
-  563400 ( 91.99): player 5 fireball  landed crits for 3026 next is fireball  ic 5 it 4.00 in 0.66 id 3177 sc 5 st 25.08 cs 29 cl 0
-  566120 ( 92.09): player 6 fireball  landed crits for 2719 next is fireball  ic 5 it 4.00 in 0.57 id 3177 sc 5 st 24.98 cs 29 cl 0
-  568948 ( 92.17): player 2 fireball  landed crits for 2829 next is fireball  ic 5 it 4.00 in 0.48 id 3177 sc 5 st 24.90 cs 29 cl 0
-  570793 ( 92.52): player 4 fireball  landed  hits for 1845 next is fireball  ic 5 it 3.65 in 0.14 id 3177 sc 5 st 24.55 cs 29 cl 0
-  574446 ( 92.65): ignite ticked   3653 damage done
-  576454 ( 92.81): player 3 fireball  landed  hits for 2008 next is fireball  ic 5 it 3.36 in 1.84 id 3177 sc 5 st 24.26 cs 29 cl 0
-         ( 93.16): player 1 finished casting fireball 
-  579330 ( 94.03): player 1 fireball  landed crits for 2876 next is fireball  ic 5 it 4.00 in 0.62 id 3177 sc 5 st 23.04 cs 31 cl 0
-         ( 94.14): player 5 finished casting fireball 
-         ( 94.27): player 6 finished casting fireball 
-         ( 94.30): player 2 finished casting fireball 
-  582984 ( 94.65): ignite ticked   3653 damage done
-         ( 94.70): player 4 finished casting fireball 
-         ( 94.96): player 3 finished casting fireball 
-  585909 ( 95.02): player 5 fireball  landed crits for 2926 next is fireball  ic 5 it 4.00 in 1.63 id 3177 sc 5 st 22.05 cs 30 cl 0
-  587813 ( 95.15): player 6 fireball  landed  hits for 1904 next is fireball  ic 5 it 3.87 in 1.50 id 3177 sc 5 st 21.92 cs 30 cl 0
-  590836 ( 95.17): player 2 fireball  landed crits for 3022 next is fireball  ic 5 it 4.00 in 1.48 id 3177 sc 5 st 21.90 cs 30 cl 0
-  592792 ( 95.58): player 4 fireball  landed  hits for 1956 next is fireball  ic 5 it 3.59 in 1.07 id 3177 sc 5 st 21.49 cs 30 cl 0
-  592792 ( 95.84): player 3 fireball  landed misses         next is fireball  ic 5 it 3.33 in 0.81 id 3177 sc 5 st 21.23 cs 29 cl 0
-  595724 ( 95.84): player 3 fireball  landed crits for 2932 next is fireball  ic 5 it 4.00 in 0.81 id 3177 sc 5 st 21.23 cs 30 cl 0
-         ( 96.22): player 1 finished casting fireball 
-  599377 ( 96.65): ignite ticked   3653 damage done
-  602384 ( 97.09): player 1 fireball  landed crits for 3007 next is fireball  ic 5 it 4.00 in 1.56 id 3177 sc 5 st 19.98 cs 32 cl 0
-         ( 97.17): player 5 finished casting fireball 
-         ( 97.28): player 6 finished casting fireball 
-         ( 97.32): player 2 finished casting fireball 
-         ( 97.71): player 4 finished casting fireball 
-         ( 97.98): player 3 finished casting fireball 
-  604212 ( 98.04): player 5 fireball  landed  hits for 1828 next is fireball  ic 5 it 3.05 in 0.61 id 3177 sc 5 st 19.03 cs 31 cl 0
-  607131 ( 98.16): player 6 fireball  landed crits for 2918 next is fireball  ic 5 it 4.00 in 0.50 id 3177 sc 5 st 18.91 cs 31 cl 0
-  609847 ( 98.20): player 2 fireball  landed crits for 2716 next is fireball  ic 5 it 4.00 in 0.45 id 3177 sc 5 st 18.87 cs 31 cl 0
-  612637 ( 98.59): player 4 fireball  landed crits for 2790 next is fireball  ic 5 it 4.00 in 0.06 id 3177 sc 5 st 18.48 cs 31 cl 0
-  616291 ( 98.65): ignite ticked   3653 damage done
-  618269 ( 98.86): player 3 fireball  landed  hits for 1979 next is fireball  ic 5 it 3.73 in 1.79 id 3177 sc 5 st 18.21 cs 31 cl 0
-         ( 99.25): player 1 finished casting fireball 
-  621284 (100.13): player 1 fireball  landed crits for 3015 next is fireball  ic 5 it 4.00 in 0.52 id 3177 sc 5 st 16.94 cs 33 cl 0
-         (100.21): player 5 finished casting fireball 
-         (100.31): player 6 finished casting fireball 
-         (100.33): player 2 finished casting fireball 
-  624938 (100.65): ignite ticked   3653 damage done
-         (100.80): player 4 finished casting fireball 
-         (101.08): player 3 finished casting fireball 
-  626841 (101.08): player 5 fireball  landed  hits for 1903 next is fireball  ic 5 it 3.04 in 1.57 id 3177 sc 5 st 15.98 cs 32 cl 0
-  628869 (101.19): player 6 fireball  landed  hits for 2027 next is fireball  ic 5 it 2.94 in 1.46 id 3177 sc 5 st 15.88 cs 32 cl 0
-  630833 (101.21): player 2 fireball  landed  hits for 1965 next is fireball  ic 5 it 2.92 in 1.44 id 3177 sc 5 st 15.86 cs 32 cl 0
-  630833 (101.67): player 4 fireball  landed misses         next is fireball  ic 5 it 2.46 in 0.98 id 3177 sc 5 st 15.40 cs 31 cl 0
-  633722 (101.67): player 4 fireball  landed crits for 2889 next is fireball  ic 5 it 4.00 in 0.98 id 3177 sc 5 st 15.40 cs 32 cl 0
-  635599 (101.96): player 3 fireball  landed  hits for 1876 next is fireball  ic 5 it 3.71 in 0.69 id 3177 sc 5 st 15.11 cs 32 cl 0
-         (102.27): player 1 finished casting fireball 
-  639252 (102.65): ignite ticked   3653 damage done
-  642116 (103.15): player 1 fireball  landed crits for 2864 next is fireball  ic 5 it 4.00 in 1.50 id 3177 sc 5 st 13.92 cs 34 cl 0
-         (103.30): player 5 finished casting fireball 
-         (103.35): player 6 finished casting fireball 
-         (103.39): player 2 finished casting fireball 
-         (103.83): player 4 finished casting fireball 
-         (104.14): player 3 finished casting fireball 
-  644033 (104.17): player 5 fireball  landed  hits for 1917 next is fireball  ic 5 it 2.97 in 0.48 id 3177 sc 5 st 12.89 cs 33 cl 0
-  645965 (104.23): player 6 fireball  landed  hits for 1932 next is fireball  ic 5 it 2.92 in 0.42 id 3177 sc 5 st 12.84 cs 33 cl 0
-  648791 (104.27): player 2 fireball  landed crits for 2826 next is fireball  ic 5 it 4.00 in 0.38 id 3177 sc 5 st 12.80 cs 33 cl 0
-  652444 (104.65): ignite ticked   3653 damage done
-  655436 (104.71): player 4 fireball  landed crits for 2992 next is fireball  ic 5 it 4.00 in 1.94 id 3177 sc 5 st 12.36 cs 33 cl 0
-  655436 (105.01): player 3 fireball  landed misses         next is fireball  ic 5 it 3.69 in 1.64 id 3177 sc 5 st 12.06 cs 32 cl 0
-  658239 (105.01): player 3 fireball  landed crits for 2803 next is fireball  ic 5 it 4.00 in 1.64 id 3177 sc 5 st 12.06 cs 33 cl 0
-         (105.31): player 1 finished casting fireball 
-  660099 (106.18): player 1 fireball  landed  hits for 1860 next is fireball  ic 5 it 2.83 in 0.47 id 3177 sc 5 st 10.88 cs 35 cl 0
-         (106.38): player 5 finished casting fireball 
-         (106.38): player 6 finished casting fireball 
-         (106.45): player 2 finished casting fireball 
-  663753 (106.65): ignite ticked   3653 damage done
-         (106.84): player 4 finished casting fireball 
-         (107.17): player 3 finished casting fireball 
-  666577 (107.25): player 5 fireball  landed crits for 2824 next is fireball  ic 5 it 4.00 in 1.40 id 3177 sc 5 st  9.81 cs 34 cl 0
-  668420 (107.26): player 6 fireball  landed  hits for 1843 next is fireball  ic 5 it 4.00 in 1.39 id 3177 sc 5 st  9.81 cs 34 cl 0
-  671322 (107.33): player 2 fireball  landed crits for 2902 next is fireball  ic 5 it 4.00 in 1.33 id 3177 sc 5 st  9.74 cs 34 cl 0
-  674176 (107.71): player 4 fireball  landed crits for 2854 next is fireball  ic 5 it 4.00 in 0.94 id 3177 sc 5 st  9.35 cs 34 cl 0
-  675987 (108.05): player 3 fireball  landed  hits for 1810 next is fireball  ic 5 it 3.66 in 0.60 id 3177 sc 5 st  9.02 cs 34 cl 0
-         (108.40): player 1 finished casting fireball 
-  679640 (108.65): ignite ticked   3653 damage done
-  682585 (109.28): player 1 fireball  landed crits for 2945 next is fireball  ic 5 it 4.00 in 1.37 id 3177 sc 5 st  7.79 cs 36 cl 0
-         (109.43): player 5 finished casting fireball 
-         (109.45): player 6 finished casting fireball 
-         (109.45): player 2 finished casting fireball 
-         (109.85): player 4 finished casting fireball 
-         (110.20): player 3 finished casting fireball 
-  682585 (110.31): player 5 fireball  landed misses         next is fireball  ic 5 it 2.97 in 0.34 id 3177 sc 5 st  6.76 cs 34 cl 0
-  685301 (110.31): player 5 fireball  landed crits for 2715 next is fireball  ic 5 it 4.00 in 0.34 id 3177 sc 5 st  6.76 cs 35 cl 0
-  688026 (110.32): player 6 fireball  landed crits for 2725 next is fireball  ic 5 it 4.00 in 0.33 id 3177 sc 5 st  6.74 cs 35 cl 0
-  690041 (110.33): player 2 fireball  landed  hits for 2015 next is fireball  ic 5 it 3.99 in 0.32 id 3177 sc 5 st  6.74 cs 35 cl 0
-  693694 (110.65): ignite ticked   3653 damage done
-  696420 (110.72): player 4 fireball  landed crits for 2726 next is fireball  ic 5 it 4.00 in 1.93 id 3177 sc 5 st  6.35 cs 35 cl 0
-  698364 (111.08): player 3 fireball  landed  hits for 1944 next is fireball  ic 5 it 3.65 in 1.57 id 3177 sc 5 st  5.99 cs 35 cl 0
-         (111.41): player 1 finished casting fireball 
-  701179 (112.29): player 1 fireball  landed crits for 2815 next is fireball  ic 5 it 4.00 in 0.36 id 3177 sc 5 st  4.78 cs 37 cl 0
-         (112.47): player 5 finished casting fireball 
-         (112.49): player 6 finished casting fireball 
-         (112.55): player 2 finished casting fireball 
-  704832 (112.65): ignite ticked   3653 damage done
-         (112.87): player 4 finished casting fireball 
-         (113.22): player 3 finished casting fireball 
-  707726 (113.34): player 5 fireball  landed crits for 2894 next is fireball  ic 5 it 4.00 in 1.31 id 3177 sc 5 st  3.73 cs 36 cl 0
-  710558 (113.37): player 6 fireball  landed crits for 2832 next is fireball  ic 5 it 4.00 in 1.28 id 3177 sc 5 st  3.70 cs 36 cl 0
-  713339 (113.43): player 2 fireball  landed crits for 2781 next is fireball  ic 5 it 4.00 in 1.22 id 3177 sc 5 st  3.64 cs 36 cl 0
-  715244 (113.74): player 4 fireball  landed  hits for 1906 next is fireball  ic 5 it 3.68 in 0.91 id 3177 sc 5 st  3.33 cs 36 cl 0
-  718184 (114.09): player 3 fireball  landed crits for 2940 next is fireball  ic 5 it 4.00 in 0.56 id 3177 sc 5 st  2.97 cs 36 cl 0
-         (114.44): player 1 finished casting fireball 
-  721838 (114.65): ignite ticked   3653 damage done
-  723747 (115.32): player 1 fireball  landed  hits for 1910 next is scorch    ic 5 it 2.78 in 1.33 id 3177 sc 5 st  1.75 cs 38 cl 0
-         (115.48): player 5 finished casting fireball 
-         (115.55): player 6 finished casting fireball 
-         (115.61): player 2 finished casting fireball 
-         (115.95): player 4 finished casting fireball 
-         (115.98): player 1 finished casting scorch   
-  724890 (115.98): player 1 scorch    landed crits for 1143 next is fireball  ic 5 it 4.00 in 0.67 id 3177 sc 5 st 30.00 cs 39 cl 0
-  726836 (116.36): player 5 fireball  landed  hits for 1946 next is fireball  ic 5 it 3.63 in 0.29 id 3177 sc 5 st 29.63 cs 37 cl 0
-         (116.40): player 3 finished casting fireball 
-  728862 (116.43): player 6 fireball  landed  hits for 2026 next is fireball  ic 5 it 3.55 in 0.22 id 3177 sc 5 st 29.55 cs 37 cl 0
-  731616 (116.48): player 2 fireball  landed crits for 2754 next is fireball  ic 5 it 4.00 in 0.17 id 3177 sc 5 st 29.50 cs 37 cl 0
-  735270 (116.65): ignite ticked   3653 damage done
-  737201 (116.82): player 4 fireball  landed  hits for 1932 next is fireball  ic 5 it 3.66 in 1.83 id 3177 sc 5 st 29.16 cs 37 cl 0
-  739076 (117.27): player 3 fireball  landed  hits for 1875 next is fireball  ic 5 it 3.21 in 1.38 id 3177 sc 5 st 28.71 cs 37 cl 0
-         (118.56): player 5 finished casting fireball 
-         (118.57): player 6 finished casting fireball 
-         (118.65): player 2 finished casting fireball 
-  742729 (118.65): ignite ticked   3653 damage done
-         (118.98): player 4 finished casting fireball 
-         (118.99): player 1 finished casting fireball 
-         (119.43): player 3 finished casting fireball 
-  744727 (119.44): player 5 fireball  landed  hits for 1998 next is fireball  ic 5 it 1.04 in 1.21 id 3177 sc 5 st 26.55 cs 38 cl 0
-  746689 (119.44): player 6 fireball  landed  hits for 1962 next is fireball  ic 5 it 1.04 in 1.21 id 3177 sc 5 st 26.54 cs 38 cl 0
-  749407 (119.52): player 2 fireball  landed crits for 2718 next is fireball  ic 5 it 4.00 in 1.13 id 3177 sc 5 st 26.46 cs 38 cl 0
-  752165 (119.86): player 4 fireball  landed crits for 2758 next is fireball  ic 5 it 4.00 in 0.79 id 3177 sc 5 st 26.13 cs 38 cl 0
-  754183 (119.86): player 1 fireball  landed  hits for 2018 next is fireball  ic 5 it 4.00 in 0.79 id 3177 sc 5 st 26.12 cs 40 cl 0
-  756203 (120.30): player 3 fireball  landed  hits for 2020 next is fireball  ic 5 it 3.56 in 0.35 id 3177 sc 5 st 25.68 cs 38 cl 0
-  759856 (120.65): ignite ticked   3653 damage done
-         (121.61): player 6 finished casting fireball 
-         (121.63): player 5 finished casting fireball 
-         (121.66): player 2 finished casting fireball 
-         (122.01): player 4 finished casting fireball 
-         (122.03): player 1 finished casting fireball 
-         (122.48): player 3 finished casting fireball 
-  761853 (122.49): player 6 fireball  landed  hits for 1996 next is fireball  ic 5 it 1.37 in 0.16 id 3177 sc 5 st 23.50 cs 39 cl 0
-  763838 (122.51): player 5 fireball  landed  hits for 1986 next is fireball  ic 5 it 1.35 in 0.14 id 3177 sc 5 st 23.48 cs 39 cl 0
-  766871 (122.53): player 2 fireball  landed crits for 3033 next is fireball  ic 5 it 4.00 in 0.12 id 3177 sc 5 st 23.45 cs 39 cl 0
-  770524 (122.65): ignite ticked   3653 damage done
-  773273 (122.89): player 4 fireball  landed crits for 2748 next is fireball  ic 5 it 4.00 in 1.76 id 3177 sc 5 st 23.10 cs 39 cl 0
-  775214 (122.91): player 1 fireball  landed  hits for 1941 next is fireball  ic 5 it 3.98 in 1.74 id 3177 sc 5 st 23.08 cs 41 cl 0
-  777113 (123.36): player 3 fireball  landed  hits for 1899 next is fireball  ic 5 it 3.53 in 1.29 id 3177 sc 5 st 22.63 cs 39 cl 0
-         (124.64): player 6 finished casting fireball 
-  780766 (124.65): ignite ticked   3653 damage done
-         (124.66): player 2 finished casting fireball 
-         (124.74): player 5 finished casting fireball 
-         (125.04): player 4 finished casting fireball 
-         (125.09): player 1 finished casting fireball 
-         (125.49): player 3 finished casting fireball 
-  782637 (125.51): player 6 fireball  landed  hits for 1871 next is fireball  ic 5 it 1.37 in 1.14 id 3177 sc 5 st 20.47 cs 40 cl 0
-  785493 (125.54): player 2 fireball  landed crits for 2856 next is fireball  ic 5 it 4.00 in 1.11 id 3177 sc 5 st 20.45 cs 40 cl 0
-  787388 (125.62): player 5 fireball  landed  hits for 1896 next is fireball  ic 5 it 3.92 in 1.03 id 3177 sc 5 st 20.36 cs 40 cl 0
-  789208 (125.92): player 4 fireball  landed  hits for 1820 next is fireball  ic 5 it 3.62 in 0.73 id 3177 sc 5 st 20.06 cs 40 cl 0
-  792039 (125.97): player 1 fireball  landed crits for 2831 next is fireball  ic 5 it 4.00 in 0.68 id 3177 sc 5 st 20.02 cs 42 cl 0
-  792039 (126.36): player 3 fireball  landed misses         next is fireball  ic 5 it 3.61 in 0.29 id 3177 sc 5 st 19.62 cs 39 cl 0
-  793852 (126.36): player 3 fireball  landed  hits for 1813 next is fireball  ic 5 it 3.61 in 0.29 id 3177 sc 5 st 19.62 cs 40 cl 0
-  797506 (126.65): ignite ticked   3653 damage done
-         (127.69): player 6 finished casting fireball 
-         (127.73): player 2 finished casting fireball 
-         (127.75): player 5 finished casting fireball 
-         (128.08): player 4 finished casting fireball 
-         (128.13): player 1 finished casting fireball 
-         (128.52): player 3 finished casting fireball 
-total damage =  797506
+         (  0.06): player 5 finished casting scorch    
+     679 (  0.06): player 5 scorch     landed  hits for  679 next is pyroblast  ic 0 it 0.00 in 0.00 id    0 sc 1 st 30.00 cs  0 cl 3
+         (  0.32): player 3 finished casting scorch    
+    1381 (  0.32): player 3 scorch     landed  hits for  703 next is pyroblast  ic 0 it 0.00 in 0.00 id    0 sc 2 st 30.00 cs  0 cl 3
+         (  0.45): player 2 finished casting scorch    
+    2488 (  0.45): player 2 scorch     landed crits for 1107 next is pyroblast  ic 1 it 4.00 in 2.00 id  243 sc 3 st 30.00 cs  0 cl 3
+         (  0.50): player 1 finished casting scorch    
+    3244 (  0.50): player 1 scorch     landed  hits for  756 next is pyroblast  ic 1 it 3.95 in 1.95 id  243 sc 4 st 30.00 cs  0 cl 3
+         (  0.63): player 4 finished casting scorch    
+    4018 (  0.63): player 4 scorch     landed  hits for  774 next is pyroblast  ic 1 it 3.82 in 1.82 id  243 sc 5 st 30.00 cs  0 cl 3
+         (  0.91): player 6 finished casting scorch    
+    5182 (  0.91): player 6 scorch     landed crits for 1164 next is pyroblast  ic 2 it 4.00 in 1.55 id  500 sc 5 st 30.00 cs  0 cl 3
+    5757 (  2.45): ignite ticked    575 damage done
+    6331 (  4.45): ignite ticked    575 damage done
+    6331 (  4.91): ignite expired
+         (  6.08): player 5 finished casting pyroblast 
+         (  6.36): player 3 finished casting pyroblast 
+         (  6.54): player 1 finished casting pyroblast 
+         (  6.56): player 2 finished casting pyroblast 
+         (  6.66): player 4 finished casting pyroblast 
+    8484 (  6.96): player 5 pyroblast  landed  hits for 2153 next is fireball   ic 0 it 0.00 in 0.00 id    0 sc 5 st 23.95 cs  1 cl 3
+         (  6.97): player 6 finished casting pyroblast 
+   11710 (  7.23): player 3 pyroblast  landed crits for 3226 next is fireball   ic 1 it 4.00 in 2.00 id  710 sc 5 st 23.68 cs  1 cl 2
+   13707 (  7.41): player 1 pyroblast  landed  hits for 1997 next is fireball   ic 1 it 3.82 in 1.82 id  710 sc 5 st 23.50 cs  1 cl 3
+   16823 (  7.44): player 2 pyroblast  landed crits for 3116 next is fireball   ic 2 it 4.00 in 1.79 id 1395 sc 5 st 23.47 cs  1 cl 2
+   18897 (  7.53): player 4 pyroblast  landed  hits for 2074 next is fireball   ic 2 it 3.91 in 1.70 id 1395 sc 5 st 23.38 cs  1 cl 3
+   21103 (  7.85): player 6 pyroblast  landed  hits for 2206 next is fireball   ic 2 it 3.59 in 1.38 id 1395 sc 5 st 23.06 cs  1 cl 3
+         (  9.17): player 5 finished casting fireball  
+   22707 (  9.23): ignite ticked   1605 damage done
+         (  9.37): player 3 finished casting fireball  
+         (  9.57): player 1 finished casting fireball  
+         (  9.58): player 2 finished casting fireball  
+         (  9.71): player 4 finished casting fireball  
+         ( 10.02): player 6 finished casting fireball  
+   24707 ( 10.04): player 5 fireball   landed  hits for 2000 next is fireball   ic 2 it 1.40 in 1.19 id 1395 sc 5 st 20.87 cs  2 cl 3
+   26511 ( 10.24): player 3 fireball   landed  hits for 1804 next is fireball   ic 2 it 1.20 in 0.99 id 1395 sc 5 st 20.67 cs  2 cl 2
+   29294 ( 10.44): player 1 fireball   landed crits for 2783 next is fireball   ic 3 it 4.00 in 0.79 id 2008 sc 5 st 20.46 cs  2 cl 2
+   32167 ( 10.45): player 2 fireball   landed crits for 2873 next is fireball   ic 4 it 4.00 in 0.78 id 2640 sc 5 st 20.45 cs  2 cl 1
+   34002 ( 10.59): player 4 fireball   landed  hits for 1835 next is fireball   ic 4 it 3.87 in 0.64 id 2640 sc 5 st 20.32 cs  2 cl 3
+   35826 ( 10.89): player 6 fireball   landed  hits for 1824 next is fireball   ic 4 it 3.56 in 0.34 id 2640 sc 5 st 20.01 cs  2 cl 3
+   38862 ( 11.23): ignite ticked   3035 damage done
+         ( 12.20): player 5 finished casting fireball  
+         ( 12.40): player 3 finished casting fireball  
+         ( 12.58): player 1 finished casting fireball  
+         ( 12.63): player 2 finished casting fireball  
+         ( 12.74): player 4 finished casting fireball  
+         ( 13.04): player 6 finished casting fireball  
+   41806 ( 13.07): player 5 fireball   landed crits for 2944 next is fireball   ic 5 it 4.00 in 0.16 id 3287 sc 5 st 17.84 cs  3 cl 2
+   45586 ( 13.23): ignite ticked   3780 damage done
+   47418 ( 13.28): player 3 fireball   landed  hits for 1832 next is fireball   ic 5 it 3.79 in 1.95 id 3287 sc 5 st 17.63 cs  3 cl 2
+   50284 ( 13.46): player 1 fireball   landed crits for 2865 next is fireball   ic 5 it 4.00 in 1.77 id 3287 sc 5 st 17.45 cs  3 cl 1
+   53222 ( 13.50): player 2 fireball   landed crits for 2939 next is fireball   ic 5 it 4.00 in 1.73 id 3287 sc 5 st 17.40 cs  3 cl 0
+   56257 ( 13.62): player 4 fireball   landed crits for 3035 next is fireball   ic 5 it 4.00 in 1.61 id 3287 sc 5 st 17.29 cs  3 cl 2
+   59259 ( 13.91): player 6 fireball   landed crits for 3002 next is fireball   ic 5 it 4.00 in 1.32 id 3287 sc 5 st 17.00 cs  3 cl 2
+         ( 15.20): player 5 finished casting fireball  
+   63040 ( 15.23): ignite ticked   3780 damage done
+         ( 15.43): player 3 finished casting fireball  
+         ( 15.64): player 2 finished casting fireball  
+         ( 15.70): player 1 finished casting fireball  
+         ( 15.82): player 4 finished casting fireball  
+   63040 ( 16.08): player 5 fireball   landed misses         next is fireball   ic 5 it 1.83 in 1.15 id 3287 sc 5 st 14.83 cs  3 cl 2
+         ( 16.11): player 6 finished casting fireball  
+   66011 ( 16.31): player 3 fireball   landed crits for 2971 next is fireball   ic 5 it 4.00 in 0.92 id 3287 sc 5 st 14.60 cs  4 cl 1
+   68729 ( 16.51): player 2 fireball   landed crits for 2718 next is fireball   ic 5 it 4.00 in 0.72 id 3287 sc 5 st 14.39 cs  4 cl 0
+   70730 ( 16.57): player 1 fireball   landed  hits for 2001 next is fireball   ic 5 it 3.94 in 0.66 id 3287 sc 5 st 14.34 cs  4 cl 1
+   73747 ( 16.69): player 4 fireball   landed crits for 3017 next is fireball   ic 5 it 4.00 in 0.54 id 3287 sc 5 st 14.22 cs  4 cl 1
+   76648 ( 16.99): player 6 fireball   landed crits for 2901 next is fireball   ic 5 it 4.00 in 0.25 id 3287 sc 5 st 13.92 cs  4 cl 1
+   80428 ( 17.23): ignite ticked   3780 damage done
+         ( 18.21): player 5 finished casting fireball  
+         ( 18.50): player 3 finished casting fireball  
+         ( 18.67): player 2 finished casting fireball  
+         ( 18.73): player 1 finished casting fireball  
+         ( 18.89): player 4 finished casting fireball  
+   83396 ( 19.08): player 5 fireball   landed crits for 2967 next is fireball   ic 5 it 4.00 in 0.15 id 3287 sc 5 st 11.82 cs  4 cl 1
+         ( 19.15): player 6 finished casting fireball  
+   87176 ( 19.23): ignite ticked   3780 damage done
+   89071 ( 19.37): player 3 fireball   landed  hits for 1895 next is fireball   ic 5 it 3.71 in 1.86 id 3287 sc 5 st 11.53 cs  5 cl 1
+   91880 ( 19.55): player 2 fireball   landed crits for 2809 next is fireball   ic 5 it 4.00 in 1.68 id 3287 sc 5 st 11.36 cs  5 cl 0
+   94849 ( 19.60): player 1 fireball   landed crits for 2969 next is fireball   ic 5 it 4.00 in 1.63 id 3287 sc 5 st 11.31 cs  5 cl 0
+   97620 ( 19.76): player 4 fireball   landed crits for 2772 next is fireball   ic 5 it 4.00 in 1.47 id 3287 sc 5 st 11.14 cs  5 cl 0
+  100515 ( 20.02): player 6 fireball   landed crits for 2895 next is fireball   ic 5 it 4.00 in 1.21 id 3287 sc 5 st 10.89 cs  5 cl 0
+  104295 ( 21.23): ignite ticked   3780 damage done
+         ( 21.28): player 5 finished casting fireball  
+         ( 21.58): player 3 finished casting fireball  
+         ( 21.72): player 2 finished casting fireball  
+         ( 21.73): player 1 finished casting fireball  
+         ( 21.93): player 4 finished casting fireball  
+  107173 ( 22.15): player 5 fireball   landed crits for 2878 next is fireball   ic 5 it 4.00 in 1.08 id 3287 sc 5 st  8.76 cs  5 cl 0
+         ( 22.17): player 6 finished casting fireball  
+  109888 ( 22.46): player 3 fireball   landed crits for 2716 next is fireball   ic 5 it 4.00 in 0.77 id 3287 sc 5 st  8.45 cs  6 cl 0
+  111798 ( 22.60): player 2 fireball   landed  hits for 1910 next is fireball   ic 5 it 3.86 in 0.63 id 3287 sc 5 st  8.31 cs  6 cl 0
+  113730 ( 22.60): player 1 fireball   landed  hits for 1931 next is fireball   ic 5 it 3.86 in 0.63 id 3287 sc 5 st  8.30 cs  6 cl 0
+  115686 ( 22.81): player 4 fireball   landed  hits for 1956 next is fireball   ic 5 it 3.65 in 0.42 id 3287 sc 5 st  8.10 cs  6 cl 0
+  117673 ( 23.04): player 6 fireball   landed  hits for 1988 next is fireball   ic 5 it 3.42 in 0.19 id 3287 sc 5 st  7.87 cs  6 cl 0
+  121454 ( 23.23): ignite ticked   3780 damage done
+         ( 24.32): player 5 finished casting fireball  
+         ( 24.62): player 3 finished casting fireball  
+         ( 24.74): player 1 finished casting fireball  
+         ( 24.78): player 2 finished casting fireball  
+         ( 24.96): player 4 finished casting fireball  
+  123418 ( 25.19): player 5 fireball   landed  hits for 1965 next is fireball   ic 5 it 1.26 in 0.04 id 3287 sc 5 st  5.71 cs  6 cl 0
+         ( 25.20): player 6 finished casting fireball  
+  127199 ( 25.23): ignite ticked   3780 damage done
+  130152 ( 25.50): player 3 fireball   landed crits for 2953 next is fireball   ic 5 it 4.00 in 1.73 id 3287 sc 5 st  5.41 cs  7 cl 0
+  132132 ( 25.61): player 1 fireball   landed  hits for 1981 next is fireball   ic 5 it 3.88 in 1.62 id 3287 sc 5 st  5.29 cs  7 cl 0
+  134041 ( 25.65): player 2 fireball   landed  hits for 1908 next is fireball   ic 5 it 3.85 in 1.58 id 3287 sc 5 st  5.26 cs  7 cl 0
+  135978 ( 25.83): player 4 fireball   landed  hits for 1937 next is fireball   ic 5 it 3.66 in 1.40 id 3287 sc 5 st  5.07 cs  7 cl 0
+  138746 ( 26.08): player 6 fireball   landed crits for 2768 next is fireball   ic 5 it 4.00 in 1.15 id 3287 sc 5 st  4.83 cs  7 cl 0
+  142527 ( 27.23): ignite ticked   3780 damage done
+         ( 27.40): player 5 finished casting fireball  
+         ( 27.66): player 3 finished casting fireball  
+         ( 27.80): player 2 finished casting fireball  
+         ( 27.80): player 1 finished casting fireball  
+         ( 27.96): player 4 finished casting fireball  
+         ( 28.25): player 6 finished casting fireball  
+  144349 ( 28.27): player 5 fireball   landed  hits for 1822 next is fireball   ic 5 it 1.81 in 0.96 id 3287 sc 5 st  2.64 cs  7 cl 0
+  147228 ( 28.54): player 3 fireball   landed crits for 2879 next is fireball   ic 5 it 4.00 in 0.69 id 3287 sc 5 st  2.37 cs  8 cl 0
+  149245 ( 28.68): player 2 fireball   landed  hits for 2017 next is fireball   ic 5 it 3.86 in 0.56 id 3287 sc 5 st  2.23 cs  8 cl 0
+  151200 ( 28.68): player 1 fireball   landed  hits for 1955 next is scorch     ic 5 it 3.86 in 0.55 id 3287 sc 5 st  2.23 cs  8 cl 0
+  153026 ( 28.84): player 4 fireball   landed  hits for 1826 next is fireball   ic 5 it 3.70 in 0.40 id 3287 sc 5 st  2.07 cs  8 cl 0
+  154844 ( 29.12): player 6 fireball   landed  hits for 1817 next is fireball   ic 5 it 3.42 in 0.11 id 3287 sc 5 st  1.79 cs  8 cl 0
+  158624 ( 29.23): ignite ticked   3780 damage done
+         ( 29.36): player 1 finished casting scorch    
+  159807 ( 29.36): player 1 scorch     landed crits for 1182 next is fireball   ic 5 it 4.00 in 1.87 id 3287 sc 5 st 30.00 cs  9 cl 0
+         ( 30.42): player 5 finished casting fireball  
+         ( 30.72): player 3 finished casting fireball  
+         ( 30.84): player 2 finished casting fireball  
+         ( 30.97): player 4 finished casting fireball  
+  163587 ( 31.23): ignite ticked   3780 damage done
+         ( 31.29): player 6 finished casting fireball  
+  165480 ( 31.29): player 5 fireball   landed  hits for 1893 next is fireball   ic 5 it 2.06 in 1.94 id 3287 sc 5 st 28.06 cs  8 cl 0
+  167329 ( 31.60): player 3 fireball   landed  hits for 1849 next is fireball   ic 5 it 1.76 in 1.63 id 3287 sc 5 st 27.76 cs  9 cl 0
+  169192 ( 31.71): player 2 fireball   landed  hits for 1863 next is fireball   ic 5 it 1.65 in 1.52 id 3287 sc 5 st 27.65 cs  9 cl 0
+  171052 ( 31.84): player 4 fireball   landed  hits for 1860 next is fireball   ic 5 it 1.51 in 1.39 id 3287 sc 5 st 27.51 cs  9 cl 0
+  174036 ( 32.17): player 6 fireball   landed crits for 2984 next is fireball   ic 5 it 4.00 in 1.07 id 3287 sc 5 st 27.19 cs  9 cl 0
+         ( 32.39): player 1 finished casting fireball  
+  177817 ( 33.23): ignite ticked   3780 damage done
+  180537 ( 33.27): player 1 fireball   landed crits for 2721 next is fireball   ic 5 it 4.00 in 1.96 id 3287 sc 5 st 26.09 cs 10 cl 0
+         ( 33.48): player 5 finished casting fireball  
+         ( 33.81): player 3 finished casting fireball  
+         ( 33.90): player 2 finished casting fireball  
+         ( 34.04): player 4 finished casting fireball  
+         ( 34.34): player 6 finished casting fireball  
+  182485 ( 34.35): player 5 fireball   landed  hits for 1948 next is fireball   ic 5 it 2.92 in 0.88 id 3287 sc 5 st 25.01 cs  9 cl 0
+  184302 ( 34.68): player 3 fireball   landed  hits for 1817 next is fireball   ic 5 it 2.59 in 0.55 id 3287 sc 5 st 24.68 cs 10 cl 0
+  184302 ( 34.77): player 2 fireball   landed misses         next is fireball   ic 5 it 2.50 in 0.46 id 3287 sc 5 st 24.59 cs  9 cl 0
+  186125 ( 34.92): player 4 fireball   landed  hits for 1823 next is fireball   ic 5 it 2.35 in 0.31 id 3287 sc 5 st 24.44 cs 10 cl 0
+  188012 ( 35.22): player 6 fireball   landed  hits for 1887 next is fireball   ic 5 it 2.05 in 0.01 id 3287 sc 5 st 24.14 cs 10 cl 0
+  191792 ( 35.23): ignite ticked   3780 damage done
+         ( 35.41): player 1 finished casting fireball  
+  193642 ( 36.28): player 1 fireball   landed  hits for 1850 next is fireball   ic 5 it 0.99 in 0.95 id 3287 sc 5 st 23.08 cs 11 cl 0
+         ( 36.49): player 5 finished casting fireball  
+         ( 36.84): player 3 finished casting fireball  
+         ( 36.97): player 2 finished casting fireball  
+         ( 37.06): player 4 finished casting fireball  
+  197422 ( 37.23): ignite ticked   3780 damage done
+  197422 ( 37.27): ignite expired
+  200327 ( 37.36): player 5 fireball   landed crits for 2905 next is fireball   ic 1 it 4.00 in 2.00 id  639 sc 5 st 22.00 cs 10 cl 0
+         ( 37.48): player 6 finished casting fireball  
+  202307 ( 37.71): player 3 fireball   landed  hits for 1979 next is fireball   ic 1 it 3.65 in 1.65 id  639 sc 5 st 21.64 cs 11 cl 0
+  204218 ( 37.85): player 2 fireball   landed  hits for 1911 next is fireball   ic 1 it 3.51 in 1.51 id  639 sc 5 st 21.51 cs 10 cl 0
+  207211 ( 37.93): player 4 fireball   landed crits for 2993 next is fireball   ic 2 it 4.00 in 1.43 id 1298 sc 5 st 21.42 cs 11 cl 0
+  209952 ( 38.36): player 6 fireball   landed crits for 2741 next is fireball   ic 3 it 4.00 in 1.01 id 1901 sc 5 st 21.00 cs 11 cl 0
+         ( 38.43): player 1 finished casting fireball  
+  211894 ( 39.30): player 1 fireball   landed  hits for 1941 next is fireball   ic 3 it 3.05 in 0.06 id 1901 sc 5 st 20.06 cs 12 cl 0
+  214079 ( 39.36): ignite ticked   2186 damage done
+         ( 39.53): player 5 finished casting fireball  
+         ( 39.84): player 3 finished casting fireball  
+         ( 40.01): player 2 finished casting fireball  
+         ( 40.06): player 4 finished casting fireball  
+  215948 ( 40.40): player 5 fireball   landed  hits for 1869 next is fireball   ic 3 it 1.95 in 0.96 id 1901 sc 5 st 18.96 cs 11 cl 0
+         ( 40.55): player 6 finished casting fireball  
+  218685 ( 40.72): player 3 fireball   landed crits for 2737 next is fireball   ic 4 it 4.00 in 0.64 id 2503 sc 5 st 18.64 cs 12 cl 0
+  221554 ( 40.88): player 2 fireball   landed crits for 2869 next is fireball   ic 5 it 4.00 in 0.48 id 3134 sc 5 st 18.48 cs 11 cl 0
+  223565 ( 40.94): player 4 fireball   landed  hits for 2011 next is fireball   ic 5 it 3.94 in 0.42 id 3134 sc 5 st 18.42 cs 12 cl 0
+  227169 ( 41.36): ignite ticked   3604 damage done
+  229189 ( 41.42): player 6 fireball   landed  hits for 2020 next is fireball   ic 5 it 3.46 in 1.94 id 3134 sc 5 st 17.93 cs 12 cl 0
+         ( 41.46): player 1 finished casting fireball  
+  232049 ( 42.33): player 1 fireball   landed crits for 2861 next is fireball   ic 5 it 4.00 in 1.03 id 3134 sc 5 st 17.03 cs 13 cl 0
+         ( 42.61): player 5 finished casting fireball  
+         ( 42.89): player 3 finished casting fireball  
+         ( 43.05): player 2 finished casting fireball  
+         ( 43.11): player 4 finished casting fireball  
+  235653 ( 43.36): ignite ticked   3604 damage done
+  237583 ( 43.48): player 5 fireball   landed  hits for 1929 next is fireball   ic 5 it 2.85 in 1.88 id 3134 sc 5 st 15.87 cs 12 cl 0
+         ( 43.61): player 6 finished casting fireball  
+  239587 ( 43.77): player 3 fireball   landed  hits for 2005 next is fireball   ic 5 it 2.56 in 1.59 id 3134 sc 5 st 15.59 cs 13 cl 0
+  241544 ( 43.92): player 2 fireball   landed  hits for 1957 next is fireball   ic 5 it 2.41 in 1.44 id 3134 sc 5 st 15.44 cs 12 cl 0
+  243454 ( 43.99): player 4 fireball   landed  hits for 1909 next is fireball   ic 5 it 2.34 in 1.37 id 3134 sc 5 st 15.37 cs 13 cl 0
+         ( 44.48): player 1 finished casting fireball  
+  245445 ( 44.49): player 6 fireball   landed  hits for 1991 next is fireball   ic 5 it 1.84 in 0.87 id 3134 sc 5 st 14.87 cs 13 cl 0
+  247299 ( 45.36): player 1 fireball   landed  hits for 1854 next is fireball   ic 5 it 0.97 in 0.00 id 3134 sc 5 st 14.00 cs 14 cl 0
+  250903 ( 45.36): ignite ticked   3604 damage done
+         ( 45.63): player 5 finished casting fireball  
+         ( 45.91): player 3 finished casting fireball  
+         ( 46.15): player 2 finished casting fireball  
+         ( 46.19): player 4 finished casting fireball  
+  250903 ( 46.33): ignite expired
+  252863 ( 46.50): player 5 fireball   landed  hits for 1960 next is fireball   ic 0 it 0.00 in 0.00 id    0 sc 5 st 12.86 cs 13 cl 0
+         ( 46.62): player 6 finished casting fireball  
+  252863 ( 46.79): player 3 fireball   landed misses         next is fireball   ic 0 it 0.00 in 0.00 id    0 sc 5 st 12.57 cs 13 cl 0
+  255878 ( 47.03): player 2 fireball   landed crits for 3015 next is fireball   ic 1 it 4.00 in 2.00 id  663 sc 5 st 12.33 cs 13 cl 0
+  255878 ( 47.06): player 4 fireball   landed misses         next is fireball   ic 1 it 3.96 in 1.96 id  663 sc 5 st 12.29 cs 13 cl 0
+         ( 47.49): player 1 finished casting fireball  
+  257744 ( 47.50): player 6 fireball   landed  hits for 1866 next is fireball   ic 1 it 3.53 in 1.53 id  663 sc 5 st 11.86 cs 14 cl 0
+  259716 ( 48.36): player 1 fireball   landed  hits for 1972 next is fireball   ic 1 it 2.67 in 0.67 id  663 sc 5 st 11.00 cs 15 cl 0
+         ( 48.71): player 5 finished casting fireball  
+         ( 48.95): player 3 finished casting fireball  
+  260479 ( 49.03): ignite ticked    763 damage done
+         ( 49.15): player 2 finished casting fireball  
+         ( 49.21): player 4 finished casting fireball  
+  262389 ( 49.58): player 5 fireball   landed  hits for 1910 next is fireball   ic 1 it 1.44 in 1.44 id  663 sc 5 st  9.77 cs 14 cl 0
+         ( 49.64): player 6 finished casting fireball  
+  264355 ( 49.82): player 3 fireball   landed  hits for 1965 next is fireball   ic 1 it 1.20 in 1.20 id  663 sc 5 st  9.54 cs 14 cl 0
+  266186 ( 50.03): player 2 fireball   landed  hits for 1831 next is fireball   ic 1 it 1.00 in 1.00 id  663 sc 5 st  9.33 cs 14 cl 0
+  268051 ( 50.08): player 4 fireball   landed  hits for 1865 next is fireball   ic 1 it 0.95 in 0.95 id  663 sc 5 st  9.28 cs 14 cl 0
+  269977 ( 50.52): player 6 fireball   landed  hits for 1925 next is fireball   ic 1 it 0.51 in 0.51 id  663 sc 5 st  8.84 cs 15 cl 0
+         ( 50.54): player 1 finished casting fireball  
+  270739 ( 51.03): ignite ticked    763 damage done
+  270739 ( 51.03): ignite expired
+  272715 ( 51.42): player 1 fireball   landed  hits for 1976 next is fireball   ic 0 it 0.00 in 0.00 id    0 sc 5 st  7.94 cs 16 cl 0
+         ( 51.79): player 5 finished casting fireball  
+         ( 52.00): player 3 finished casting fireball  
+         ( 52.15): player 2 finished casting fireball  
+         ( 52.22): player 4 finished casting fireball  
+  274706 ( 52.66): player 5 fireball   landed  hits for 1991 next is fireball   ic 0 it 0.00 in 0.00 id    0 sc 5 st  6.69 cs 15 cl 0
+         ( 52.68): player 6 finished casting fireball  
+  277536 ( 52.87): player 3 fireball   landed crits for 2830 next is fireball   ic 1 it 4.00 in 2.00 id  623 sc 5 st  6.49 cs 15 cl 0
+  279523 ( 53.03): player 2 fireball   landed  hits for 1987 next is fireball   ic 1 it 3.84 in 1.84 id  623 sc 5 st  6.33 cs 15 cl 0
+  281406 ( 53.10): player 4 fireball   landed  hits for 1883 next is fireball   ic 1 it 3.77 in 1.77 id  623 sc 5 st  6.26 cs 15 cl 0
+  283430 ( 53.56): player 6 fireball   landed  hits for 2023 next is fireball   ic 1 it 3.31 in 1.31 id  623 sc 5 st  5.80 cs 16 cl 0
+         ( 53.59): player 1 finished casting fireball  
+  285453 ( 54.47): player 1 fireball   landed  hits for 2024 next is fireball   ic 1 it 2.41 in 0.41 id  623 sc 5 st  4.89 cs 17 cl 0
+         ( 54.81): player 5 finished casting fireball  
+  286169 ( 54.87): ignite ticked    716 damage done
+         ( 55.07): player 3 finished casting fireball  
+         ( 55.22): player 2 finished casting fireball  
+         ( 55.23): player 4 finished casting fireball  
+  289072 ( 55.68): player 5 fireball   landed crits for 2902 next is fireball   ic 2 it 4.00 in 1.19 id 1261 sc 5 st  3.67 cs 16 cl 0
+         ( 55.71): player 6 finished casting fireball  
+  290947 ( 55.95): player 3 fireball   landed  hits for 1875 next is fireball   ic 2 it 3.74 in 0.92 id 1261 sc 5 st  3.41 cs 16 cl 0
+  293721 ( 56.09): player 2 fireball   landed crits for 2775 next is fireball   ic 3 it 4.00 in 0.78 id 1872 sc 5 st  3.26 cs 16 cl 0
+  295694 ( 56.11): player 4 fireball   landed  hits for 1972 next is fireball   ic 3 it 3.99 in 0.76 id 1872 sc 5 st  3.25 cs 16 cl 0
+  298521 ( 56.58): player 6 fireball   landed crits for 2828 next is fireball   ic 4 it 4.00 in 0.29 id 2494 sc 5 st  2.78 cs 17 cl 0
+         ( 56.63): player 1 finished casting fireball  
+  301389 ( 56.87): ignite ticked   2868 damage done
+  304153 ( 57.51): player 1 fireball   landed crits for 2763 next is scorch     ic 5 it 4.00 in 1.36 id 3102 sc 5 st  1.85 cs 18 cl 0
+         ( 57.83): player 5 finished casting fireball  
+         ( 58.17): player 1 finished casting scorch    
+  305309 ( 58.17): player 1 scorch     landed crits for 1157 next is fireball   ic 5 it 4.00 in 0.70 id 3102 sc 5 st 30.00 cs 19 cl 0
+         ( 58.20): player 3 finished casting fireball  
+         ( 58.30): player 2 finished casting fireball  
+         ( 58.31): player 4 finished casting fireball  
+  308322 ( 58.71): player 5 fireball   landed crits for 3013 next is fireball   ic 5 it 4.00 in 0.16 id 3102 sc 5 st 29.46 cs 17 cl 0
+         ( 58.74): player 6 finished casting fireball  
+  311889 ( 58.87): ignite ticked   3567 damage done
+  314804 ( 59.08): player 3 fireball   landed crits for 2916 next is fireball   ic 5 it 4.00 in 1.79 id 3102 sc 5 st 29.09 cs 17 cl 0
+  317837 ( 59.18): player 2 fireball   landed crits for 3032 next is fireball   ic 5 it 4.00 in 1.70 id 3102 sc 5 st 29.00 cs 17 cl 0
+  320737 ( 59.18): player 4 fireball   landed crits for 2900 next is fireball   ic 5 it 4.00 in 1.69 id 3102 sc 5 st 28.99 cs 17 cl 0
+  322567 ( 59.62): player 6 fireball   landed  hits for 1830 next is fireball   ic 5 it 3.57 in 1.25 id 3102 sc 5 st 28.56 cs 18 cl 0
+         ( 60.84): player 5 finished casting fireball  
+  326134 ( 60.87): ignite ticked   3567 damage done
+         ( 61.22): player 1 finished casting fireball  
+         ( 61.26): player 3 finished casting fireball  
+         ( 61.32): player 2 finished casting fireball  
+         ( 61.39): player 4 finished casting fireball  
+  328016 ( 61.72): player 5 fireball   landed  hits for 1883 next is fireball   ic 5 it 1.46 in 1.15 id 3102 sc 5 st 26.46 cs 18 cl 0
+         ( 61.77): player 6 finished casting fireball  
+  329973 ( 62.09): player 1 fireball   landed  hits for 1957 next is fireball   ic 5 it 1.09 in 0.78 id 3102 sc 5 st 26.08 cs 20 cl 0
+  331847 ( 62.14): player 3 fireball   landed  hits for 1874 next is fireball   ic 5 it 1.04 in 0.73 id 3102 sc 5 st 26.03 cs 18 cl 0
+  333803 ( 62.19): player 2 fireball   landed  hits for 1956 next is fireball   ic 5 it 0.99 in 0.68 id 3102 sc 5 st 25.98 cs 18 cl 0
+  335807 ( 62.27): player 4 fireball   landed  hits for 2003 next is fireball   ic 5 it 0.91 in 0.60 id 3102 sc 5 st 25.90 cs 18 cl 0
+  337656 ( 62.65): player 6 fireball   landed  hits for 1850 next is fireball   ic 5 it 0.54 in 0.23 id 3102 sc 5 st 25.53 cs 19 cl 0
+  341223 ( 62.87): ignite ticked   3567 damage done
+  341223 ( 63.18): ignite expired
+         ( 63.87): player 5 finished casting fireball  
+         ( 64.28): player 1 finished casting fireball  
+         ( 64.29): player 3 finished casting fireball  
+         ( 64.33): player 2 finished casting fireball  
+         ( 64.40): player 4 finished casting fireball  
+  344222 ( 64.75): player 5 fireball   landed crits for 2998 next is fireball   ic 1 it 4.00 in 2.00 id  660 sc 5 st 23.42 cs 19 cl 0
+         ( 64.83): player 6 finished casting fireball  
+  347000 ( 65.15): player 1 fireball   landed crits for 2778 next is fireball   ic 2 it 4.00 in 1.59 id 1271 sc 5 st 23.02 cs 21 cl 0
+  349877 ( 65.17): player 3 fireball   landed crits for 2877 next is fireball   ic 3 it 4.00 in 1.58 id 1904 sc 5 st 23.00 cs 19 cl 0
+  352812 ( 65.21): player 2 fireball   landed crits for 2935 next is fireball   ic 4 it 4.00 in 1.54 id 2550 sc 5 st 22.96 cs 19 cl 0
+  354719 ( 65.28): player 4 fireball   landed  hits for 1907 next is fireball   ic 4 it 3.93 in 1.47 id 2550 sc 5 st 22.89 cs 19 cl 0
+  357548 ( 65.70): player 6 fireball   landed crits for 2829 next is fireball   ic 5 it 4.00 in 1.04 id 3172 sc 5 st 22.47 cs 20 cl 0
+  361196 ( 66.75): ignite ticked   3648 damage done
+         ( 66.92): player 5 finished casting fireball  
+         ( 67.32): player 3 finished casting fireball  
+         ( 67.33): player 1 finished casting fireball  
+         ( 67.40): player 2 finished casting fireball  
+         ( 67.45): player 4 finished casting fireball  
+  363158 ( 67.80): player 5 fireball   landed  hits for 1962 next is fireball   ic 5 it 1.91 in 0.95 id 3172 sc 5 st 20.37 cs 20 cl 0
+         ( 67.88): player 6 finished casting fireball  
+  365108 ( 68.20): player 3 fireball   landed  hits for 1950 next is fireball   ic 5 it 1.51 in 0.55 id 3172 sc 5 st 19.97 cs 20 cl 0
+  368048 ( 68.21): player 1 fireball   landed crits for 2941 next is fireball   ic 5 it 4.00 in 0.54 id 3172 sc 5 st 19.97 cs 22 cl 0
+  370823 ( 68.28): player 2 fireball   landed crits for 2774 next is fireball   ic 5 it 4.00 in 0.47 id 3172 sc 5 st 19.89 cs 20 cl 0
+  373603 ( 68.32): player 4 fireball   landed crits for 2780 next is fireball   ic 5 it 4.00 in 0.42 id 3172 sc 5 st 19.85 cs 20 cl 0
+  377250 ( 68.75): ignite ticked   3648 damage done
+  379098 ( 68.75): player 6 fireball   landed  hits for 1847 next is fireball   ic 5 it 3.57 in 1.99 id 3172 sc 5 st 19.42 cs 21 cl 0
+         ( 69.93): player 5 finished casting fireball  
+         ( 70.37): player 1 finished casting fireball  
+         ( 70.39): player 3 finished casting fireball  
+         ( 70.42): player 2 finished casting fireball  
+         ( 70.52): player 4 finished casting fireball  
+  382745 ( 70.75): ignite ticked   3648 damage done
+  384753 ( 70.81): player 5 fireball   landed  hits for 2007 next is fireball   ic 5 it 1.51 in 1.94 id 3172 sc 5 st 17.36 cs 21 cl 0
+         ( 70.92): player 6 finished casting fireball  
+  386779 ( 71.25): player 1 fireball   landed  hits for 2026 next is fireball   ic 5 it 1.08 in 1.50 id 3172 sc 5 st 16.92 cs 23 cl 0
+  388794 ( 71.26): player 3 fireball   landed  hits for 2015 next is fireball   ic 5 it 1.06 in 1.48 id 3172 sc 5 st 16.91 cs 21 cl 0
+  390823 ( 71.29): player 2 fireball   landed  hits for 2029 next is fireball   ic 5 it 1.03 in 1.45 id 3172 sc 5 st 16.88 cs 21 cl 0
+  392680 ( 71.39): player 4 fireball   landed  hits for 1856 next is fireball   ic 5 it 0.93 in 1.35 id 3172 sc 5 st 16.78 cs 21 cl 0
+  395608 ( 71.79): player 6 fireball   landed crits for 2928 next is fireball   ic 5 it 4.00 in 0.95 id 3172 sc 5 st 16.38 cs 22 cl 0
+  399255 ( 72.75): ignite ticked   3648 damage done
+         ( 72.97): player 5 finished casting fireball  
+         ( 73.44): player 3 finished casting fireball  
+         ( 73.45): player 2 finished casting fireball  
+         ( 73.45): player 1 finished casting fireball  
+         ( 73.57): player 4 finished casting fireball  
+  402045 ( 73.85): player 5 fireball   landed crits for 2790 next is fireball   ic 5 it 4.00 in 0.90 id 3172 sc 5 st 14.32 cs 22 cl 0
+         ( 73.98): player 6 finished casting fireball  
+  405060 ( 74.31): player 3 fireball   landed crits for 3015 next is fireball   ic 5 it 4.00 in 0.43 id 3172 sc 5 st 13.86 cs 22 cl 0
+  407794 ( 74.32): player 2 fireball   landed crits for 2734 next is fireball   ic 5 it 4.00 in 0.42 id 3172 sc 5 st 13.85 cs 22 cl 0
+  409750 ( 74.33): player 1 fireball   landed  hits for 1956 next is fireball   ic 5 it 4.00 in 0.42 id 3172 sc 5 st 13.85 cs 24 cl 0
+  412775 ( 74.44): player 4 fireball   landed crits for 3025 next is fireball   ic 5 it 4.00 in 0.30 id 3172 sc 5 st 13.73 cs 22 cl 0
+  416423 ( 74.75): ignite ticked   3648 damage done
+  418411 ( 74.85): player 6 fireball   landed  hits for 1988 next is fireball   ic 5 it 3.59 in 1.89 id 3172 sc 5 st 13.32 cs 23 cl 0
+         ( 75.99): player 5 finished casting fireball  
+         ( 76.46): player 1 finished casting fireball  
+         ( 76.47): player 3 finished casting fireball  
+         ( 76.48): player 2 finished casting fireball  
+         ( 76.57): player 4 finished casting fireball  
+  422059 ( 76.75): ignite ticked   3648 damage done
+  423892 ( 76.86): player 5 fireball   landed  hits for 1833 next is fireball   ic 5 it 1.58 in 1.89 id 3172 sc 5 st 11.31 cs 23 cl 0
+         ( 76.99): player 6 finished casting fireball  
+  425767 ( 77.33): player 1 fireball   landed  hits for 1875 next is fireball   ic 5 it 1.11 in 1.41 id 3172 sc 5 st 10.84 cs 25 cl 0
+  427629 ( 77.34): player 3 fireball   landed  hits for 1863 next is fireball   ic 5 it 1.10 in 1.40 id 3172 sc 5 st 10.83 cs 23 cl 0
+  430498 ( 77.35): player 2 fireball   landed crits for 2868 next is fireball   ic 5 it 4.00 in 1.39 id 3172 sc 5 st 10.82 cs 23 cl 0
+  432428 ( 77.44): player 4 fireball   landed  hits for 1930 next is fireball   ic 5 it 3.91 in 1.30 id 3172 sc 5 st 10.73 cs 23 cl 0
+  434434 ( 77.87): player 6 fireball   landed  hits for 2006 next is fireball   ic 5 it 3.48 in 0.88 id 3172 sc 5 st 10.30 cs 24 cl 0
+  438082 ( 78.75): ignite ticked   3648 damage done
+         ( 79.04): player 5 finished casting fireball  
+         ( 79.49): player 3 finished casting fireball  
+         ( 79.50): player 1 finished casting fireball  
+         ( 79.56): player 2 finished casting fireball  
+         ( 79.65): player 4 finished casting fireball  
+  438082 ( 79.92): player 5 fireball   landed misses         next is fireball   ic 5 it 1.44 in 0.83 id 3172 sc 5 st  8.25 cs 23 cl 0
+         ( 80.04): player 6 finished casting fireball  
+  439964 ( 80.37): player 3 fireball   landed  hits for 1882 next is fireball   ic 5 it 0.99 in 0.38 id 3172 sc 5 st  7.81 cs 24 cl 0
+  442761 ( 80.37): player 1 fireball   landed crits for 2797 next is fireball   ic 5 it 4.00 in 0.37 id 3172 sc 5 st  7.80 cs 26 cl 0
+  444731 ( 80.44): player 2 fireball   landed  hits for 1970 next is fireball   ic 5 it 3.94 in 0.31 id 3172 sc 5 st  7.73 cs 24 cl 0
+  447678 ( 80.52): player 4 fireball   landed crits for 2947 next is fireball   ic 5 it 4.00 in 0.22 id 3172 sc 5 st  7.65 cs 24 cl 0
+  451326 ( 80.75): ignite ticked   3648 damage done
+  453132 ( 80.92): player 6 fireball   landed  hits for 1806 next is fireball   ic 5 it 3.60 in 1.83 id 3172 sc 5 st  7.25 cs 25 cl 0
+         ( 82.06): player 5 finished casting fireball  
+         ( 82.51): player 1 finished casting fireball  
+         ( 82.56): player 3 finished casting fireball  
+         ( 82.57): player 2 finished casting fireball  
+         ( 82.67): player 4 finished casting fireball  
+  456779 ( 82.75): ignite ticked   3648 damage done
+  458770 ( 82.94): player 5 fireball   landed  hits for 1991 next is fireball   ic 5 it 1.59 in 1.81 id 3172 sc 5 st  5.23 cs 24 cl 0
+         ( 83.07): player 6 finished casting fireball  
+  460613 ( 83.38): player 1 fireball   landed  hits for 1843 next is fireball   ic 5 it 1.14 in 1.36 id 3172 sc 5 st  4.79 cs 27 cl 0
+  462509 ( 83.43): player 3 fireball   landed  hits for 1896 next is fireball   ic 5 it 1.09 in 1.31 id 3172 sc 5 st  4.74 cs 25 cl 0
+  464514 ( 83.44): player 2 fireball   landed  hits for 2005 next is fireball   ic 5 it 1.08 in 1.30 id 3172 sc 5 st  4.73 cs 25 cl 0
+  466460 ( 83.55): player 4 fireball   landed  hits for 1946 next is fireball   ic 5 it 0.97 in 1.20 id 3172 sc 5 st  4.62 cs 25 cl 0
+  468389 ( 83.95): player 6 fireball   landed  hits for 1928 next is fireball   ic 5 it 0.58 in 0.80 id 3172 sc 5 st  4.22 cs 26 cl 0
+  468389 ( 84.52): ignite expired
+         ( 85.08): player 5 finished casting fireball  
+         ( 85.56): player 1 finished casting fireball  
+         ( 85.58): player 3 finished casting fireball  
+         ( 85.67): player 2 finished casting fireball  
+         ( 85.71): player 4 finished casting fireball  
+  470350 ( 85.96): player 5 fireball   landed  hits for 1961 next is fireball   ic 0 it 0.00 in 0.00 id    0 sc 5 st  2.22 cs 25 cl 0
+         ( 86.11): player 6 finished casting fireball  
+  472376 ( 86.43): player 1 fireball   landed  hits for 2026 next is scorch     ic 0 it 0.00 in 0.00 id    0 sc 5 st  1.74 cs 28 cl 0
+  474317 ( 86.46): player 3 fireball   landed  hits for 1941 next is fireball   ic 0 it 0.00 in 0.00 id    0 sc 5 st  1.71 cs 26 cl 0
+  476135 ( 86.54): player 2 fireball   landed  hits for 1818 next is fireball   ic 0 it 0.00 in 0.00 id    0 sc 5 st  1.63 cs 26 cl 0
+  479013 ( 86.59): player 4 fireball   landed crits for 2879 next is fireball   ic 1 it 4.00 in 2.00 id  633 sc 5 st  1.59 cs 26 cl 0
+  480962 ( 86.99): player 6 fireball   landed  hits for 1949 next is fireball   ic 1 it 3.60 in 1.60 id  633 sc 5 st  1.19 cs 27 cl 0
+         ( 87.14): player 1 finished casting scorch    
+  481746 ( 87.14): player 1 scorch     landed  hits for  784 next is fireball   ic 1 it 3.44 in 1.44 id  633 sc 5 st 30.00 cs 29 cl 0
+         ( 88.09): player 5 finished casting fireball  
+  482475 ( 88.59): ignite ticked    728 damage done
+         ( 88.64): player 3 finished casting fireball  
+         ( 88.71): player 2 finished casting fireball  
+         ( 88.71): player 4 finished casting fireball  
+  484482 ( 88.96): player 5 fireball   landed  hits for 2007 next is fireball   ic 1 it 1.62 in 1.62 id  633 sc 5 st 28.18 cs 26 cl 0
+         ( 89.20): player 6 finished casting fireball  
+  487371 ( 89.52): player 3 fireball   landed crits for 2889 next is fireball   ic 2 it 4.00 in 1.07 id 1269 sc 5 st 27.62 cs 27 cl 0
+  487371 ( 89.59): player 2 fireball   landed misses         next is fireball   ic 2 it 3.93 in 1.00 id 1269 sc 5 st 27.56 cs 26 cl 0
+  489390 ( 89.59): player 4 fireball   landed  hits for 2020 next is fireball   ic 2 it 3.93 in 1.00 id 1269 sc 5 st 27.56 cs 27 cl 0
+  492131 ( 90.08): player 6 fireball   landed crits for 2741 next is fireball   ic 3 it 4.00 in 0.51 id 1872 sc 5 st 27.07 cs 28 cl 0
+         ( 90.16): player 1 finished casting fireball  
+  494284 ( 90.59): ignite ticked   2153 damage done
+  496119 ( 91.04): player 1 fireball   landed  hits for 1835 next is fireball   ic 3 it 3.04 in 1.55 id 1872 sc 5 st 26.10 cs 30 cl 0
+         ( 91.13): player 5 finished casting fireball  
+         ( 91.66): player 3 finished casting fireball  
+         ( 91.73): player 2 finished casting fireball  
+         ( 91.73): player 4 finished casting fireball  
+  499153 ( 92.00): player 5 fireball   landed crits for 3034 next is fireball   ic 4 it 4.00 in 0.58 id 2539 sc 5 st 25.14 cs 27 cl 0
+         ( 92.25): player 6 finished casting fireball  
+  501059 ( 92.54): player 3 fireball   landed  hits for 1906 next is fireball   ic 4 it 3.47 in 0.05 id 2539 sc 5 st 24.61 cs 28 cl 0
+  503980 ( 92.59): ignite ticked   2920 damage done
+  505860 ( 92.60): player 2 fireball   landed  hits for 1880 next is fireball   ic 4 it 3.40 in 1.98 id 2539 sc 5 st 24.54 cs 27 cl 0
+  508646 ( 92.61): player 4 fireball   landed crits for 2787 next is fireball   ic 5 it 4.00 in 1.98 id 3153 sc 5 st 24.54 cs 28 cl 0
+  510528 ( 93.12): player 6 fireball   landed  hits for 1882 next is fireball   ic 5 it 3.49 in 1.46 id 3153 sc 5 st 24.02 cs 29 cl 0
+         ( 93.23): player 1 finished casting fireball  
+  513444 ( 94.11): player 1 fireball   landed crits for 2916 next is fireball   ic 5 it 4.00 in 0.48 id 3153 sc 5 st 23.04 cs 31 cl 0
+         ( 94.19): player 5 finished casting fireball  
+  517070 ( 94.59): ignite ticked   3625 damage done
+         ( 94.67): player 3 finished casting fireball  
+         ( 94.74): player 4 finished casting fireball  
+         ( 94.77): player 2 finished casting fireball  
+  518959 ( 95.07): player 5 fireball   landed  hits for 1890 next is fireball   ic 5 it 3.04 in 1.52 id 3153 sc 5 st 22.08 cs 28 cl 0
+         ( 95.29): player 6 finished casting fireball  
+  520900 ( 95.54): player 3 fireball   landed  hits for 1940 next is fireball   ic 5 it 2.56 in 1.05 id 3153 sc 5 st 21.60 cs 29 cl 0
+  523934 ( 95.62): player 4 fireball   landed crits for 3034 next is fireball   ic 5 it 4.00 in 0.97 id 3153 sc 5 st 21.53 cs 29 cl 0
+  525772 ( 95.64): player 2 fireball   landed  hits for 1838 next is fireball   ic 5 it 3.98 in 0.95 id 3153 sc 5 st 21.50 cs 28 cl 0
+  527698 ( 96.16): player 6 fireball   landed  hits for 1926 next is fireball   ic 5 it 3.46 in 0.43 id 3153 sc 5 st 20.98 cs 30 cl 0
+         ( 96.24): player 1 finished casting fireball  
+  531323 ( 96.59): ignite ticked   3625 damage done
+  533261 ( 97.11): player 1 fireball   landed  hits for 1938 next is fireball   ic 5 it 2.50 in 1.47 id 3153 sc 5 st 20.03 cs 32 cl 0
+         ( 97.23): player 5 finished casting fireball  
+         ( 97.71): player 3 finished casting fireball  
+         ( 97.78): player 4 finished casting fireball  
+         ( 97.80): player 2 finished casting fireball  
+  536037 ( 98.10): player 5 fireball   landed crits for 2775 next is fireball   ic 5 it 4.00 in 0.48 id 3153 sc 5 st 19.04 cs 29 cl 0
+         ( 98.32): player 6 finished casting fireball  
+  539662 ( 98.59): ignite ticked   3625 damage done
+  541592 ( 98.59): player 3 fireball   landed  hits for 1929 next is fireball   ic 5 it 3.52 in 2.00 id 3153 sc 5 st 18.56 cs 30 cl 0
+  544468 ( 98.66): player 4 fireball   landed crits for 2876 next is fireball   ic 5 it 4.00 in 1.93 id 3153 sc 5 st 18.48 cs 30 cl 0
+  546471 ( 98.68): player 2 fireball   landed  hits for 2003 next is fireball   ic 5 it 3.98 in 1.91 id 3153 sc 5 st 18.46 cs 29 cl 0
+  549508 ( 99.20): player 6 fireball   landed crits for 3037 next is fireball   ic 5 it 4.00 in 1.39 id 3153 sc 5 st 17.94 cs 31 cl 0
+         ( 99.29): player 1 finished casting fireball  
+  552459 (100.16): player 1 fireball   landed crits for 2951 next is fireball   ic 5 it 4.00 in 0.42 id 3153 sc 5 st 16.98 cs 33 cl 0
+         (100.25): player 5 finished casting fireball  
+  556085 (100.59): ignite ticked   3625 damage done
+         (100.74): player 3 finished casting fireball  
+         (100.82): player 4 finished casting fireball  
+         (100.94): player 2 finished casting fireball  
+  557981 (101.12): player 5 fireball   landed  hits for 1896 next is fireball   ic 5 it 3.04 in 1.46 id 3153 sc 5 st 16.02 cs 30 cl 0
+         (101.35): player 6 finished casting fireball  
+  559825 (101.62): player 3 fireball   landed  hits for 1844 next is fireball   ic 5 it 2.54 in 0.97 id 3153 sc 5 st 15.52 cs 31 cl 0
+  559825 (101.69): player 4 fireball   landed misses         next is fireball   ic 5 it 2.47 in 0.89 id 3153 sc 5 st 15.45 cs 30 cl 0
+  561641 (101.81): player 2 fireball   landed  hits for 1816 next is fireball   ic 5 it 2.35 in 0.77 id 3153 sc 5 st 15.33 cs 30 cl 0
+  563595 (102.22): player 6 fireball   landed  hits for 1954 next is fireball   ic 5 it 1.94 in 0.36 id 3153 sc 5 st 14.92 cs 32 cl 0
+         (102.34): player 1 finished casting fireball  
+  567221 (102.59): ignite ticked   3625 damage done
+  569176 (103.21): player 1 fireball   landed  hits for 1956 next is fireball   ic 5 it 0.95 in 1.37 id 3153 sc 5 st 13.93 cs 34 cl 0
+         (103.25): player 5 finished casting fireball  
+         (103.75): player 3 finished casting fireball  
+         (103.85): player 4 finished casting fireball  
+         (103.98): player 2 finished casting fireball  
+  571090 (104.12): player 5 fireball   landed  hits for 1914 next is fireball   ic 5 it 0.04 in 0.46 id 3153 sc 5 st 13.02 cs 31 cl 0
+  571090 (104.16): ignite expired
+         (104.40): player 6 finished casting fireball  
+  574006 (104.62): player 3 fireball   landed crits for 2915 next is fireball   ic 1 it 4.00 in 2.00 id  641 sc 5 st 12.52 cs 32 cl 0
+  575957 (104.73): player 4 fireball   landed  hits for 1951 next is fireball   ic 1 it 3.90 in 1.90 id  641 sc 5 st 12.42 cs 31 cl 0
+  577850 (104.85): player 2 fireball   landed  hits for 1893 next is fireball   ic 1 it 3.77 in 1.77 id  641 sc 5 st 12.29 cs 31 cl 0
+  579721 (105.28): player 6 fireball   landed  hits for 1871 next is fireball   ic 1 it 3.34 in 1.34 id  641 sc 5 st 11.87 cs 33 cl 0
+         (105.42): player 1 finished casting fireball  
+         (106.28): player 5 finished casting fireball  
+  581719 (106.29): player 1 fireball   landed  hits for 1998 next is fireball   ic 1 it 2.33 in 0.33 id  641 sc 5 st 10.85 cs 35 cl 0
+  582457 (106.62): ignite ticked    738 damage done
+         (106.77): player 3 finished casting fireball  
+         (106.93): player 4 finished casting fireball  
+         (106.99): player 2 finished casting fireball  
+  584415 (107.15): player 5 fireball   landed  hits for 1958 next is fireball   ic 1 it 1.47 in 1.47 id  641 sc 5 st  9.99 cs 32 cl 0
+         (107.49): player 6 finished casting fireball  
+  586417 (107.65): player 3 fireball   landed  hits for 2002 next is fireball   ic 1 it 0.98 in 0.98 id  641 sc 5 st  9.50 cs 33 cl 0
+  589403 (107.80): player 4 fireball   landed crits for 2986 next is fireball   ic 2 it 4.00 in 0.82 id 1298 sc 5 st  9.34 cs 32 cl 0
+  592402 (107.87): player 2 fireball   landed crits for 2999 next is fireball   ic 3 it 4.00 in 0.75 id 1958 sc 5 st  9.27 cs 32 cl 0
+  594293 (108.37): player 6 fireball   landed  hits for 1891 next is fireball   ic 3 it 3.50 in 0.25 id 1958 sc 5 st  8.77 cs 34 cl 0
+         (108.46): player 1 finished casting fireball  
+  596545 (108.62): ignite ticked   2252 damage done
+         (109.33): player 5 finished casting fireball  
+  599294 (109.33): player 1 fireball   landed crits for 2749 next is fireball   ic 4 it 4.00 in 1.29 id 2563 sc 5 st  7.81 cs 36 cl 0
+         (109.82): player 3 finished casting fireball  
+         (110.02): player 2 finished casting fireball  
+         (110.05): player 4 finished casting fireball  
+  602026 (110.21): player 5 fireball   landed crits for 2732 next is fireball   ic 5 it 4.00 in 0.42 id 3164 sc 5 st  6.94 cs 33 cl 0
+         (110.57): player 6 finished casting fireball  
+  605664 (110.62): ignite ticked   3638 damage done
+  607507 (110.70): player 3 fireball   landed  hits for 1843 next is fireball   ic 5 it 3.51 in 1.92 id 3164 sc 5 st  6.44 cs 34 cl 0
+  609368 (110.90): player 2 fireball   landed  hits for 1861 next is fireball   ic 5 it 3.31 in 1.72 id 3164 sc 5 st  6.24 cs 33 cl 0
+  611185 (110.92): player 4 fireball   landed  hits for 1818 next is fireball   ic 5 it 3.28 in 1.70 id 3164 sc 5 st  6.22 cs 33 cl 0
+  613099 (111.44): player 6 fireball   landed  hits for 1914 next is fireball   ic 5 it 2.76 in 1.18 id 3164 sc 5 st  5.70 cs 35 cl 0
+         (111.47): player 1 finished casting fireball  
+  615984 (112.34): player 1 fireball   landed crits for 2885 next is fireball   ic 5 it 4.00 in 0.28 id 3164 sc 5 st  4.80 cs 37 cl 0
+         (112.39): player 5 finished casting fireball  
+  619622 (112.62): ignite ticked   3638 damage done
+         (112.86): player 3 finished casting fireball  
+         (113.05): player 2 finished casting fireball  
+         (113.08): player 4 finished casting fireball  
+  622500 (113.27): player 5 fireball   landed crits for 2878 next is fireball   ic 5 it 4.00 in 1.35 id 3164 sc 5 st  3.87 cs 34 cl 0
+         (113.62): player 6 finished casting fireball  
+  624444 (113.73): player 3 fireball   landed  hits for 1944 next is fireball   ic 5 it 3.53 in 0.89 id 3164 sc 5 st  3.41 cs 35 cl 0
+  626341 (113.93): player 2 fireball   landed  hits for 1897 next is fireball   ic 5 it 3.34 in 0.70 id 3164 sc 5 st  3.22 cs 34 cl 0
+  628250 (113.95): player 4 fireball   landed  hits for 1909 next is fireball   ic 5 it 3.32 in 0.67 id 3164 sc 5 st  3.19 cs 34 cl 0
+         (114.49): player 1 finished casting fireball  
+  631078 (114.49): player 6 fireball   landed crits for 2829 next is fireball   ic 5 it 4.00 in 0.13 id 3164 sc 5 st  2.65 cs 36 cl 0
+  634717 (114.62): ignite ticked   3638 damage done
+  636597 (115.36): player 1 fireball   landed  hits for 1881 next is scorch     ic 5 it 3.13 in 1.26 id 3164 sc 5 st  1.78 cs 38 cl 0
+         (115.42): player 5 finished casting fireball  
+         (115.94): player 3 finished casting fireball  
+         (116.02): player 1 finished casting scorch    
+  637766 (116.02): player 1 scorch     landed crits for 1168 next is fireball   ic 5 it 4.00 in 0.61 id 3164 sc 5 st 30.00 cs 39 cl 0
+         (116.10): player 2 finished casting fireball  
+         (116.14): player 4 finished casting fireball  
+  637766 (116.30): player 5 fireball   landed misses         next is fireball   ic 5 it 3.72 in 0.33 id 3164 sc 5 st 29.72 cs 34 cl 0
+  641404 (116.62): ignite ticked   3638 damage done
+         (116.69): player 6 finished casting fireball  
+  643342 (116.82): player 3 fireball   landed  hits for 1938 next is fireball   ic 5 it 3.20 in 1.80 id 3164 sc 5 st 29.20 cs 36 cl 0
+  645245 (116.97): player 2 fireball   landed  hits for 1903 next is fireball   ic 5 it 3.04 in 1.65 id 3164 sc 5 st 29.04 cs 35 cl 0
+  647062 (117.01): player 4 fireball   landed  hits for 1817 next is fireball   ic 5 it 3.00 in 1.61 id 3164 sc 5 st 29.00 cs 35 cl 0
+  648978 (117.56): player 6 fireball   landed  hits for 1917 next is fireball   ic 5 it 2.45 in 1.06 id 3164 sc 5 st 28.45 cs 37 cl 0
+         (118.46): player 5 finished casting fireball  
+  652617 (118.62): ignite ticked   3638 damage done
+         (118.95): player 3 finished casting fireball  
+         (119.13): player 2 finished casting fireball  
+         (119.15): player 1 finished casting fireball  
+         (119.21): player 4 finished casting fireball  
+  655577 (119.33): player 5 fireball   landed crits for 2960 next is fireball   ic 5 it 4.00 in 1.29 id 3164 sc 5 st 26.69 cs 35 cl 0
+         (119.73): player 6 finished casting fireball  
+  657425 (119.82): player 3 fireball   landed  hits for 1848 next is fireball   ic 5 it 3.51 in 0.80 id 3164 sc 5 st 26.19 cs 37 cl 0
+  659377 (120.00): player 2 fireball   landed  hits for 1951 next is fireball   ic 5 it 3.33 in 0.62 id 3164 sc 5 st 26.01 cs 36 cl 0
+  661259 (120.02): player 1 fireball   landed  hits for 1882 next is fireball   ic 5 it 3.31 in 0.60 id 3164 sc 5 st 25.99 cs 40 cl 0
+  663965 (120.08): player 4 fireball   landed crits for 2707 next is fireball   ic 5 it 4.00 in 0.54 id 3164 sc 5 st 25.93 cs 36 cl 0
+  665799 (120.60): player 6 fireball   landed  hits for 1833 next is fireball   ic 5 it 3.48 in 0.02 id 3164 sc 5 st 25.42 cs 38 cl 0
+  669437 (120.62): ignite ticked   3638 damage done
+         (121.54): player 5 finished casting fireball  
+         (122.02): player 3 finished casting fireball  
+         (122.14): player 2 finished casting fireball  
+         (122.16): player 1 finished casting fireball  
+         (122.24): player 4 finished casting fireball  
+  671275 (122.42): player 5 fireball   landed  hits for 1838 next is fireball   ic 5 it 1.66 in 0.20 id 3164 sc 5 st 23.60 cs 36 cl 0
+  674914 (122.62): ignite ticked   3638 damage done
+total damage =  671275
