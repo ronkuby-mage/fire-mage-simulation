@@ -30,7 +30,7 @@ The frostbolt is rank 11 and untalented aside from elemental precision.
 
 Replacing pyroblast with fire blast + fireball results in up to 2% dps improvement:
 ![combustion first vs later](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/fire_blast_open_700.png)
-A opening rotation of **```scorch -> fire blast -> combustion -> -> fireball (repeated)```** is the highest tested.
+**```scorch -> fire blast -> combustion -> -> fireball (repeated)```** is the highest tested opening rotation.
 
 ### DPS by number of mages
 
