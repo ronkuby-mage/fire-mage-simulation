@@ -35,4 +35,4 @@ Casting combustion before scorch is not a good idea:
 
 DPS per mage as a function of number of mages is plotted for a few values of spell power [here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/dps_per_mage_plots).
 ![dps per mage, 700 sp](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/dps_per_mage_plots/spellpower_700.png)
-Assuming the number of mages is fixed, these curves are only useful towards determining ones expected dps. Lifting this assumption, the optimal single player strategy is to maximize spell power and crit chance and then drive all other mages from the raid.
+Assuming the number of mages is fixed, these curves are only useful towards determining ones expected dps.
