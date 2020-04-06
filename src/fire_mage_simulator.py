@@ -9,10 +9,10 @@ import plots
 from mechanics import get_damage, get_crit_damage_diff, get_hit_damage_diff
 
 ## run parameters
-_DO_ROTATION_SEARCH = False
+_DO_ROTATION_SEARCH = True
 _DO_RESPONSE_SEARCH = False
-_DO_CRIT_SP_EQUIV = False
-_DO_HIT_SP_EQUIV = False
+_DO_CRIT_SP_EQUIV = True
+_DO_HIT_SP_EQUIV = True
 _DO_DPS_PER_MAGE = True
 
 def fill_args(args, crit_chance, nmages):
