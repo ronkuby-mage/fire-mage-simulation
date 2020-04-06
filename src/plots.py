@@ -17,8 +17,8 @@ def plot_response(responses, damages, spd, hit, crit, fn_desc, desc, nmages, sim
         plt.plot(np.array(responses), np.array(damage), label='{:d} mage{:s}'.format(num_mages, 's' if num_mages > 1 else ''), color=color, marker='.')
     plt.legend()
     plt.grid()
-    savefile = '../plots/reaction_plots/{:s}_{:3.0f}_{:2.0f}_{:2.0f}.png'.format(fn_desc, spd, hit*100.0, crit*100.0)
-    os.makedirs('../plots/reaction_plots', exist_ok=True)
+    savefile = '../plots/reaction/{:s}_{:3.0f}_{:2.0f}_{:2.0f}.png'.format(fn_desc, spd, hit*100.0, crit*100.0)
+    os.makedirs('../plots/reaction', exist_ok=True)
     plt.savefig(savefile)
     
 def plot_rotation(crit_chance, nmages, rotation_map, spd, hit, sim_size, duration, response):
@@ -54,16 +54,16 @@ def plot_rotation(crit_chance, nmages, rotation_map, spd, hit, sim_size, duratio
     cbar.set_ticklabels(['pyroblast', 'frostbolt', 'fire blast'])
     cbar.set_label('spell', labelpad=-30, y=0.0, rotation=0)
         
-    savefile = '../plots/rotation_plots/rotation_{:3.0f}_{:2.0f}.png'.format(spd, hit*100.0)
-    os.makedirs('../plots/rotation_plots', exist_ok=True)
+    savefile = '../plots/rotation/rotation_{:3.0f}_{:2.0f}.png'.format(spd, hit*100.0)
+    os.makedirs('../plots/rotation', exist_ok=True)
     plt.savefig(savefile)
     mpl.rcParams.update(mpl.rcParamsDefault)
 
-def plot_crit_equiv(sps, crit_chance, conversions, hit, num_mages, sim_size, duration):
+def plot_equiv(sps, crit_chance, conversions, hit, num_mages, sim_size, duration, ptype):
     colors = ['indigo', 'purple', 'darkblue', 'royalblue', 'skyblue', 'green', 'lime', 'gold', 'orange', 'darkorange', 'red', 'firebrick', 'black']
     plt.close('all')
     plt.figure(figsize=(10.0, 7.0), dpi=200)
-    plt.title('{:d} mages, {:2.0f}% hit, n={:d}, encounter duration {:3.0f}s'.format(num_mages, 100.0*hit, sim_size, duration))
+    plt.title('{:d} mage{:s}, {:2.0f}% hit, n={:d}, encounter duration {:3.0f}s'.format(num_mages, 's' if num_mages > 1 else '', 100.0*hit, sim_size, duration))
     plt.xlabel('Crit Chance (percent)')
     plt.ylabel('SP ratio')
     plt.xlim(0, 75.0)
@@ -73,6 +73,27 @@ def plot_crit_equiv(sps, crit_chance, conversions, hit, num_mages, sim_size, dur
         plt.plot(100.0*np.array(crit_chance), np.array(conv), label='{:3.0f} SP'.format(spell_power), color=color, marker='.')
     plt.legend()
     plt.grid()
-    savefile = '../plots/crit_equiv/crit_equiv_{:2.0f}_{:d}.png'.format(hit*100.0, num_mages)
-    os.makedirs('../plots/crit_equiv', exist_ok=True)
+    savefile = '../plots/{:s}_equiv/{:s}_equiv_{:2.0f}_{:d}.png'.format(ptype, ptype, hit*100.0, num_mages)
+    os.makedirs('../plots/{:s}_equiv'.format(ptype), exist_ok=True)
     plt.savefig(savefile)
+    
+def plot_dps(crit_chance, nmages, damages, spd, hit, sim_size, duration, response):
+    colors = ['indigo', 'purple', 'darkblue', 'skyblue', 'green', 'lime', 'gold', 'orange', 'darkorange', 'red', 'firebrick', 'black']
+    plt.close('all')
+    plt.figure(figsize=(10.0, 7.0), dpi=200)
+
+    title = 'max damage spell in {scorch -> *spell* -> fireball} rotation\n'
+    title += '{:3.0f}  spell damage, {:2.0f}% hit, n={:d}\n'.format(spd, hit*100.0, sim_size)
+    title += 'encounter duration {:3.0f}s, {:3.1f}s cast start variance'.format(duration, response)
+
+    plt.xlabel('Number of mages')
+    plt.ylabel('Average DPS')
+    plt.xlim(0, 10)
+    for color, crit, damage in zip(colors, crit_chance, damages):
+        plt.plot(np.array(nmages), np.array(damage), label='{:2.0f}% crit'.format(100.0*crit), color=color, marker='.')
+    plt.legend()
+    plt.grid()
+    savefile = '../plots/dps/dps__{:3.0f}_{:2.0f}.png'.format(spd, hit*100.0)
+    os.makedirs('../plots/dps', exist_ok=True)
+    plt.savefig(savefile)
+

@@ -6,8 +6,9 @@ class Constant():
     
     def __init__(self, sim_size=10000):
         
-        self._ROTATION_SIMSIZE = 1000
+        self._ROTATION_SIMSIZE = 3000
         self._CRIT_SIMSIZE = 50000
+        self._HIT_SIMSIZE = 100000
         
         ## adapt variables
         self._LOW_MAGE_EXTRA_SCORCH = True
@@ -23,7 +24,7 @@ class Constant():
 
         self._HIT_START = 0.89
         self._HIT_END = 0.99
-        self._HIT_STEP = 0.01
+        self._HIT_STEP = 0.02
 
         self._CRIT_START = 0.10
         self._CRIT_END = 0.70
