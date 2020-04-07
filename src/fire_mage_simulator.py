@@ -15,7 +15,7 @@ _DO_CRIT_SP_EQUIV = True
 _DO_HIT_SP_EQUIV = True
 _DO_DPS_PER_MAGE = True
 
-def fill_args(args, crit_chance, nmages):
+def adjust_rotation(args, crit_chance, nmages):
     for index, arg in enumerate(args):
         filename = '../savestates/rotation_{:3.0f}_{:2.0f}.dat'.format(arg[0], 100.0*arg[1])
         with open(filename, 'rb') as fid:
@@ -30,7 +30,7 @@ def fill_args(args, crit_chance, nmages):
 
     return sim_size
 
-def fill_sim_size(args):
+def adjust_sim_size(args):
     mean_mages = sum([a[3] for a in args])/len(args)
     
     for index, arg in enumerate(args):
@@ -81,7 +81,7 @@ def main():
             
                     args = itertools.product(sps, hits, crit_chance, nmages, rotations, responses, sim_size)
                     largs = [*args]
-                    mean_mages = fill_sim_size(largs)
+                    mean_mages = adjust_sim_size(largs)
                     
                     print('  Starting {:d} sims with {:d} samples each.  Estimated run time is {:.2f} minutes.'.format(len(largs), C._ROTATION_SIMSIZE, 8e-5*len(largs)*mean_mages*C._ROTATION_SIMSIZE/60.0))
                     with Pool() as p:
@@ -124,12 +124,13 @@ def main():
                 mages = np.array([num_mages])
                 sim_size = C._CRIT_SIMSIZE*nmages.astype(np.float32).mean()/num_mages
                 sim_size = np.array([sim_size]).astype(np.int32)
-                rotations = np.array([0]).astype(np.int16)
+                rotations = np.array([C._DEFAULT_ROTATION]).astype(np.int16)
                 responses = np.array([C._INITIAL_SIGMA])
 
                 args = itertools.product(spell_damage, hits, crit_chance, mages, rotations, responses, sim_size)
                 largs = [*args]
-                fill_args(largs, crit_chance, nmages)
+                if C._ADAPT_ROTATION:
+                    adjust_rotation(largs, crit_chance, nmages)
 
                 print('Hit = {:2.0f} # mages = {:d}'.format(100.0*hit, num_mages))
 
@@ -139,7 +140,8 @@ def main():
                         lsim_size = pickle.load(fid)[0]
                         conversions = pickle.load(fid)
                 if lsim_size != sim_size[0]:
-                    print('  Starting {:d} sims with {:d} mages and {:d} samples each.  Estimated run time is {:.2f} minutes.'.format(len(largs), num_mages, sim_size[0], 8e-5*len(largs)*num_mages*sim_size[0]/60.0))
+                    print('  Starting {:d} sims with {:d} mages and {:d} samples.  Estimated run time is {:.2f} minutes.'.format(len(largs), num_mages, sim_size[0], 8e-5*len(largs)*num_mages*sim_size[0]/60.0))
+                    
                     with Pool() as p:
                         out = np.array(p.starmap(get_crit_damage_diff, largs)).reshape((len(spell_damage), len(hits), len(crit_chance), len(mages), len(rotations), len(responses), len(sim_size)))
                     conversions = np.squeeze(out)
@@ -161,12 +163,13 @@ def main():
                 mages = np.array([num_mages])
                 sim_size = C._HIT_SIMSIZE*nmages.astype(np.float32).mean()/num_mages
                 sim_size = np.array([sim_size]).astype(np.int32)
-                rotations = np.array([0]).astype(np.int16)
+                rotations = np.array([C._DEFAULT_ROTATION]).astype(np.int16)
                 responses = np.array([C._INITIAL_SIGMA])
 
                 args = itertools.product(spell_damage, hits, crit_chance, mages, rotations, responses, sim_size)
                 largs = [*args]
-                fill_args(largs, crit_chance, nmages)
+                if C._ADAPT_ROTATION:
+                    adjust_rotation(largs, crit_chance, nmages)
 
                 print('Hit = {:2.0f} # mages = {:d}'.format(100.0*hit, num_mages))
 
@@ -217,6 +220,7 @@ def main():
                                                    hit_conversions[sindex, cindex],
                                                    crit_conversions[sindex, cindex])
                             fid.write(output)
+                            
         fid.close()
 
     if _DO_DPS_PER_MAGE:

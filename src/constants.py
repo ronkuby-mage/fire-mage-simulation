@@ -5,6 +5,13 @@ _LOG_SIM = -1 # set to -1 for no log
 class Constant():
     
     def __init__(self, sim_size=10000):
+        ## rotation strategies
+        self._PYROBLAST = 0
+        self._FROSTBOLT = 1
+        self._FIRE_BLAST = 2
+
+        self._ADAPT_ROTATION = False
+        self._DEFAULT_ROTATION = self._FIRE_BLAST
         
         self._ROTATION_SIMSIZE = 3000
         self._CRIT_SIMSIZE = 50000
@@ -49,10 +56,6 @@ class Constant():
         self._INITIAL_SIGMA = 1.0
         self._CONTINUING_SIGMA = 0.05
 
-        ## rotation strategies
-        self._PYROBLAST = 0
-        self._FROSTBOLT = 1
-        self._FIRE_BLAST = 2
         
         self._EXTRA_SCORCHES = [9000, 4, 3, 2, 2, 0, 0, 0, 0, 0]
 

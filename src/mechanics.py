@@ -131,12 +131,12 @@ def advance(arrays, plus_damage, hit_chance, crit_chance, rotation, sim_size):
             cast_timer[cst[special], next_hit[special]] = epsilon + react_time[special]
             cast_type[cst[special], next_hit[special]] = C._CAST_FIRE_BLAST
         elif rotation == C._FROSTBOLT:
-            cast_timer[cst[special], next_hit[special]] = C._PYROBLAST_CASTTIME + react_time[special]
-            cast_type[cst[special], next_hit[special]] = C._CAST_PYROBLAST
-        else:
             cast_timer[cst[special], next_hit[special]] = C._FIREBALL_CASTTIME + C._FROSTBOLT_CASTTIME + react_time[special]
             cast_type[cst[special], next_hit[special]] = C._CAST_FIREBALL
             damage[cst[special]] += hit_chance*(1 + C._FROSTBOLT_CRIT_DAMAGE*(crit_chance - C._FROSTBOLT_CRIT_MOD))*(C._FROSTBOLT_DAMAGE + C._FROSTBOLT_MODIFIER*(plus_damage - C._FROSTBOLT_PLUS))*C._FROSTBOLT_OVERALL
+        else:
+            cast_timer[cst[special], next_hit[special]] = C._PYROBLAST_CASTTIME + react_time[special]
+            cast_type[cst[special], next_hit[special]] = C._CAST_PYROBLAST
 
         # scorch next
         scorcher = np.logical_not(np.logical_or(next_hit, special_array)) # scorch mage only
