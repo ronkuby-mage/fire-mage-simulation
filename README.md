@@ -13,29 +13,29 @@ A [posted log](https://github.com/ronkuby-mage/fire-spec-simulation/blob/master/
 ### Spell power equivalency of critical strike rating
 
 With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  Here is the equivalency for 7 mages:
-![seven mage equivalence](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/sp_equiv_plots/sp_equiv_7_mages_96_25000.png)
+![seven mage equivalence](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_97_7.png)
 Compare with other simulations:
 * [Quasexort](https://docs.google.com/spreadsheets/d/1dqFuQeNVa403ulrmuW_8Ww-5UszOde0RPMBe2g7t1g4)
 * [elio](https://github.com/ignitelio/ignite/blob/master/magus2.ipynb)
 
 ### Alternative rotations
 
-The comparative average damage from several alternative rotations is plotted [here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/rotation_plots).  In cases of 3 or 4 mages, starting with two scorches yields higher DPS than the baseline of a single scorch to start:
-![two scorches vs one](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/two_scorches_700.png)
+The comparative average damage from several alternative rotations is plotted [here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/plots/rotation).  In cases of 3 or 4 mages, starting with two scorches yields higher DPS than the baseline of a single scorch to start:
+![two scorches vs one](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/legacy/two_scorches_700.png)
 The superiority of an extra scorch in these conditions is not surprising because otherwise some of the initial crits will not benefit from a full scorch stack.
 
 Replacing pyroblast with an (approximate) frostbolt + fireball results in up to 1% dps improvement:
-![frostbolt+fireball vs pyroblast](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/frostbolt_700.png)
+![frostbolt+fireball vs pyroblast](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/legacy/frostbolt_700.png)
 The frostbolt is rank 11 and untalented aside from elemental precision.
 
 Replacing pyroblast with fire blast + fireball results in up to 2% dps improvement:
-![combustion first vs later](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/rotation_plots/fire_blast_open_700.png)
+![combustion first vs later](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/legacy/fire_blast_open_700.png)
 **```scorch -> fire blast -> combustion -> -> fireball (repeated)```** is the highest tested opening rotation.
 
 ### DPS by number of mages
 
 DPS per mage as a function of number of mages is plotted for a few values of spell power [here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/dps_per_mage_plots).
-![dps per mage, 700 sp](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/dps_per_mage_plots/spellpower_700.png)
+![dps per mage, 700 sp](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/dps/dps_700_97.png)
 Assuming the number of mages is fixed, these curves are only useful towards determining ones expected dps.
 
 *Thanks to elio for tracking down the error in ignite timing and providing parallel code sample!*
