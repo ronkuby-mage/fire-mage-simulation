@@ -13,7 +13,7 @@ A [posted log](https://github.com/ronkuby-mage/fire-spec-simulation/blob/master/
 ### Spell power equivalency of critical strike rating
 
 With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  Here is the equivalency for 7 mages:
-![seven mage equivalence](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_97_7.png)
+![seven mage equivalence](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_95_5.png)
 Compare with other simulations:
 * [Quasexort](https://docs.google.com/spreadsheets/d/1dqFuQeNVa403ulrmuW_8Ww-5UszOde0RPMBe2g7t1g4)
 * [elio](https://github.com/ignitelio/ignite/blob/master/magus2.ipynb)
