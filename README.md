@@ -3,6 +3,7 @@
 These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, and travel time.  The effects of nightfall, power infusion, DMF double dip, trinkets, spell batching, and unmitigable boss resistance are not included.  The baseline rotation is:
 **```N x scorch -> *spells* -> fireball (repeated)```**
 Several options for *spells* were explored: **combustion -> pyroblast**, **combustion -> frostbolt**, and **fire blast -> combustion**.  [Here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/plots/rotation) are the highest average dps values for *spell*.  
+
 Most evaluations depend on current spell power, hit chance, crit chance, and number of mages.  For example the highest dps rotation for fixed 700 spell power and a 95% hit chance is:
 ![rotation](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/rotation/rotation_700_95.png)
 and this plot will change depending on the hit and spell power values.
