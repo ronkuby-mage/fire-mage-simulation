@@ -1,18 +1,24 @@
 ## Fire Mage Simulations
 
-These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, and travel time.  The baseline rotation is:
-**```scorch -> combustion -> pyroblast -> fireball (repeated)```**
-There will always be a designated scorch mage who, after pyroblast, casts scorch instead of fireball if:
+These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, and travel time.  The effects of nightfall, power infusion, DMF double dip, trinkets, spell batching, and unmitigable boss resistance are not included.  The baseline rotation is:
+**```N x scorch -> *spells* -> fireball (repeated)```**
+Several options for *spells* were explored: **combustion -> pyroblast**, **combustion -> frostbolt**, and **fire blast -> combustion**.  [Here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/plots/rotation) are the highest average dps values for *spell*.  
+Most evaluations depend on current spell power, hit chance, crit chance, and number of mages.  For example the highest dps rotation for fixed 700 spell power and a 95% hit chance is:
+![rotation](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/rotation/rotation_700_95.png)
+and this plot will change depending on the hit and spell power values.
+
+There will always be a designated scorch mage who, after the initial rotation, casts scorch instead of fireball if:
 1. The scorch debuff has less than five seconds to expiration
 2. The scorch debuff stack is not at its full value of 5
+If the number of mages is less than 5, at least 2 scorches should be initially cast (see below).  Two mages should cast 3 scorches and one mage should cast 5 scorches.
 
-The simulation starts immediately before the first scorch finishes casting.  Each of the mages is given a normally distributed initial delay with standard deviation 0.4 seconds.  Between casts an additional normally distributed delay of 0.05 seconds is imposed.  The duration of a session is again normally distributed with an average of 120 seconds and a 12 second deviation.  If a fixed encounter duration is imposed rather than a distribution, the selected encounter duration highly influences relative rotation values due to cyclical advantages of spell timing.
+The simulation starts immediately before the first scorch finishes casting.  Each of the mages is given a normally distributed initial delay with standard deviation 1.0 seconds.  Between casts an additional normally distributed delay of 0.05 seconds is imposed.  The duration of a session is again normally distributed with an average of 120 seconds and a 12 second deviation.  If a fixed encounter duration is imposed rather than a distribution, the selected encounter duration highly influences relative rotation values due to cyclical advantages of spell timing.
 
 A [posted log](https://github.com/ronkuby-mage/fire-spec-simulation/blob/master/log_example.txt) can be reviewed to verify mechanics.  Most of the status information in the logs is shown when a cast damages the boss.  This status information reports the condition after the spell has affected both boss and player.  Logs can be activated by setting the ```_LOG_SIM``` variable to an integer n, where n >= 0 and n < ```_SIM_SIZE```.
 
 ### Spell power equivalency of critical strike rating
 
-With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  The equivalency value is dependent on current spell power, hit chance, crit chance, and number of mages.  Each plot below shows the values for a range of crit change and spell power values.  To find the appropriate plot, select from the table based on your current hit chance and number of mages:
+With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  The equivalency value is dependent on current spell power, hit chance, crit chance, and number of mages.  Each plot below shows the values for a range of crit chance and spell power values.  To find the appropriate plot, select from the table based on your current hit chance and number of mages:
 
 |             | 89% Hit | 91% Hit | 93% Hit | 95% Hit | 97% Hit | 99% Hit |
 |-------------|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
