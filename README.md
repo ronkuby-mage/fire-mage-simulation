@@ -1,4 +1,4 @@
-[Skip to SP to critical conversion table](#spell-power-equivalency-of-critical-strike-rating)
+## [Skip to SP to critical conversion table](#spell-power-equivalency-of-critical-strike-rating)
 
 ## Fire Mage Simulations
 
