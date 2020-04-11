@@ -1,3 +1,5 @@
+[Skip to SP to critical conversion table](#spell-power-equivalency-of-critical-strike-rating)
+
 ## Fire Mage Simulations
 
 These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, and travel time.  The effects of nightfall, power infusion, DMF double dip, trinkets, spell batching, and unmitigable boss resistance are not included.  The baseline rotation is:
