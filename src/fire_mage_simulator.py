@@ -8,8 +8,9 @@ import plots
 import constants
 
 def main():
-    get_damage(700.0, 0.970, 0.300, 6, 1.0, 100000)
+    print(get_damage(700.0, 0.970, 0.300, 6, 1.0, 100000))
 
+    t0 = time.time()
     C = constants.Constant()
     
     spell_damage = np.arange(C._SP_START, C._SP_END + C._SP_STEP/2.0, C._SP_STEP)
@@ -33,7 +34,7 @@ def main():
 
     plots.plot_equiv(spell_damage, crit_chance, conversions, hit, num_mages, sim_size[0], C._DURATION_AVERAGE, 'crit')
 
-    
+    print(time.time() - t0)
     
 if __name__ == '__main__':
     main()

@@ -24,7 +24,7 @@ def do_cast(C, arrays, still_going, cast_array):
         subtime(C, arrays, cst, add_time)
 
         if C._LOG_SIM >= 0:
-            if  C._LOG_SIM in cst:
+            if C._LOG_SIM in cst:
                 message = '         ({:6.2f}): player {:d} finished casting {:s}'
                 sub_index = cst.tolist().index( C._LOG_SIM)
                 message = message.format(arrays['global']['running_time'][C._LOG_SIM],
@@ -78,8 +78,8 @@ def do_spell(C, arrays, still_going, spell_array):
         # reset timer
         arrays['player']['spell_timer'][spl, lnext_hit] = C._LONG_TIME
 
-        if  C._LOG_SIM >= 0:
-            if  C._LOG_SIM in spl:
+        if C._LOG_SIM >= 0:
+            if C._LOG_SIM in spl:
                 message = ' ({:6.2f}): player {:d} {:s} landed '
                 sub_index = spl.tolist().index( C._LOG_SIM)
                 message = message.format(arrays['global']['running_time'][C._LOG_SIM],
@@ -149,8 +149,8 @@ def do_spell(C, arrays, still_going, spell_array):
             lcl_crits = np.where(crit_array & np.logical_not(C._IS_FIRE[spell_type]))[0]
             arrays['global']['damage'][sph[lcl_crits]] += C._CRIT_DAMAGE*spell_damage[lcl_crits]
 
-            if  C._LOG_SIM >= 0:
-                if  C._LOG_SIM in sph:
+            if C._LOG_SIM >= 0:
+                if C._LOG_SIM in sph:
                     sub_index = sph.tolist().index(C._LOG_SIM)
                     if  sub_index in lcl_crits:
                         message2 = 'crits for {:4.0f} '.format((1.0 + C._CRIT_DAMAGE)*spell_damage[sub_index])
@@ -207,8 +207,8 @@ def do_tick(C, arrays, still_going, tick_array):
         multiplier = C._COE_MULTIPLIER*arrays['boss']['ignite_multiplier'][no_expire]
         multiplier *= 1.0 + scorch*(arrays['boss']['scorch_timer'][no_expire] > 0.0).astype(np.float)
         arrays['global']['damage'][no_expire] += multiplier*arrays['boss']['ignite_value'][no_expire]
-        if  C._LOG_SIM >= 0:
-            if  C._LOG_SIM in no_expire:
+        if C._LOG_SIM >= 0:
+            if C._LOG_SIM in no_expire:
                 sub_index = no_expire.tolist().index(C._LOG_SIM)
                 message = ' {:7.0f} ({:6.2f}): ignite ticked   {:4.0f} damage done'
                 print(message.format(arrays['global']['total_damage'][C._LOG_SIM] + arrays['global']['damage'][C._LOG_SIM],
@@ -245,7 +245,8 @@ def get_decisions(C, arrays):
     next_hit = np.argmin(arrays['player']['cast_timer'][still_going, :], axis=1)
     
     react_time = np.abs(C._CONTINUING_SIGMA*np.random.randn(still_going.size))    
-    
+
+    mqg = (arrays['player']['buff_timer'][C._BUFF_MQG][still_going, next_hit] > 0.0).astype(np.float)    
     num_mages = arrays['player']['cast_timer'].shape[1]
 
     # begin decision -- filling cast_type and cast_timer    
@@ -257,7 +258,7 @@ def get_decisions(C, arrays):
     do_scorch = aut_scorch | man_scorch
     scorch = np.where(do_scorch)[0]
     arrays['player']['cast_type'][still_going[scorch], next_hit[scorch]] = C._CAST_SCORCH
-    arrays['player']['cast_timer'][still_going[scorch], next_hit[scorch]] = C._CAST_TIME[C._CAST_SCORCH] + react_time[scorch]
+    arrays['player']['cast_timer'][still_going[scorch], next_hit[scorch]] = C._CAST_TIME[C._CAST_SCORCH]/(1.0 + C._MQG*mqg[scorch]) + react_time[scorch]
     
     do_fire_blast = arrays['player']['cast_number'][still_going, next_hit] == C._SCORCHES[num_mages] + 1
     fire_blast = np.where(do_fire_blast)[0]
@@ -272,7 +273,7 @@ def get_decisions(C, arrays):
     do_fireball = np.logical_not(do_scorch|do_fire_blast|do_combustion)
     fireball = np.where(do_fireball)[0]
     arrays['player']['cast_type'][still_going[fireball], next_hit[fireball]] = C._CAST_FIREBALL
-    arrays['player']['cast_timer'][still_going[fireball], next_hit[fireball]] = C._CAST_TIME[C._CAST_FIREBALL] + react_time[fireball]
+    arrays['player']['cast_timer'][still_going[fireball], next_hit[fireball]] = C._CAST_TIME[C._CAST_FIREBALL]/(1.0 + C._MQG*mqg[scorch]) + react_time[fireball]
     
     # end decision
     gcd = np.where(arrays['player']['cast_type'][still_going, next_hit] < C._CAST_GCD)[0]
@@ -283,7 +284,7 @@ def get_decisions(C, arrays):
 def get_damage(sp, hit, crit, num_mages, response, sim_size):
     C = constants.Constant(sim_size=sim_size)
     arrays = constants.init_const_arrays(C, sp, hit, crit, num_mages, response)
-    if  C._LOG_SIM >= 0:
+    if C._LOG_SIM >= 0:
         constants.log_message(sp, hit, crit)
     while True:
         while advance(C, arrays):
@@ -293,7 +294,7 @@ def get_damage(sp, hit, crit, num_mages, response, sim_size):
             break
         get_decisions(C, arrays)
         
-    if  C._LOG_SIM >= 0:
+    if C._LOG_SIM >= 0:
         print('total damage = {:7.0f}'.format(arrays['global']['total_damage'][ C._LOG_SIM]))
 
     return (arrays['global']['total_damage']/arrays['global']['duration']).mean()

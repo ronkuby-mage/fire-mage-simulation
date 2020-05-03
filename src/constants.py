@@ -112,7 +112,7 @@ class Constant():
 
         # BUFFs have simple mechanics: limited use and a timer
         self._POWER_INFUSION = 0.2
-        self._MQG = 1.33
+        self._MQG = 0.33
 
         self._BUFF_POWER_INFUSION = 0
         self._BUFF_MQG = 1
@@ -155,7 +155,7 @@ def init_const_arrays(C, sp, hit, crit, num_mages, response):
                 'scorch_timer': np.zeros(sim_size),
                 'scorch_count': np.zeros(sim_size).astype(np.int32),
                 'debuff_timer': [np.zeros(sim_size) for aa in range(C._DEBUFFS)],
-                'buff_avail': [np.zeros(sim_size).astype(np.int) for aa in range(C._DEBUFFS)]},
+                'debuff_avail': [np.zeros(sim_size).astype(np.int) for aa in range(C._DEBUFFS)]},
             'player': {
                 'cast_timer': np.abs(response*np.random.randn(sim_size, num_mages)),
                 'cast_type': C._CAST_GCD*np.ones((sim_size, num_mages)).astype(np.int32),
