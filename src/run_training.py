@@ -1,9 +1,6 @@
 import argparse
 
 import ray
-import gym
-import numpy as np
-from gym.spaces import Discrete, Box
 from fire_env import FireMageEnv
 from ray.rllib.models.preprocessors import get_preprocessor
 from ray.rllib.models.torch.recurrent_torch_model import RecurrentTorchModel
@@ -17,12 +14,10 @@ torch, nn = try_import_torch()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--run", type=str, default="PPO")
-parser.add_argument("--env", type=str, default="repeat_initial")
-parser.add_argument("--stop", type=int, default=90)
+parser.add_argument("--stop", type=int, default=9000)
 parser.add_argument("--num-cpus", type=int, default=0)
 parser.add_argument("--fc-size", type=int, default=64)
 parser.add_argument("--lstm-cell-size", type=int, default=256)
-
 
 class RNNModel(RecurrentTorchModel):
     def __init__(self,
@@ -85,31 +80,6 @@ class RNNModel(RecurrentTorchModel):
             torch.squeeze(lstm_out[1][0], 0),
             torch.squeeze(lstm_out[1][1], 0)
         ]
-
-class SimpleCorridor(gym.Env):
-    """Example of a custom env in which you have to walk down a corridor.
-
-    You can configure the length of the corridor via the env config."""
-
-    def __init__(self, config):
-        self.end_pos = config["corridor_length"]
-        self.cur_pos = 0
-        self.action_space = Discrete(2)
-        self.observation_space = Box(
-            0.0, self.end_pos, shape=(1, ), dtype=np.float32)
-
-    def reset(self):
-        self.cur_pos = 0
-        return [self.cur_pos]
-
-    def step(self, action):
-        assert action in [0, 1], action
-        if action == 0 and self.cur_pos > 0:
-            self.cur_pos -= 1
-        elif action == 1:
-            self.cur_pos += 1
-        done = self.cur_pos >= self.end_pos
-        return [self.cur_pos], 1 if done else 0, done, {}
     
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -131,12 +101,8 @@ if __name__ == "__main__":
         'power_infusion': 0,
         'mqg': 0}
 
-    scon = {'corridor_length': 9}
-    
     tune.register_env(
         "fire_mage", lambda _: FireMageEnv(config))
-    tune.register_env(
-        "blea", lambda _: SimpleCorridor(scon))
 
     rnn_config = {
         "env": "fire_mage",
@@ -166,7 +132,7 @@ if __name__ == "__main__":
         args.run,
         stop={
             "episode_reward_mean": args.stop,
-            "timesteps_total": 100000
+            "timesteps_total": 3000000
         },
         checkpoint_at_end=True,
         config=rnn_config,
