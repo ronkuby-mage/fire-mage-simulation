@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import gym
 from gym import spaces
@@ -7,40 +8,31 @@ from dynamic_action import DynamicSpace
 class FireMageEnv(gym.Env):
 
     def __init__(self, config):
-        super(FireMageEnv, self).__init__()
+        #super(FireMageEnv, self).__init__()
         self._config = config
-        self._C = constant.Constant()
-        self.reset()
-        self.action_space = DynamicSpace(self._C._CASTS)
-        self.observation_space = spaces.Box(low=0, high=1, shape=(18), dtype=np.float16)
-        
+        self._C = constants.Constant()
+        #self.action_space = DynamicSpace(self._C._CASTS)
+        self.action_space = spaces.Discrete(self._C._CASTS)
+        self.observation_space = spaces.Box(0.0, 1.0, shape=(18,), dtype=np.float32)
+        #self.reset()
+
     def step(self, action):
-        self._apply_decision(action)
+        with open('/home/ronkuby/code/fire-mage-simulation/src/out.txt', 'at') as fid:
+            fid.write('act_in : ' + str(action) + '\n')
+        next_hit = np.argmin(self._state['player']['cast_timer'])
+        self._apply_decision(action, next_hit)
         while self._advance():
             if self._state['global']['running_time'] < self._state['global']['duration']:
                 self._state['global']['total_damage'] += self._state['global']['damage']
 
-        # set action space
-        next_hit = np.argmin(self._state['player']['cast_timer'])
-        actions = set(range(self._C._CAST_GCD))
-        actions.remove(self._C._CAST_FIRE_BLAST) # cooldown not implemented it anyway
-        if self._state['player']['comb_avail'][next_hit] > 0:
-            actions.add(self._C._CAST_COMBUSTION)
-        if self._state['player']['buff_avail'][self._C._BUFF_POWER_INFUSION][next_hit] > 0:
-            actions.add(self._C._CAST_POWER_INFUSION)
-        if self._state['player']['buff_avail'][self._C._BUFF_MQG][next_hit] > 0:
-            actions.add(self._C._CAST_MQG)
-        self.action_space.set_actions(actions)
-
         obs = self._get_obs(next_hit)
-
         # thoughts on reward:
         # total damage since last cast
-        reward = self._['global']['total_damage'] - self._state['player']['damage'][next_hit]
+        reward = self._state['global']['total_damage'] - self._state['player']['damage'][next_hit]
 
         done = self._state['global']['running_time'] >= self._state['global']['duration']
 
-        return obs, reward, done, {}
+        return obs, reward/100000.0, done, {}
 
     def reset(self):
         num_mages = self._config['num_mages']
@@ -53,16 +45,16 @@ class FireMageEnv(gym.Env):
         spell_power.sort()
         hit_chance = self._config['hit_average'] +\
                      self._config['hit_sigma']*np.random.randn(num_mages)
-        hit_chance = np.minimum([0.99, (hit_chance*100).astype(np.int32).astype(np.float)/100.0])
+        hit_chance = np.minimum(0.99, (hit_chance*100).astype(np.int32).astype(np.float)/100.0)
         crit_chance = self._config['crit_average'] +\
                      self._config['crit_sigma']*np.random.randn(num_mages)
-        crit_chance = np.maximum([0.0, (crit_chance*100).astype(np.int32).astype(np.float)/100.0])
-        cast_timer = np.abs(config._['response_time']*np.random.randn(num_mages))
+        crit_chance = np.maximum(0.0, (crit_chance*100).astype(np.int32).astype(np.float)/100.0)
+        cast_timer = np.abs(self._config['response_time']*np.random.randn(num_mages))
         duration += np.min(cast_timer)
         cast_timer -= np.min(cast_timer)
-        buff_avail = [[0 for bb in range(num_mages)] for aa in range(self._C._BUFFS)]
-        buff_avail[self._C._BUFF_POWER_INFUSION][(num_mages - self._config['power_infusion']):-1] = 1
-        buff_avail[self._C._BUFF_MQG][(num_mages - self._config['mqg']):-1] = 1
+        buff_avail = np.zeros((self._C._BUFFS, num_mages), dtype=np.int32)
+        buff_avail[self._C._BUFF_POWER_INFUSION, (num_mages - self._config['power_infusion']):-1] = 1
+        buff_avail[self._C._BUFF_MQG, (num_mages - self._config['mqg']):-1] = 1
         self._state = {
             'global': {
                 'total_damage': 0.0,
@@ -79,19 +71,19 @@ class FireMageEnv(gym.Env):
                 'scorch_timer': 0.0,
                 'scorch_count': 0,
                 'debuff_timer': [0.0 for aa in range(self._C._DEBUFFS)],
-                'debuff_avail': [0 for aa in range(C._DEBUFFS)]
+                'debuff_avail': [0 for aa in range(self._C._DEBUFFS)]
             },
             'player': {
                 'cast_timer': cast_timer,
-                'cast_type': C._CAST_GCD*np.ones(num_mages),
-                'spell_timer': C._LONG_TIME*np.ones(num_mages),
-                'spell_type': C._CAST_GCD*np.ones(num_mages).astype(np.int32),
+                'cast_type': self._C._CAST_GCD*np.ones(num_mages).astype(np.int32),
+                'spell_timer': self._C._LONG_TIME*np.ones(num_mages),
+                'spell_type': self._C._CAST_GCD*np.ones(num_mages).astype(np.int32),
                 'comb_stack': np.zeros(num_mages).astype(np.int32),
                 'comb_left': np.zeros(num_mages).astype(np.int32),
                 'comb_avail': np.ones(num_mages).astype(np.int32),
                 'cast_number': np.zeros(num_mages).astype(np.int32),
                 'buff_avail': buff_avail,
-                'buff_timer': [[0.0 for bb in range(num_mages)] for aa in range(self._C._BUFFS)],
+                'buff_timer': np.zeros((self._C._BUFFS, num_mages)),
                 'spell_power': spell_power,
                 'hit_chance': hit_chance,
                 'crit_chance': crit_chance,
@@ -113,13 +105,29 @@ class FireMageEnv(gym.Env):
                      '      cs = combustion stack size (ignore if cl is 0)',
                      '      cl = combustion remaining crits']
                      
+        next_hit = np.argmin(self._state['player']['cast_timer'])
 
-        return
+        return self._get_obs(next_hit)
 
     def render(self, mode='human', close=False):
         for log_line in self._log:
             print(log_line)
 
+    def _get_actions(self, next_hit):
+        actions = set(range(self._C._CAST_GCD))
+        actions.remove(self._C._CAST_FIRE_BLAST) # cooldown not implemented it anyway
+        if self._state['player']['comb_avail'][next_hit] > 0:
+            actions.add(self._C._CAST_COMBUSTION)
+        if self._state['player']['buff_avail'][self._C._BUFF_POWER_INFUSION, next_hit] > 0:
+            actions.add(self._C._CAST_POWER_INFUSION)
+        if self._state['player']['buff_avail'][self._C._BUFF_MQG, next_hit] > 0:
+            actions.add(self._C._CAST_MQG)
+
+        with open('/home/ronkuby/code/fire-mage-simulation/src/out.txt', 'at') as fid:
+            fid.write('act_out: ' + str(actions) + '\n')
+
+        return actions
+            
     def _get_obs(self, next_hit):
         obs = []
         # self stats - 3
@@ -128,25 +136,25 @@ class FireMageEnv(gym.Env):
         obs.append(self._state['player']['crit_chance'][next_hit])
 
         # self buffs - 7
-        obs.append(self._state['player']['comb_avail'][next_hit])
+        obs.append(max([0, self._state['player']['comb_avail'][next_hit]]))
         if self._state['player']['comb_avail'][next_hit] > 0:
             obs += [0, 0]
         else:
-            obs.append(self._state['player']['comb_left'][next_hit])
+            obs.append(self._state['player']['comb_left'][next_hit]/3)
             if not self._state['player']['comb_left'][next_hit]:
                 obs.append(0)
             else:
-                obs.append(min([1.0, self._state['player']['comb_stacks'][next_hit]/7]))
-        obs.append(self._state['player']['buff_avail'][self._C._BUFF_POWER_INFUSION][next_hit])
+                obs.append(min([1.0, self._state['player']['comb_stack'][next_hit]/7]))
         for buff in range(self._C._BUFFS):
-            if self._state['player']['buff_avail'][buff][next_hit]:
+            obs.append(max([0, self._state['player']['buff_avail'][buff, next_hit]]))
+            if self._state['player']['buff_avail'][buff, next_hit] > 0:
                 obs.append(0)
             else:
-                timer = self._state['player']['buff_timer'][buff][next_hit]
+                timer = self._state['player']['buff_timer'][buff, next_hit]
                 timer = max([0.0, timer/self._C._BUFF_DURATION[buff]])
                 obs.append(timer)
 
-        #   boss debuffs - 6
+        # boss debuffs - 6
         obs.append(max([0.0, self._state['boss']['ignite_timer']/self._C._IGNITE_TIME]))
         if self._state['boss']['ignite_timer'] > 0.0:
             obs.append(self._state['boss']['ignite_count']/self._C._IGNITE_STACK)
@@ -169,13 +177,16 @@ class FireMageEnv(gym.Env):
         #   casts - 1
         obs.append(min([1.0, self._state['player']['cast_number'][next_hit]/20]))
 
-        return obs
+        with open('/home/ronkuby/code/fire-mage-simulation/src/out.txt', 'at') as fid:
+            fid.write('hi4 ' + str(len(obs)) + ' ' + str(obs) + '\n')
+                
+        return np.array(obs)
             
     def _subtime(self, add_time):
         self._state['global']['running_time'] += add_time
         self._state['player']['cast_timer'] -= add_time
         self._state['player']['spell_timer'] -= add_time
-        self._state['boss']['ignite_timer']] -= add_time
+        self._state['boss']['ignite_timer'] -= add_time
         self._state['boss']['tick_timer'] -= add_time
         self._state['boss']['scorch_timer'] -= add_time
         for buff in range(self._C._BUFFS):
@@ -199,22 +210,22 @@ class FireMageEnv(gym.Env):
         # transfer to spell
         if self._state['player']['cast_type'][next_hit] < self._C._CAST_GCD:
             self._state['player']['spell_type'][next_hit] = self._state['player']['cast_type'][next_hit]
-            self._state['player']['spell_timer'][next_hit] = self._C._SPELL_TIME[self._state['player']['cast_type'][no_instant]]
+            self._state['player']['spell_timer'][next_hit] = self._C._SPELL_TIME[self._state['player']['cast_type'][next_hit]]
 
         # apply instant spells
-        if self._state['player']['cast_type'][next_hit] == self._C._CAST_COMBUSTION):
+        if self._state['player']['cast_type'][next_hit] == self._C._CAST_COMBUSTION:
             self._state['player']['comb_left'][next_hit] = self._C._COMBUSTIONS
             self._state['player']['comb_stack'][next_hit] = 0
             self._state['player']['comb_avail'][next_hit] -= 1
 
         for buff in range(self._C._BUFFS):
             if self._state['player']['cast_type'][next_hit] == self._C._BUFF_CAST_TYPE[buff]:
-                self._state['player']['buff_timer'][buff][next_hit] = self._C._BUFF_DURATION[buff]
-                self._state['player']['buff_avail'][buff][next_hit] -= 1
+                self._state['player']['buff_timer'][buff, next_hit] = self._C._BUFF_DURATION[buff]
+                self._state['player']['buff_avail'][buff, next_hit] -= 1
         
         # push gcd
         if self._state['player']['gcd'][next_hit] > 0.0:
-            self._state['player']['cast_type'][next_hit] = self._C._self._CAST_GCD
+            self._state['player']['cast_type'][next_hit] = self._C._CAST_GCD
             self._state['player']['cast_timer'][next_hit] = self._state['player']['gcd'][next_hit]
             self._state['player']['gcd'][next_hit] = 0.0
 
@@ -249,7 +260,7 @@ class FireMageEnv(gym.Env):
                            self._C._SPELL_RANGE[spell_type]*np.random.rand() +\
                            self._C._SP_MULTIPLIER[spell_type]*self._state['player']['spell_power'][next_hit]
             # self._CoE + talents
-            spell_damage *= self._C._self._COE_MULTIPLIER*self._C._DAMAGE_MULTIPLIER[spell_type] 
+            spell_damage *= self._C._COE_MULTIPLIER*self._C._DAMAGE_MULTIPLIER[spell_type] 
             scorch = self._C._IS_FIRE[spell_type]*self._C._SCORCH_MULTIPLIER*self._state['boss']['scorch_count']
             spell_damage *= 1.0 + scorch*(self._state['boss']['scorch_timer'] > 0.0).astype(np.float)
             pi = (self._state['player']['buff_timer'][self._C._BUFF_POWER_INFUSION][next_hit] > 0.0).astype(np.float)
@@ -290,7 +301,7 @@ class FireMageEnv(gym.Env):
                                                                self._C._IGNITE_STACK])
 
                     # add crit to damage
-                    self._state['global']['damage'][gbl_icrits] += self._C._ICRIT_DAMAGE*spell_damage
+                    self._state['global']['damage'] += self._C._ICRIT_DAMAGE*spell_damage
             
                     # remove from combustion
                     self._state['player']['comb_left'][next_hit] = max([self._state['player']['comb_left'][next_hit] - 1, 0])
@@ -342,13 +353,13 @@ class FireMageEnv(gym.Env):
 
             scorch = self._C._SCORCH_MULTIPLIER*self._state['boss']['scorch_count']
             multiplier = self._C._COE_MULTIPLIER*self._state['boss']['ignite_multiplier']
-            multiplier *= 1.0 + scorch*(self._state['boss']['scorch_timer'] > 0.0).astype(np.float)
+            multiplier *= 1.0 + scorch*float(self._state['boss']['scorch_timer'] > 0.0)
             self._state['global']['damage'] += multiplier*self._state['boss']['ignite_value']
             if self._C._LOG_SIM:
                 message = ' {:7.0f} ({:6.2f}): ignite ticked   {:4.0f} damage done'
                 self._log.append(message.format(self._state['global']['total_damage'] + self._state['global']['damage'],
                                                 self._state['global']['running_time'],
-                                                multiplier[sub_index]*self._state['boss']['ignite_value']))
+                                                multiplier*self._state['boss']['ignite_value']))
         return
 
     def _advance(self):
@@ -359,7 +370,7 @@ class FireMageEnv(gym.Env):
             return False
 
         # cast finished
-        cast_timer = mp.min(self._state['player']['cast_timer'])
+        cast_timer = np.min(self._state['player']['cast_timer'])
         spell_timer = np.min(self._state['player']['spell_timer'])
         tick_timer = self._state['boss']['tick_timer']
         if cast_timer < spell_timer and cast_timer < tick_timer:
@@ -371,21 +382,24 @@ class FireMageEnv(gym.Env):
     
         return True
 
-    def _apply_decision(self, cast_type):
-        next_hit = np.argmin(self._state['player']['cast_timer'])
-        self._state['player']['damage'][next_hit] = self._['global']['total_damage']
+    def _apply_decision(self, cast_type, next_hit):
+        if cast_type not in self._get_actions(next_hit):
+            mod_type = self._C._CAST_GCD
+        else:
+            mod_type = cast_type
+
+        self._state['player']['damage'][next_hit] = self._state['global']['total_damage']
         
         react_time = np.abs(self._config['react_time']*np.random.randn())
-        self._state['player']['cast_type'][next_hit] = cast_type
-        if cast_type < self._C._CAST_GCD:
-            self._state['player']['cast_timer'][next_hit] = self._C._CAST_TIME[cast_type]
+        self._state['player']['cast_timer'][next_hit] = react_time 
+        self._state['player']['cast_type'][next_hit] = mod_type
+        if mod_type < self._C._CAST_GCD:
+            self._state['player']['cast_timer'][next_hit] += self._C._CAST_TIME[mod_type]
             if self._state['player']['buff_timer'][self._C._BUFF_MQG][next_hit] > 0.0:
                 self._state['player']['cast_timer'][next_hit] /= 1.0 + self._C._MQG
-        else:
-            self._state['player']['cast_timer'][next_hit] = 0.0
     
         if self._state['player']['cast_type'][next_hit] < self._C._CAST_GCD:
-            self._state['player']['gcd'] = np.max([0.0, self._C._GLOBAL_COOLDOWN + react_time - self._state['player']['cast_timer'][next_hit]])
+            self._state['player']['gcd'][next_hit] = np.max([0.0, self._C._GLOBAL_COOLDOWN + react_time - self._state['player']['cast_timer'][next_hit]])
     
         self._state['global']['decision'] = False
 

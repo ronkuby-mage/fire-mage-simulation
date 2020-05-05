@@ -90,7 +90,7 @@ class Constant():
         self._IS_SCORCH = np.array([True, False, False, False, False])
         self._IS_FIRE = np.array([1.0, 1.0, 1.0, 1.0, 0.0])
         self._INCIN_BONUS = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
-        self._CAST_TIME = np.array([1.5, 6.0, 3.0, 0.0, 3.0])
+        self._CAST_TIME = np.array([1.5, 6.0, 3.0, 0.0, 3.0, 3.0])
         self._SPELL_TIME = np.array([0.0, 0.875, 0.875, 0.0, 0.75])
 
         if self._FIREBALL_RANK == 11:
