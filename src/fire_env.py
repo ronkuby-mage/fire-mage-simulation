@@ -3,7 +3,6 @@ import numpy as np
 import gym
 from gym import spaces
 import constants
-from dynamic_action import DynamicSpace
 
 class FireMageEnv(gym.Env):
 
@@ -13,57 +12,82 @@ class FireMageEnv(gym.Env):
         self._C = constants.Constant()
         #self.action_space = DynamicSpace(self._C._CASTS)
         self.action_space = spaces.Discrete(self._C._CASTS)
-        self.observation_space = spaces.Box(0.0, 1.0, shape=(18,), dtype=np.float32)
-        #self.reset()
+        self.observation_space = spaces.Box(0.0, 1.0, shape=(19,), dtype=np.float32)
+        #self.observation_space = spaces.Box(0.0, 1.0, shape=(2,), dtype=np.float32)
 
     def step(self, action):
-        next_hit = np.argmin(self._state['player']['cast_timer'])
-        self._apply_decision(action, next_hit)
+        last_hit = np.argmin(self._state['player']['cast_timer'])
+        self._apply_decision(action, last_hit)
         while self._advance():
             if self._state['global']['running_time'] < self._state['global']['duration']:
                 self._state['global']['total_damage'] += self._state['global']['damage']
 
+        next_hit = np.argmin(self._state['player']['cast_timer'])
         obs = self._get_obs(next_hit)
 
         # total damage since last cast
         ctime = self._state['global']['running_time']
-        l_e = self._state['player']['last_eval'][next_hit]
-        player_damage = sum([d[1] for d in self._state['player']['damage'][next_hit] if l_e < d[0]])
-        ignite_damage = sum([d[1] for d in self._state['boss']['ignite_damage'] if l_e < d[0]])
+        l_e = self._state['player']['last_eval'][last_hit]
+        #l_e = ctime - 4.0
+        player_damage = sum([d[1] for d in self._state['player']['damage'][last_hit]])
+        self._state['player']['damage'][last_hit] = []
+        ignite_damage = sum([d[1] for d in self._state['boss']['ignite_damage'] if d[0] >= l_e])
         #print(ctime, player_damage, self._state['player']['damage'][next_hit])
         if ctime > l_e:
-            #print('   ', player_damage, ctime, l_e)
             reward = (player_damage + ignite_damage/self._config['num_mages'])/(ctime - l_e)
         else:
             reward = 0.0
-        self._state['player']['last_eval'][next_hit] = ctime
+        reward = (player_damage + ignite_damage/self._config['num_mages'])/self._state['global']['duration']
+
+        #player_damage = sum([d[1] for d in self._state['player']['damage'][last_hit] if d[0] >= l_e])
+        #ignite_damage = sum([d[1] for d in self._state['boss']['ignite_damage'] if d[0] >= l_e])
+        #if ctime > l_e:
+        #    r2 = (player_damage + ignite_damage/self._config['num_mages'])/(ctime - l_e)
+        #else:
+        #    r2 = 0.0
+        #if r2 - reward > 10000:
+        #    self.render()
+        #    for ii, pp in enumerate(self._state['player']['damage']):
+        #        print('  ', ii + 1, pp[-1][0], pp[-1][1])
+        #    print('reward', r2 - reward, l_e, last_hit + 1)
+        #    print(sum([d[1] for d in self._state['player']['damage'][last_hit] if d[0] >= l_e]), sum([d[1] for d in self._state['boss']['ignite_damage'] if d[0] >= l_e]), r2)
+        #    sdjfi()
+
+        self._state['player']['last_eval'][last_hit] = ctime
         
         done = self._state['global']['running_time'] >= self._state['global']['duration']
 
         return obs, reward/100.0, done, {}
 
-    def reset(self):
+    def reset(self, retain_stats=False):
         num_mages = self._config['num_mages']
-        duration = self._config['duration_average'] +\
-                   self._config['duration_sigma']*np.random.randn()
-        duration = max([self._config['duration_average']/2.0, duration])
-        spell_power = self._config['sp_average'] +\
-                      self._config['sp_sigma']*np.random.randn(num_mages)
-        spell_power = spell_power.astype(np.int32).astype(np.float)
-        # first mage may be scorch mage, last is finisher
-        spell_power.sort()
-        hit_chance = self._config['hit_average'] +\
-                     self._config['hit_sigma']*np.random.randn(num_mages)
-        hit_chance = np.minimum(0.99, (hit_chance*100).astype(np.int32).astype(np.float)/100.0)
-        crit_chance = self._config['crit_average'] +\
-                     self._config['crit_sigma']*np.random.randn(num_mages)
+        if not retain_stats:
+            duration = self._config['duration_average'] +\
+                       self._config['duration_sigma']*np.random.randn()
+            duration = max([self._config['duration_average']/2.0, duration])
+            spell_power = self._config['sp_average'] +\
+                          self._config['sp_sigma']*np.random.randn(num_mages)
+            spell_power = spell_power.astype(np.int32).astype(np.float)
+            # first mage may be scorch mage, last is finisher
+            spell_power.sort()
+            hit_chance = self._config['hit_average'] +\
+                         self._config['hit_sigma']*np.random.randn(num_mages)
+            hit_chance = np.minimum(0.99, (hit_chance*100).astype(np.int32).astype(np.float)/100.0)
+            hit_chance = np.maximum(0.89, hit_chance)
+            crit_chance = self._config['crit_average'] +\
+                          self._config['crit_sigma']*np.random.randn(num_mages)
+        else:
+            duration = self._state['global']['duration']
+            spell_power = self._state['player']['spell_power']
+            hit_chance = self._state['player']['hit_chance']
+            crit_chance = self._state['player']['crit_chance']
         crit_chance = np.maximum(0.0, (crit_chance*100).astype(np.int32).astype(np.float)/100.0)
         cast_timer = np.abs(self._config['response_time']*np.random.randn(num_mages))
         duration += np.min(cast_timer)
         cast_timer -= np.min(cast_timer)
         buff_avail = np.zeros((self._C._BUFFS, num_mages), dtype=np.int32)
-        buff_avail[self._C._BUFF_POWER_INFUSION, (num_mages - self._config['power_infusion']):-1] = 1
-        buff_avail[self._C._BUFF_MQG, (num_mages - self._config['mqg']):-1] = 1
+        buff_avail[self._C._BUFF_POWER_INFUSION, (num_mages - self._config['power_infusion']):] = 1
+        buff_avail[self._C._BUFF_MQG, (num_mages - self._config['mqg']):] = 1
         self._state = {
             'global': {
                 'total_damage': 0.0,
@@ -117,9 +141,13 @@ class FireMageEnv(gym.Env):
                      '      cl = combustion remaining crits']
                      
         next_hit = np.argmin(self._state['player']['cast_timer'])
+        self._state['player']['cast_number'][next_hit] += 1
 
         return self._get_obs(next_hit)
 
+    def total(self):
+        return self._state['global']['total_damage']
+    
     def render(self, mode='human', close=False):
         for log_line in self._log:
             print(log_line)
@@ -183,7 +211,8 @@ class FireMageEnv(gym.Env):
         obs.append(self._state['player']['spell_type'][next_hit]/(self._C._CASTS - 1))
 
         #   casts - 1
-        obs.append(min([1.0, self._state['player']['cast_number'][next_hit]/20]))
+        obs.append(min([1.0, self._state['player']['cast_number'][next_hit]/8]))
+        obs.append(min([1.0, self._state['player']['cast_number'][next_hit]/40]))
                 
         return np.array(obs)
             
@@ -233,9 +262,6 @@ class FireMageEnv(gym.Env):
             self._state['player']['cast_type'][next_hit] = self._C._CAST_GCD
             self._state['player']['cast_timer'][next_hit] = self._state['player']['gcd'][next_hit]
             self._state['player']['gcd'][next_hit] = 0.0
-
-            # inc cast number
-            self._state['global']['decision'] = False
         else:
             self._state['global']['decision'] = True
             self._state['player']['cast_number'][next_hit] += 1 # attempt at batching
@@ -408,7 +434,7 @@ class FireMageEnv(gym.Env):
                 if self._state['player']['buff_timer'][self._C._BUFF_MQG][next_hit] > 0.0:
                     self._state['player']['cast_timer'][next_hit] /= 1.0 + self._C._MQG
                 self._state['player']['gcd'][next_hit] = np.max([0.0, self._C._GLOBAL_COOLDOWN + react_time - self._state['player']['cast_timer'][next_hit]])
-
+                
         self._state['global']['decision'] = False
 
         return
