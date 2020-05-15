@@ -1,6 +1,6 @@
 import numpy as np
 
-_LOG_SIM = -1 # set to -1 for no log
+_LOG_SIM = 99273 # set to -1 for no log
 
 class Constant():
     
@@ -41,8 +41,8 @@ class Constant():
 
         self._SIM_SIZE = sim_size
 
-        self._DURATION_AVERAGE = 120.0
-        self._DURATION_SIGMA = 12.0
+        self._DURATION_AVERAGE = 45.0
+        self._DURATION_SIGMA = 6.0
 
         ## strategy/performance variables
         # maximum seconds before scorch expires for designated mage to start casting scorch
@@ -75,8 +75,8 @@ class Constant():
         self._CAST_GCD = 5 # placeholder for extra time due to GCD
         # below this line are instant/external source casts
         self._CAST_COMBUSTION = 6
-        self._CAST_POWER_INFUSION = 7
-        self._CAST_MQG = 8
+        self._CAST_MQG = 7
+        self._CAST_POWER_INFUSION = 8
         self._CASTS = 9
 
         self._SP_MULTIPLIER = np.array([0.428571429, 1.0, 1.0, 0.428571429, 0.814285714])
@@ -114,12 +114,12 @@ class Constant():
         self._POWER_INFUSION = 0.2
         self._MQG = 0.33
 
-        self._BUFF_POWER_INFUSION = 0
-        self._BUFF_MQG = 1
+        self._BUFF_MQG = 0
+        self._BUFF_POWER_INFUSION = 1
         self._BUFFS = 2
 
-        self._BUFF_DURATION = np.array([15.0, 20.0])
-        self._BUFF_CAST_TYPE = np.array([self._CAST_POWER_INFUSION, self._CAST_MQG])
+        self._BUFF_DURATION = np.array([20.0, 15.0])
+        self._BUFF_CAST_TYPE = np.array([self._CAST_MQG, self._CAST_POWER_INFUSION])
 
         self._DEBUFFS = 0
 
@@ -135,7 +135,7 @@ class Constant():
         self._LONG_TIME = 999*self._DURATION_AVERAGE
 
         ## debugging
-        self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion', 'power inf ', 'mqg       ']
+        self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion', 'mqg       ', 'power inf ']
         self._LOG_SIM = _LOG_SIM
         
 def init_const_arrays(C, sp, hit, crit, num_mages, response):

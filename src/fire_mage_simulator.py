@@ -8,8 +8,8 @@ import plots
 import constants
 
 def main():
-    print(get_damage(700.0, 0.970, 0.300, 6, 1.0, 100000))
-
+    print(get_damage(700.0, 0.970, 0.150, 6, 1.0, 100000))
+    fjidsjf()
     t0 = time.time()
     C = constants.Constant()
     

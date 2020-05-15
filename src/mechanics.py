@@ -61,7 +61,6 @@ def do_cast(C, arrays, still_going, cast_array):
         arrays['player']['gcd'][cst[yes_gcd], next_hit[yes_gcd]] = 0.0
 
         # inc cast number
-        arrays['global']['decision'][cst[yes_gcd]] = False
         arrays['global']['decision'][cst[no_gcd]] = True
         arrays['player']['cast_number'][cst[no_gcd], next_hit[no_gcd]] += 1 # attempt at batching
 
@@ -174,9 +173,11 @@ def do_spell(C, arrays, still_going, spell_array):
             if C._LOG_SIM in spl:
                 sub_index = spl.tolist().index(C._LOG_SIM)
                 dam_done = ' {:7.0f}'.format(arrays['global']['total_damage'][C._LOG_SIM] + arrays['global']['damage'][C._LOG_SIM])
-                message3 = C._LOG_SPELL[arrays['player']['cast_type'][C._LOG_SIM][lnext_hit[sub_index]]]
-                message = message + message2 + 'next is ' + message3
-                status = ' ic {:d} it {:4.2f} in {:s} id {:4.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d}'
+                message = message + message2
+                buffs = arrays['player']['buff_timer']
+                is_mqg = 'msg' if buffs[C._BUFF_MQG][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
+                is_pi =  'pi' if buffs[C._BUFF_POWER_INFUSION][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '  '
+                status = ' ic {:d} it {:4.2f} in {:s} id {:4.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d} {:s} {:s}'
                 ival = arrays['boss']['tick_timer'][C._LOG_SIM]
                 istat = '{:4.2f}'.format(ival) if ival > 0.0 and ival <= 2.0 else ' off'
                 status = status.format(arrays['boss']['ignite_count'][C._LOG_SIM],
@@ -186,7 +187,9 @@ def do_spell(C, arrays, still_going, spell_array):
                                        arrays['boss']['scorch_count'][C._LOG_SIM],
                                        max([arrays['boss']['scorch_timer'][C._LOG_SIM], 0.0]),
                                        arrays['player']['comb_stack'][C._LOG_SIM, lnext_hit[sub_index]],
-                                       arrays['player']['comb_left'][C._LOG_SIM, lnext_hit[sub_index]])
+                                       arrays['player']['comb_left'][C._LOG_SIM, lnext_hit[sub_index]],
+                                       is_mqg,
+                                       is_pi)
                 print(dam_done + message + status)
 
 def do_tick(C, arrays, still_going, tick_array):
@@ -240,13 +243,9 @@ def advance(C, arrays):
     
     return True
 
-def get_decisions(C, arrays):
-    still_going = np.where(arrays['global']['running_time'] < arrays['global']['duration'])[0]
+def get_decisions(C, arrays, still_going):
     next_hit = np.argmin(arrays['player']['cast_timer'][still_going, :], axis=1)
-    
-    react_time = np.abs(C._CONTINUING_SIGMA*np.random.randn(still_going.size))    
-
-    mqg = (arrays['player']['buff_timer'][C._BUFF_MQG][still_going, next_hit] > 0.0).astype(np.float)    
+    decisions = np.zeros(still_going.size).astype(np.int32)
     num_mages = arrays['player']['cast_timer'].shape[1]
 
     # begin decision -- filling cast_type and cast_timer    
@@ -256,46 +255,73 @@ def get_decisions(C, arrays):
     man_scorch &= (arrays['player']['cast_number'][still_going, next_hit] >= C._SCORCHES[num_mages] + 4)
     man_scorch &= np.logical_not(next_hit)
     do_scorch = aut_scorch | man_scorch
-    scorch = np.where(do_scorch)[0]
-    arrays['player']['cast_type'][still_going[scorch], next_hit[scorch]] = C._CAST_SCORCH
-    arrays['player']['cast_timer'][still_going[scorch], next_hit[scorch]] = C._CAST_TIME[C._CAST_SCORCH]/(1.0 + C._MQG*mqg[scorch]) + react_time[scorch]
+
+    decisions[np.where(do_scorch)] = C._CAST_SCORCH
     
-    do_fire_blast = arrays['player']['cast_number'][still_going, next_hit] == C._SCORCHES[num_mages] + 1
-    fire_blast = np.where(do_fire_blast)[0]
-    arrays['player']['cast_type'][still_going[fire_blast], next_hit[fire_blast]] = C._CAST_FIRE_BLAST
-    arrays['player']['cast_timer'][still_going[fire_blast], next_hit[fire_blast]] = C._CAST_TIME[C._CAST_FIRE_BLAST] + react_time[fire_blast]
+    do_pyro = arrays['player']['cast_number'][still_going, next_hit] == C._SCORCHES[num_mages] + 1
+    decisions[np.where(do_pyro)[0]] = C._CAST_PYROBLAST
     
     do_combustion = arrays['player']['cast_number'][still_going, next_hit] == C._SCORCHES[num_mages] + 2
-    combustion = np.where(do_combustion)[0]
-    arrays['player']['cast_type'][still_going[combustion], next_hit[combustion]] = C._CAST_COMBUSTION
-    arrays['player']['cast_timer'][still_going[combustion], next_hit[combustion]] = 0.0
+    decisions[np.where(do_combustion)[0]] = C._CAST_COMBUSTION
 
-    do_fireball = np.logical_not(do_scorch|do_fire_blast|do_combustion)
-    fireball = np.where(do_fireball)[0]
-    arrays['player']['cast_type'][still_going[fireball], next_hit[fireball]] = C._CAST_FIREBALL
-    arrays['player']['cast_timer'][still_going[fireball], next_hit[fireball]] = C._CAST_TIME[C._CAST_FIREBALL]/(1.0 + C._MQG*mqg[scorch]) + react_time[fireball]
+    do_fireball = np.logical_not(do_scorch|do_pyro|do_combustion)
+    decisions[np.where(do_fireball)[0]] = C._CAST_FIREBALL
+
+    return decisions, next_hit
     
-    # end decision
-    gcd = np.where(arrays['player']['cast_type'][still_going, next_hit] < C._CAST_GCD)[0]
+def apply_decisions(C, arrays, still_going, decisions, next_hit):
+    react_time = np.abs(C._CONTINUING_SIGMA*np.random.randn(still_going.size))    
+
+    arrays['player']['cast_timer'][still_going, next_hit] = react_time
+    arrays['player']['cast_type'][still_going, next_hit] = decisions
+
+    # spell on global cooldown
+    gcd = np.where(decisions < C._CAST_GCD)[0]
+    arrays['player']['cast_timer'][still_going[gcd], next_hit[gcd]] += C._CAST_TIME[decisions[gcd]]
+    # mind quickening gem
+    mqg = (arrays['player']['buff_timer'][C._BUFF_MQG][still_going[gcd], next_hit[gcd]] > 0.0).astype(np.float)
+    arrays['player']['cast_timer'][still_going[gcd], next_hit[gcd]] /= (1.0 + C._MQG*mqg)
+    
     arrays['player']['gcd'][still_going[gcd], next_hit[gcd]] = np.maximum(0.0, C._GLOBAL_COOLDOWN + react_time[gcd] - arrays['player']['cast_timer'][still_going[gcd], next_hit[gcd]])
+
+    if C._LOG_SIM >= 0:
+        if C._LOG_SIM in still_going:
+            message = '         ({:6.2f}): player {:d} started  casting {:s}'
+            sub_index = still_going.tolist().index( C._LOG_SIM)
+            message = message.format(arrays['global']['running_time'][C._LOG_SIM] + react_time[sub_index],
+                                     next_hit[sub_index] + 1,
+                                     C._LOG_SPELL[arrays['player']['cast_type'][still_going[sub_index], next_hit[sub_index]]])
+            print(message)
+
     
     arrays['global']['decision'] = np.zeros(arrays['global']['decision'].shape, dtype=np.bool)
-
+    
 def get_damage(sp, hit, crit, num_mages, response, sim_size):
     C = constants.Constant(sim_size=sim_size)
+
     arrays = constants.init_const_arrays(C, sp, hit, crit, num_mages, response)
+
+    # prep for first player to "move"
+    first_act = np.min(arrays['player']['cast_timer'], axis=1)
+    arrays['global']['duration'] += first_act
+    arrays['player']['cast_timer'] -= first_act[:, None]
+    next_hit = np.argmin(arrays['player']['cast_timer'], axis=1)
+    arrays['player']['cast_number'][np.arange(arrays['player']['cast_timer'].shape[0]), next_hit] += 1
+
     if C._LOG_SIM >= 0:
         constants.log_message(sp, hit, crit)
+    still_going = np.arange(arrays['global']['running_time'].size)
     while True:
+        decisions, next_hit = get_decisions(C, arrays, still_going)
+        apply_decisions(C, arrays, still_going, decisions, next_hit)
         while advance(C, arrays):
             still_going = np.where(arrays['global']['running_time'] < arrays['global']['duration'])[0]
             arrays['global']['total_damage'][still_going] += arrays['global']['damage'][still_going]
         if still_going.size == 0:
             break
-        get_decisions(C, arrays)
         
     if C._LOG_SIM >= 0:
-        print('total damage = {:7.0f}'.format(arrays['global']['total_damage'][ C._LOG_SIM]))
+        print('total damage = {:7.0f}'.format(arrays['global']['total_damage'][C._LOG_SIM]))
 
     return (arrays['global']['total_damage']/arrays['global']['duration']).mean()
 

@@ -1,21 +1,40 @@
 import sys
 import numpy as np
-import gym
+from ray.rllib.env import MultiAgentEnv
 from gym import spaces
 import constants
 
-class FireMageEnv(gym.Env):
+class FireMageEnv(MultiAgentEnv):
 
     def __init__(self, config):
-        #super(FireMageEnv, self).__init__()
         self._config = config
         self._C = constants.Constant()
-        #self.action_space = DynamicSpace(self._C._CASTS)
-        self.action_space = spaces.Discrete(self._C._CASTS)
-        self.observation_space = spaces.Box(0.0, 1.0, shape=(19,), dtype=np.float32)
-        #self.observation_space = spaces.Box(0.0, 1.0, shape=(2,), dtype=np.float32)
+        b1 = [int(self._config['num_mages'] - ii <= self._config['mqg'])\
+               for ii in range(self._config['num_mages'])]
+        b2 = [int(self._config['num_mages'] - ii <= self._config['power_infusion'])\
+               for ii in range(self._config['num_mages'])]
+        self._numbufs = [a + b for a, b in zip(b1, b2)]
 
-    def step(self, action):
+    def _get_reward(self, mage, span=False):
+        ctime = min([self._state['global']['running_time'],
+                     self._state['global']['duration']])
+        l_e = 0.0 if span else self._state['player']['last_eval'][mage] 
+        player_damage = sum([d[1] for d in self._state['player']['damage'][mage]\
+                             if d[0] >= l_e and d[0] < ctime])
+        ignite_damage = sum([d[1] for d in self._state['boss']['ignite_damage']\
+                             if d[0] >= l_e and d[0] < ctime])
+        self._state['player']['last_eval'][mage] = ctime
+
+        reward = player_damage + ignite_damage/self._config['num_mages']
+        reward /= self._state['global']['duration']
+
+        return reward
+
+    def step(self, action_in):
+        if isinstance(action_in, dict):
+            action = list(action_in.values())[0]
+        else:
+            action = action_in
         last_hit = np.argmin(self._state['player']['cast_timer'])
         self._apply_decision(action, last_hit)
         while self._advance():
@@ -25,39 +44,24 @@ class FireMageEnv(gym.Env):
         next_hit = np.argmin(self._state['player']['cast_timer'])
         obs = self._get_obs(next_hit)
 
-        # total damage since last cast
-        ctime = self._state['global']['running_time']
-        l_e = self._state['player']['last_eval'][last_hit]
-        #l_e = ctime - 4.0
-        player_damage = sum([d[1] for d in self._state['player']['damage'][last_hit]])
-        self._state['player']['damage'][last_hit] = []
-        ignite_damage = sum([d[1] for d in self._state['boss']['ignite_damage'] if d[0] >= l_e])
-        #print(ctime, player_damage, self._state['player']['damage'][next_hit])
-        if ctime > l_e:
-            reward = (player_damage + ignite_damage/self._config['num_mages'])/(ctime - l_e)
-        else:
-            reward = 0.0
-        reward = (player_damage + ignite_damage/self._config['num_mages'])/self._state['global']['duration']
+        # total damage since last cast        
+        reward = self._get_reward(next_hit)
 
-        #player_damage = sum([d[1] for d in self._state['player']['damage'][last_hit] if d[0] >= l_e])
-        #ignite_damage = sum([d[1] for d in self._state['boss']['ignite_damage'] if d[0] >= l_e])
-        #if ctime > l_e:
-        #    r2 = (player_damage + ignite_damage/self._config['num_mages'])/(ctime - l_e)
-        #else:
-        #    r2 = 0.0
-        #if r2 - reward > 10000:
-        #    self.render()
-        #    for ii, pp in enumerate(self._state['player']['damage']):
-        #        print('  ', ii + 1, pp[-1][0], pp[-1][1])
-        #    print('reward', r2 - reward, l_e, last_hit + 1)
-        #    print(sum([d[1] for d in self._state['player']['damage'][last_hit] if d[0] >= l_e]), sum([d[1] for d in self._state['boss']['ignite_damage'] if d[0] >= l_e]), r2)
-        #    sdjfi()
-
-        self._state['player']['last_eval'][last_hit] = ctime
-        
         done = self._state['global']['running_time'] >= self._state['global']['duration']
-
-        return obs, reward/100.0, done, {}
+        
+        if not done:
+            return ({"mage_" + str(next_hit + 1): obs},
+                    {"mage_" + str(next_hit + 1): reward/100.0},
+                    {"__all__": False},
+                    {})
+        else:
+            obs = []
+            rewards = []
+            for ii in range(self._config['num_mages']):
+                obs.append(("mage_" + str(ii + 1), self._get_obs(ii)))
+                rewards.append(("mage_" + str(ii + 1), self._get_reward(ii, span=False)/100.0))
+            return dict(obs), dict(rewards), {"__all__": done}, {}
+                           
 
     def reset(self, retain_stats=False):
         num_mages = self._config['num_mages']
@@ -86,8 +90,8 @@ class FireMageEnv(gym.Env):
         duration += np.min(cast_timer)
         cast_timer -= np.min(cast_timer)
         buff_avail = np.zeros((self._C._BUFFS, num_mages), dtype=np.int32)
-        buff_avail[self._C._BUFF_POWER_INFUSION, (num_mages - self._config['power_infusion']):] = 1
         buff_avail[self._C._BUFF_MQG, (num_mages - self._config['mqg']):] = 1
+        buff_avail[self._C._BUFF_POWER_INFUSION, (num_mages - self._config['power_infusion']):] = 1
         self._state = {
             'global': {
                 'total_damage': 0.0,
@@ -99,7 +103,7 @@ class FireMageEnv(gym.Env):
                 'ignite_timer': 0.0,
                 'ignite_count': 0,
                 'ignite_value': 0.0,
-                'ignite_multiplier': 0.0,
+                'ignite_multiplier': 1.0,
                 'tick_timer': self._C._LONG_TIME,
                 'scorch_timer': 0.0,
                 'scorch_count': 0,
@@ -143,7 +147,7 @@ class FireMageEnv(gym.Env):
         next_hit = np.argmin(self._state['player']['cast_timer'])
         self._state['player']['cast_number'][next_hit] += 1
 
-        return self._get_obs(next_hit)
+        return {"mage_" + str(next_hit + 1): self._get_obs(next_hit)}
 
     def total(self):
         return self._state['global']['total_damage']
@@ -152,6 +156,10 @@ class FireMageEnv(gym.Env):
         for log_line in self._log:
             print(log_line)
 
+    @property
+    def next_hit(self):
+        return np.argmin(self._state['player']['cast_timer'])
+            
     def _get_actions(self, next_hit):
         actions = set(range(self._C._CAST_GCD))
         actions.remove(self._C._CAST_FIRE_BLAST) # cooldown not implemented it anyway
@@ -163,59 +171,46 @@ class FireMageEnv(gym.Env):
             actions.add(self._C._CAST_MQG)
 
         return actions
-            
+
     def _get_obs(self, next_hit):
+
         obs = []
-        # self stats - 3
-        obs.append(min([1.0, self._state['player']['spell_power'][next_hit]/1000]))
-        obs.append(10.0*(self._state['player']['hit_chance'][next_hit] - 0.89))
-        obs.append(self._state['player']['crit_chance'][next_hit])
 
-        # self buffs - 7
-        obs.append(max([0, self._state['player']['comb_avail'][next_hit]]))
-        if self._state['player']['comb_avail'][next_hit] > 0:
-            obs += [0, 0]
-        else:
-            obs.append(self._state['player']['comb_left'][next_hit]/3)
-            if not self._state['player']['comb_left'][next_hit]:
-                obs.append(0)
-            else:
-                obs.append(min([1.0, self._state['player']['comb_stack'][next_hit]/7]))
-        for buff in range(self._C._BUFFS):
-            obs.append(max([0, self._state['player']['buff_avail'][buff, next_hit]]))
-            if self._state['player']['buff_avail'][buff, next_hit] > 0:
-                obs.append(0)
-            else:
-                timer = self._state['player']['buff_timer'][buff, next_hit]
-                timer = max([0.0, timer/self._C._BUFF_DURATION[buff]])
-                obs.append(timer)
-
-        # boss debuffs - 6
-        obs.append(max([0.0, self._state['boss']['ignite_timer']/(self._C._IGNITE_TIME + 0.0001)]))
+        # boss debuffs - 5
+        obs.append(self._state['boss']['ignite_timer']/(self._C._IGNITE_TIME + 0.0001))
         if self._state['boss']['ignite_timer'] > 0.0:
             obs.append(self._state['boss']['ignite_count']/self._C._IGNITE_STACK)
-            if self._state['boss']['ignite_count'] > 0:
-                obs.append(min([1.0, self._state['boss']['ignite_value']/10000.0]))
-                obs.append(min([1.0, (self._state['boss']['ignite_multiplier'] - 1.0)/0.32]))
-            else:
-                obs += [0.0, 0.0]
+            obs.append(self._state['boss']['ignite_value']/5000.0)
         else:
-            obs += [0.0, 0.0, 0.0]
-        obs.append(max([0.0, self._state['boss']['scorch_timer']/self._C._SCORCH_TIME]))
+            obs.append(0.0)
+            obs.append(0.0)
+        obs.append(self._state['boss']['scorch_timer']/self._C._SCORCH_TIME)
         if self._state['boss']['scorch_timer'] > 0.0:
             obs.append(self._state['boss']['scorch_count']/self._C._SCORCH_STACK)
         else:
             obs.append(0.0)
         
-        #   current spell - 1
-        obs.append(self._state['player']['spell_type'][next_hit]/(self._C._CASTS - 1))
+        #   casts - 2
+        obs.append(self._state['player']['cast_number'][next_hit]/8.0)
+        obs.append(self._state['player']['cast_number'][next_hit]/40.0)
 
-        #   casts - 1
-        obs.append(min([1.0, self._state['player']['cast_number'][next_hit]/8]))
-        obs.append(min([1.0, self._state['player']['cast_number'][next_hit]/40]))
-                
+        # self buffs - 6
+        obs.append(self._state['player']['comb_avail'][next_hit])
+        if self._state['player']['comb_avail'][next_hit] > 0:
+            obs.append(0.0)
+        else:
+            obs.append(self._state['player']['comb_left'][next_hit]/3)
+        for buff in range(self._numbufs[next_hit]):
+            obs.append(self._state['player']['buff_avail'][buff, next_hit])
+            if self._state['player']['buff_avail'][buff, next_hit] > 0:
+                obs.append(0.0)
+            else:
+                timer = self._state['player']['buff_timer'][buff, next_hit]
+                obs.append(timer/self._C._BUFF_DURATION[buff])
+        obs = [max([0.0, min(a, 1.0)]) for a in obs]
+        
         return np.array(obs)
-            
+
     def _subtime(self, add_time):
         self._state['global']['running_time'] += add_time
         self._state['player']['cast_timer'] -= add_time
@@ -294,7 +289,7 @@ class FireMageEnv(gym.Env):
             spell_damage *= self._C._COE_MULTIPLIER*self._C._DAMAGE_MULTIPLIER[spell_type] 
             scorch = self._C._IS_FIRE[spell_type]*self._C._SCORCH_MULTIPLIER*self._state['boss']['scorch_count']
             spell_damage *= 1.0 + scorch*(self._state['boss']['scorch_timer'] > 0.0).astype(np.float)
-            pi = (self._state['player']['buff_timer'][self._C._BUFF_POWER_INFUSION][next_hit] > 0.0).astype(np.float)
+            pi = (self._state['player']['buff_timer'][self._C._BUFF_POWER_INFUSION, next_hit] > 0.0).astype(np.float)
             spell_damage *= 1.0 + self._C._POWER_INFUSION*pi
             spell_damage *= self._C._DMF_BUFF
             self._state['global']['damage'] += spell_damage
@@ -364,9 +359,11 @@ class FireMageEnv(gym.Env):
 
         if self._C._LOG_SIM:
             dam_done = ' {:7.0f}'.format(self._state['global']['total_damage'] + self._state['global']['damage'])
-            message3 = self._C._LOG_SPELL[self._state['player']['cast_type'][next_hit]]
-            message = message + message2 + 'next is ' + message3
-            status = ' ic {:d} it {:4.2f} in {:s} id {:4.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d}'
+            message = message + message2
+            buffs = self._state['player']['buff_timer']
+            is_mqg = 'msg' if buffs[self._C._BUFF_MQG, next_hit] > 0.0 else '   '
+            is_pi =  'pi' if buffs[self._C._BUFF_POWER_INFUSION, next_hit] > 0.0 else '  '
+            status = ' ic {:d} it {:4.2f} in {:s} id {:4.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d} {:s} {:s}'
             ival = self._state['boss']['tick_timer']
             istat = '{:4.2f}'.format(ival) if ival > 0.0 and ival <= 2.0 else ' off'
             status = status.format(self._state['boss']['ignite_count'],
@@ -376,7 +373,9 @@ class FireMageEnv(gym.Env):
                                    self._state['boss']['scorch_count'],
                                    max([self._state['boss']['scorch_timer'], 0.0]),
                                    self._state['player']['comb_stack'][next_hit],
-                                   self._state['player']['comb_left'][next_hit])
+                                   self._state['player']['comb_left'][next_hit],
+                                   is_mqg,
+                                   is_pi)
             self._log.append(dam_done + message + status)
 
     def _do_tick(self, add_time):
@@ -423,6 +422,7 @@ class FireMageEnv(gym.Env):
 
     def _apply_decision(self, cast_type, next_hit):
         if cast_type not in self._get_actions(next_hit):
+            react_time = 0.0
             self._state['player']['cast_type'][next_hit] = self._C._CAST_GCD
             self._state['player']['cast_timer'][next_hit] = self._C._CAST_TIME[self._C._CAST_GCD]
         else:
@@ -431,10 +431,36 @@ class FireMageEnv(gym.Env):
             self._state['player']['cast_type'][next_hit] = cast_type
             if cast_type < self._C._CAST_GCD:
                 self._state['player']['cast_timer'][next_hit] += self._C._CAST_TIME[cast_type]
-                if self._state['player']['buff_timer'][self._C._BUFF_MQG][next_hit] > 0.0:
+                if self._state['player']['buff_timer'][self._C._BUFF_MQG, next_hit] > 0.0:
                     self._state['player']['cast_timer'][next_hit] /= 1.0 + self._C._MQG
                 self._state['player']['gcd'][next_hit] = np.max([0.0, self._C._GLOBAL_COOLDOWN + react_time - self._state['player']['cast_timer'][next_hit]])
+
+        if self._C._LOG_SIM:
+            message = '         ({:6.2f}): player {:d} started  casting {:s}'
+            message = message.format(self._state['global']['running_time'] + react_time,
+                                     next_hit + 1,
+                                     self._C._LOG_SPELL[cast_type])
+            self._log.append(message)
                 
         self._state['global']['decision'] = False
 
         return
+
+    def act_space(self, atype):
+        remove = 0
+        if atype == "none":
+            remove = 2
+        elif atype == "mqg":
+            remove = 1
+
+        return spaces.Discrete(self._C._CASTS - remove)
+
+    def obs_space(self, atype):
+        remove = 0
+        if atype == "none":
+            remove = 4
+        elif atype == "mqg":
+            remove = 2
+        obs = 13 - remove
+            
+        return spaces.Box(0.0, 1.0, shape=(obs,), dtype=np.float32)
