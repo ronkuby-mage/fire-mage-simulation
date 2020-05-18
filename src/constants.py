@@ -1,6 +1,6 @@
 import numpy as np
 
-_LOG_SIM = 99273 # set to -1 for no log
+_LOG_SIM = -1 # set to -1 for no log
 
 class Constant():
     
@@ -52,8 +52,6 @@ class Constant():
         self._INITIAL_SIGMA = 1.0
         self._CONTINUING_SIGMA = 0.05
         
-        self._SCORCHES = np.array([9000, 5, 4, 2, 2, 1, 1, 1, 1, 1])
-
         ## constants, do not change
         self._GLOBAL_COOLDOWN = 1.5
         
@@ -134,30 +132,45 @@ class Constant():
         
         self._LONG_TIME = 999*self._DURATION_AVERAGE
 
+        ## decision making
+        self._SCORCHES = np.array([9000, 5, 4, 2, 2, 2, 1, 1, 1, 1])
+        self._DECIDE = {
+            "scorch": self._CAST_SCORCH,
+            "pyroblast": self._CAST_PYROBLAST,
+            "fireball": self._CAST_FIREBALL,
+            "fire_blast": self._CAST_FIRE_BLAST,
+            "frostbolt": self._CAST_FROSTBOLT,
+            "combustion": self._CAST_COMBUSTION}
+        
         ## debugging
         self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion', 'mqg       ', 'power inf ']
         self._LOG_SIM = _LOG_SIM
-        
-def init_const_arrays(C, sp, hit, crit, num_mages, response):
-    sim_size = C._SIM_SIZE
-    return {
+
+class ArrayGenerator():
+
+    def __init__(self, params):
+        self._params = params
+
+    def run(self, C):
+        sim_size = self._params['sim_size']
+        num_mages = self._params['num_mages']['num_mages']
+        arrays = {
             'global': {
                 'total_damage': np.zeros(sim_size),
                 'running_time': np.zeros(sim_size),
-                'duration': C._DURATION_AVERAGE + C._DURATION_SIGMA*np.random.randn(sim_size),
                 'decision': np.zeros(sim_size).astype(np.bool)},
             'boss': {
                 'ignite_timer': np.zeros(sim_size),
                 'ignite_count': np.zeros(sim_size).astype(np.int32),
                 'ignite_value': np.zeros(sim_size),
-                'ignite_multiplier': np.zeros(sim_size),
+                'ignite_multiplier': np.ones(sim_size),
                 'tick_timer': C._LONG_TIME*np.ones(sim_size),
                 'scorch_timer': np.zeros(sim_size),
                 'scorch_count': np.zeros(sim_size).astype(np.int32),
                 'debuff_timer': [np.zeros(sim_size) for aa in range(C._DEBUFFS)],
-                'debuff_avail': [np.zeros(sim_size).astype(np.int) for aa in range(C._DEBUFFS)]},
+                'debuff_avail': [np.zeros(sim_size).astype(np.int32) for aa in range(C._DEBUFFS)]},
             'player': {
-                'cast_timer': np.abs(response*np.random.randn(sim_size, num_mages)),
+                'cast_timer': np.abs(params['delay']*np.random.randn(sim_size, num_mages)),
                 'cast_type': C._CAST_GCD*np.ones((sim_size, num_mages)).astype(np.int32),
                 'spell_timer': C._LONG_TIME*np.ones((sim_size, num_mages)),
                 'spell_type': C._CAST_GCD*np.ones((sim_size, num_mages)).astype(np.int32),
@@ -166,14 +179,34 @@ def init_const_arrays(C, sp, hit, crit, num_mages, response):
                 'comb_avail': np.ones((sim_size, num_mages)).astype(np.int32),
                 'cast_number': np.zeros((sim_size, num_mages)).astype(np.int32),
                 'buff_timer': [np.zeros((sim_size, num_mages)) for aa in range(C._BUFFS)],
-                'buff_avail': [np.zeros((sim_size, num_mages)).astype(np.int) for aa in range(C._BUFFS)],
-                'spell_power': sp*np.ones((sim_size, num_mages)),
-                'hit_chance': hit*np.ones((sim_size, num_mages)),
-                'crit_chance': crit*np.ones((sim_size, num_mages)),
-                'gcd': np.zeros((sim_size, num_mages))}
+                'buff_avail': [np.zeros((sim_size, num_mages)).astype(np.int32) for aa in range(C._BUFFS)],
+                'gcd': np.zeros((sim_size, num_mages))
             }
+        }
+        duration = params['duration']*np.ones(sim_size)
+        if 'var' in params['timing']['duration']:
+            duration += params['timing']['duration']['var']*np.random.randn(sim_size)
+        if 'clip' in params['timing']['duration']:
+            duration = np.maximum(params['timing']['duration']['clip'][0], duration)
+            duration = np.minimum(params['timing']['duration']['clip'][1], duration)
+        for name in ['spell_power', 'hit_chance', 'crit_chance']:
+            value = param[name]*np.ones(sim_size)
+            if 'var' in params['stats'][name]:
+                value += params[stats][name]['var']*np.random.randn(sim_size)
+            if 'clip' in params['stats'][name]:
+                value = np.maximum(params[stats][name]['clip'][0], value)
+                value = np.minimum(params[stats][name]['clip'][1], value)
+            arrays['player'][name] = value
+        arrays['player']['spell_power'].sort(axis=1)
+        if 'single' in params:
+            name = [k for k, v in params['stats'].items() if 'single' in v][0]
+            arrays['player'][name][:, arrays['player'][name]['single'][slot]] = params['single']
+        config = [config for config in self._params['configuration'] if config['num_mages'] == num_mages][0]
+        arrays['player']['buff_avail'][C._BUFF_MQG][:, (num_mages - config['num_mqg']):] = 1
+        arrays['player']['buff_avail'][C._BUFF_POWER_INFUSION][:, (num_mages - config['num_pi']):] = 1
+        
+        return arrays
             
-
 def log_message(sp, hit, crit):
     message = 'log for spell power = {:3.0f}, hit chance = {:2.0f}%, crit chance = {:2.0f}%:'
     message = message.format(sp, hit*100.0, crit*100.0)
