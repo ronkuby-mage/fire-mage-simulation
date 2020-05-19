@@ -242,7 +242,6 @@ class Encounter():
 
     def _advance(self):
         C = self._C
-        self._damage = np.zeros(C._SIM_SIZE)
 
         going_array = (self._arrays['global']['running_time'] < self._arrays['global']['duration'])
         going_array &= np.logical_not(self._arrays['global']['decision'])
@@ -265,49 +264,6 @@ class Encounter():
         self._do_tick(still_going, tick_array)
     
         return True
-
-    def _get_decisions(self, still_going):
-        C = self._C
-        player = self._arrays['player']
-        boss = self._arrays['boss']
-        rotation = self._rotation
-
-        next_hit = np.argmin(player['cast_timer'][still_going, :], axis=1)
-
-        out_initial = self._stage[still_going, next_hit] >= C._OUT_INITIAL
-        cont = np.where(out_initial)[0]
-        # ... do continuing
-
-        init = np.where(np.logical_not(out_initial))[0]
-        out_common = self._stage[still_going[init], next_hit[init]] >= len(rotation['initial']['common'])
-        
-        
-
-        ##
-        
-        decisions = np.zeros(still_going.size).astype(np.int32)
-        num_mages = player['cast_timer'].shape[1]
-
-        # begin decision -- filling cast_type and cast_timer    
-        aut_scorch = player['cast_number'][still_going, next_hit] == C._SCORCHES[num_mages]
-        man_scorch = boss['scorch_timer'][still_going] < C._MAX_SCORCH_REMAIN
-        man_scorch |= boss['scorch_count'][still_going] < C._SCORCH_STACK
-        man_scorch &= (player['cast_number'][still_going, next_hit] >= C._SCORCHES[num_mages] + 4)
-        man_scorch &= np.logical_not(next_hit)
-        do_scorch = aut_scorch | man_scorch
-
-        decisions[np.where(do_scorch)] = C._CAST_SCORCH
-    
-        do_pyro = player['cast_number'][still_going, next_hit] == C._SCORCHES[num_mages] + 1
-        decisions[np.where(do_pyro)[0]] = C._CAST_PYROBLAST
-    
-        do_combustion = player['cast_number'][still_going, next_hit] == C._SCORCHES[num_mages] + 2
-        decisions[np.where(do_combustion)[0]] = C._CAST_COMBUSTION
-
-        do_fireball = np.logical_not(do_scorch|do_pyro|do_combustion)
-        decisions[np.where(do_fireball)[0]] = C._CAST_FIREBALL
-
-        return decisions, next_hit
     
     def _apply_decisions(self, still_going, decisions, next_hit):
         C = self._C
@@ -331,24 +287,23 @@ class Encounter():
             if C._LOG_SIM in still_going:
                 message = '         ({:6.2f}): player {:d} started  casting {:s}'
                 sub_index = still_going.tolist().index(C._LOG_SIM)
-                message = message.format(arrays['global']['running_time'][C._LOG_SIM] + react_time[sub_index],
+                message = message.format(self._arrays['global']['running_time'][C._LOG_SIM] + react_time[sub_index],
                                          next_hit[sub_index] + 1,
                                          C._LOG_SPELL[player['cast_type'][still_going[sub_index], next_hit[sub_index]]])
                 print(message)
-        arrays['global']['decision'] = np.zeros(arrays['global']['decision'].shape, dtype=np.bool)
+        self._arrays['global']['decision'] = np.zeros(self._arrays['global']['decision'].shape, dtype=np.bool)
     
     def run(self):
         C = constants.Constant()
+        self._C = C
         self._arrays = self._array_generator.run(C)
 
-        C = self._C
         decider = Decider(C,
                           self._rotation,
-                          self._arrays['player']['next_hit'].shape,
+                          self._arrays['player']['cast_number'].shape,
                           self._config)
         running_time = self._arrays['global']['running_time']
         duration = self._arrays['global']['duration']
-        total_damage = self._arrays['global']['total_damage']
         player = self._arrays['player']
         
 
@@ -360,23 +315,22 @@ class Encounter():
         player['cast_number'][np.arange(player['cast_timer'].shape[0]), next_hit] += 1
 
         if C._LOG_SIM >= 0:
-            constants.log_message(self._params['spell_power'],
-                                  self._params['hit_chance'],
-                                  self._params['crit_chance'])
+            constants.log_message()
         still_going = np.arange(running_time.size)
         while True:
+            self._damage = np.zeros(self._arrays['global']['total_damage'].size)
             decisions, next_hit = decider.get_decisions(self._arrays, still_going)
-            apply_decisions(C, arrays, still_going, decisions, next_hit)
-            while advance(C, arrays):
+            self._apply_decisions(still_going, decisions, next_hit)
+            while self._advance():
                 still_going = np.where(running_time < duration)[0]
-            total_damage[still_going] += self._damage[still_going]
+            self._arrays['global']['total_damage'][still_going] += self._damage[still_going]
             if not still_going.size:
                 break
         
         if C._LOG_SIM >= 0:
-            print('total damage = {:7.0f}'.format(total_damage[C._LOG_SIM]))
+            print('total damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]))
 
-        return (total_damage/duration).mean()
+        return (self._arrays['global']['total_damage']/duration).mean()
 
 def get_damage(params):
     array_generator = constants.ArrayGenerator(params)
@@ -385,7 +339,7 @@ def get_damage(params):
                           params['timing']['response'],
                           params['configuration'])
     return encounter.run()
-    
+
 def get_crit_damage_diff(sp, hit, crit, num_mages, response, sim_size):
     dcrit = 0.025
     dsp = 25.0
