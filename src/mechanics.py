@@ -233,6 +233,7 @@ class Encounter():
             multiplier *= 1.0 + scorch*(boss['scorch_timer'][no_expire] > 0.0).astype(np.float)
             self._damage[no_expire] += multiplier*boss['ignite_value'][no_expire]
             if C._LOG_SIM >= 0:
+                self._ignite[no_expire] += multiplier*boss['ignite_value'][no_expire]
                 if C._LOG_SIM in no_expire:
                     sub_index = no_expire.tolist().index(C._LOG_SIM)
                     message = ' {:7.0f} ({:6.2f}): ignite ticked   {:4.0f} damage done'
@@ -315,6 +316,7 @@ class Encounter():
         player['cast_number'][np.arange(player['cast_timer'].shape[0]), next_hit] += 1
 
         if C._LOG_SIM >= 0:
+            self._ignite = np.zeros(self._arrays['global']['total_damage'].size)
             constants.log_message()
         still_going = np.arange(running_time.size)
         while True:
@@ -331,6 +333,7 @@ class Encounter():
             print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]))
             print('average damage = {:9.1f}'.format(self._arrays['global']['total_damage'].mean()))
             print('std damage = {:7.1f}'.format(self._arrays['global']['total_damage'].std()))
+            print('ignite damage = {:9.1f}'.format(self._ignite.mean()))
 
         return (self._arrays['global']['total_damage']/duration).mean()
 

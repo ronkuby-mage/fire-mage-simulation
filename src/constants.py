@@ -1,6 +1,6 @@
 import numpy as np
 
-_LOG_SIM = -1 # set to -1 for no log
+_LOG_SIM = 9 # set to -1 for no log
 
 class Constant():
     

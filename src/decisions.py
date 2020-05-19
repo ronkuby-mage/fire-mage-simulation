@@ -147,6 +147,7 @@ class Decider():
                 if self._rotation['continuing']['special']['value'] == 'maintain_scorch':
                     need_scorch = (arrays['boss']['scorch_timer'][still_going[special]] < C._MAX_SCORCH_REMAIN) |\
                                   (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK)
+                    need_scorch &= arrays['player']['spell_type'][still_going[special], next_hit[special]] != C._CAST_SCORCH
                     no_scorch = np.where(np.logical_not(need_scorch))[0]
                     scorch = np.where(need_scorch)[0]
                     if scorch.size:
