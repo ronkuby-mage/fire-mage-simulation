@@ -9,6 +9,7 @@ from pathos.multiprocessing import Pool
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
+from copy import deepcopy
 import pickle
 import time
 from mechanics import get_damage
@@ -55,7 +56,7 @@ def get_element(config, var):
         if 'compare' in config['rotation']:
             return config['rotation']['compare']
         else:
-            return config['rotation']['baseline']
+            return [config['rotation']['baseline']]
     elif var == 'duration':
         return config['timing']['duration']
     elif var == 'delay':
@@ -71,7 +72,7 @@ def get_element(config, var):
 
 def do_plot(values, intra, inter, y_desc, plot_type, plot_name, sim_size, t0):
     sinter = SortedDict(inter)
-    colors = ['indigo', 'purple', 'darkblue', 'royalblue', 'skyblue', 'green', 'lime', 'gold', 'orange', 'darkorange', 'red', 'firebrick', 'black']
+    colors = ['purple', 'indigo', 'darkblue', 'royalblue', 'skyblue', 'green', 'lime', 'gold', 'orange', 'darkorange', 'red', 'firebrick', 'black']
     keys = []
     vals = []
     for k, vv in intra.items():
@@ -84,7 +85,7 @@ def do_plot(values, intra, inter, y_desc, plot_type, plot_name, sim_size, t0):
             vals.append(np.array(v))
         elif k == 'num_mages':
             keys.append('mages')
-            vals.append(np.array(v))
+            vals.append(np.array([nv['num_mages'] for nv in v]))
         else:
             keys.append(k)
             vals.append(np.array(v))
@@ -127,7 +128,7 @@ def do_plot(values, intra, inter, y_desc, plot_type, plot_name, sim_size, t0):
     plt.ylabel(y_desc)
             
     for index, (lval, yval) in enumerate(zip(vals[0], values)):
-        color = colors[index*len(colors)//values.shape[1]]
+        color = colors[index*len(colors)//values.shape[0]]
         plt.plot(vals[1], yval, label='{:} {:s}'.format(lval, keys[0]), color=color, marker='.')
                 
     plt.legend()
@@ -143,13 +144,14 @@ def do_plot(values, intra, inter, y_desc, plot_type, plot_name, sim_size, t0):
         pickle.dump(inter, fid)
         pickle.dump(sim_size, fid)
     
-def main(config):
-    ss_nm = 5 # standard number of mages
+def main(config, name):
+    ss_nm = 5 # standard number of mages for sim_size purposes
     sim_size = {
         'rotation': 50000,
         'crit_equiv': 50000,
         'hit_equiv': 100000,
-        'dps': 10000}
+        'dps': 10000,
+        'test': 1000000}
     variables = {'spell_power',
                  'hit_chance',
                  'crit_chance',
@@ -163,8 +165,6 @@ def main(config):
         variables.add('single')
     intra_names = [config['plot']['lines'], config['plot']['x_axis']]
     inter_names = variables - set(intra_names)
-    #intra_names.discard('rotation')
-    #inter_names.add('rotation')
     inter = OrderedDict([(iname, get_element(config, iname)) for iname in inter_names])
     intra = OrderedDict([(iname, get_element(config, iname)) for iname in intra_names])
     inter_idx = [np.arange(num_elements(element)) for element in inter.values()]
@@ -181,10 +181,12 @@ def main(config):
         args = [{**arg, **{'sim_size': int(nom_ss*ss_nm/arg['num_mages']['num_mages'])}}
                 for arg in args]
 
-        if plot_type == "rotation":
+        if plot_type == "test":
+            value = get_damage(args[0])
+            return
+        elif plot_type == "rotation":
             y_desc = 'Damage({:s})/Damage({:s})'.format(args[0]['rotation']['description'],
                                                         config['rotation']['baseline']['description'])
-            plot_name = '_'.join(args[0]['rotation']['description'].split(' '))
             with Pool() as p:
                 out1 = np.array(p.map(get_damage, args))
             for index in range(len(args)):
@@ -192,11 +194,29 @@ def main(config):
             with Pool() as p:
                 out2 = np.array(p.map(get_damage, args))
             value = out1/out2
+        elif plot_type == "crit_equiv":
+            y_desc = 'SP ratio'
+            dcrit = 0.025
+            dsp = 25.0
+            factor = dsp/dcrit/100.0
+            
+            orig_args = deepcopy(args)
+            outs = []
+            for dc, ds in zip([0.0, 0.0, -dcrit, +dcrit], [-dsp, +dsp, 0.0, 0.0]):
+                for index in range(len(args)):
+                    args[index]['crit_chance'] = orig_args[index]['crit_chance'] + dc
+                    args[index]['spell_power'] = orig_args[index]['spell_power'] + ds
+                with Pool() as p:
+                    out = np.array(p.map(get_damage, args))
+                outs.append(out)
+            value = factor*(outs[3] - outs[2])/(outs[1] - outs[0])
+
         value = value.reshape([len(idx) for idx in intra_idx])
-        do_plot(value, intra, inter_param, y_desc, plot_type, plot_name, nom_ss, t0)
+        do_plot(value, intra, inter_param, y_desc, plot_type, name, nom_ss, t0)
     
 if __name__ == '__main__':
-    config_file = '../config/wait.json'
+    config_file = sys.argv[-1]
     with open(config_file, 'rt') as fid:
         config = json.load(fid)
-    main(config)
+    name = config_file.split('/')[-1].split('.')[0]
+    main(config, name)

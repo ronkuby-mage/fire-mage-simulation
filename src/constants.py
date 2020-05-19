@@ -133,7 +133,7 @@ class Constant():
         self._LONG_TIME = 999*self._DURATION_AVERAGE
 
         ## decision making
-        self._SCORCHES = np.array([9000, 5, 4, 2, 2, 2, 1, 1, 1, 1])
+        self._SCORCHES = np.array([9000, 6, 3, 2, 2, 2, 1, 1, 1, 1])
         self._DECIDE = {
             "scorch": self._CAST_SCORCH,
             "pyroblast": self._CAST_PYROBLAST,

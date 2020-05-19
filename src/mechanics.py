@@ -328,7 +328,9 @@ class Encounter():
                 break
         
         if C._LOG_SIM >= 0:
-            print('total damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]))
+            print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]))
+            print('average damage = {:9.1f}'.format(self._arrays['global']['total_damage'].mean()))
+            print('std damage = {:7.1f}'.format(self._arrays['global']['total_damage'].std()))
 
         return (self._arrays['global']['total_damage']/duration).mean()
 
