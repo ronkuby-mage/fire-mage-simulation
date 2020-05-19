@@ -2,7 +2,23 @@
 
 ## Fire Mage Simulations
 
-These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, and travel time.  The effects of nightfall, power infusion, DMF double dip, trinkets, spell batching, and unmitigable boss resistance are not included.  The baseline rotation is:
+These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, talents, Curse of the Elements, spell travel time, power infusion, Mind Quickening Gem, and DMF double dip (turned off by default).  The effects of nightfall, other active trinkets (including Arcanite Dragonling), spell batching, and unmitigable boss resistance are not included.
+
+The primary purpose of these simulations is to determine the balance between spell power, +hit chance, and +crit chance for the purpose of gear selection.  In order to determine these equivalencies, the rotation must also be optimized at every possible stat point and raid configuration.  Doing so would require simulations at too many permutations.  Instead, for the purpose of rotation optimization, the problem is divided into three tiers of gear and raid configurations: phase four building, phase four near-max, and phase five maxed out.
+
+|               |  Min SP |  Max SP |   Hit   | Min Crit| Max Crit| #PI | Duration | Gear |
+|---------------|:-------:|:-------:|:-------:|:-------:|:-------:|:---:|:--------:|:----:|
+| P4 Building   |   472   |   632   |   97%   |   15%   |   35%   |  0  |  2 mins  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
+| P4 Near-Max   |   525   |   785   |   96%   |   20%   |   40%   |  2  |  60 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
+| P5 Max        |   683   |   943   |   99%   |   19%   |   39%   |  4  |  30 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
+
+Here, min and max reflect the range of stats from raid buffed to raid + world + consumable buffed (within reason).  The world buffs are: DMT Crit, Ony, Zandalar (effectively +1% crit), and Songflower.  The consumables are Brilliant Wizard Oil, Elixir of Greater Firepower, Greater Arcane Elixir, and Flask of Supreme Power.  These are the stat ranges used to determine the rotations for the respective gear levels.  At each gear level the equivalencies will be calculated over a much larger range of stats, still with the fixed rotations.  
+
+### Rotations
+
+
+
+The baseline rotation is:
 **```N x scorch -> *spells* -> fireball (repeated)```**
 Several options for *spells* were explored: **combustion -> pyroblast**, **combustion -> frostbolt**, and **fire blast -> combustion**.  [Here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/plots/rotation) are the highest average dps values for *spell*.  
 
