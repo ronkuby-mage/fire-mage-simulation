@@ -20,11 +20,15 @@ Here, min and max reflect the range of stats from raid buffed to raid + world + 
 
 In the previous iteration of this simulation, fire blast was found to be the best buffer spell between scorch stacking and ignite stacking from a pure dps perpective.  Here, fire blast is excluded from the rotations considered for a few reasons: 1) the fire blast buffer is too thin to be effective given real world coordination, 2) its range is a problem -- 26 yards would waste time moving to the boss (although untalented frostbolt's 30 yards isn't much better), and 3) fire blast should generally be kept out of rotations due to mana inefficiency.
 
-
-
-
 The baseline rotation is:
-**```N x scorch -> *spells* -> fireball (repeated)```**
+**```scorch to stack -> *cooldowns* -> *buffer* -> fireball (repeated)```**
+with one mage keeping the scorch stack up with a scorch when the stack size is less than five or the time remaining is less than 5 seconds.  *Cooldowns* are combustion, MQG (when available, five are allocated), and PI (when available, see Table 1 for allocation).  Many experiments were performed to explore possibilities such as expanding the buffer for not PI mages to guarentee a PI double-dip ignite stack and having a high crit chance mage spam scorch to keep the buffed ignite stack up.  None of these experments produced higher average damage than the baseline regardless of number of mages, crit chance, etc..
+
+The only variation in optimal rotation was including frostbolt as the *buffer* spell, which was better in world buffed cases -- see Max Crit column in Table 1.  For lower crit chance situations it was better to not include a buffer.  The cross-over point is around 30% crit chance as shown in Figures 1, 2, and 3.
+
+
+
+
 Several options for *spells* were explored: **combustion -> pyroblast**, **combustion -> frostbolt**, and **fire blast -> combustion**.  [Here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/plots/rotation) are the highest average dps values for *spell*.  
 
 Most evaluations depend on current spell power, hit chance, crit chance, and number of mages.  For example the highest dps rotation for fixed 700 spell power and a 95% hit chance is:
