@@ -1,4 +1,4 @@
-## [Skip to SP to critical conversion table](#spell-power-equivalency-of-critical-strike-rating)
+## [Skip to critical strike chance to spell power conversion table](#spell-power-equivalency-of-critical-strike-rating))
 
 ## Fire Mage Simulations
 
@@ -15,6 +15,9 @@ The primary purpose of these simulations is to determine the balance between spe
 Here, min and max reflect the range of stats from raid buffed to raid + world + consumable buffed (within reason).  The world buffs are: DMT Crit, Ony, Zandalar (effectively +1% crit), and Songflower.  The consumables are Brilliant Wizard Oil, Elixir of Greater Firepower, Greater Arcane Elixir, and Flask of Supreme Power.  These are the stat ranges used to determine the rotations for the respective gear levels.  At each gear level the equivalencies will be calculated over a much larger range of stats, still with the fixed rotations.  
 
 ### Rotations
+
+In the previous iteration of this simulation, fire blast was found to be the best buffer spell between scorch stacking and ignite stacking from a pure dps perpective.  Here, fire blast is excluded from the rotations considered for a few reasons: 1) the fire blast buffer is too thin to be effective given real world coordination, 2) its range is a problem -- 26 yards would waste time moving to the boss (although untalented frostbolt's 30 yards isn't much better), and 3) fire blast should generally be kept out of rotations due to mana inefficiency.
+
 
 
 
