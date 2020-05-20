@@ -12,9 +12,9 @@ The primary purpose of these simulations is to determine the balance between spe
 
 |               |  Min SP |  Max SP | Min Crit| Max Crit| #PI | Duration | Gear | Stat Weights |
 |---------------|:-------:|:-------:|:-------:|:-------:|:---:|:--------:|:----:|:------------:|
-| P4 Building   |   472   |   632   |   15%   |   35%   |  0  |  2 mins  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |             |
-| P4 Near-Max   |   525   |   785   |   20%   |   40%   |  2  |  60 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |             |
-| P5 Max        |   683   |   943   |   19%   |   39%   |  4  |  30 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |             |
+| P4 Building   |   472   |   632   |   15%   |   35%   |  0  |  2 mins  | [link](https://sixtyupgrades.com/set/6XTe9QWx4WXtvmGGTcu69P) |             |
+| P4 Max        |   560   |   820   |   22%   |   41%   |  2  |  60 sec  | [link](https://sixtyupgrades.com/set/pgo77XFrexCt3eJ89Sjnza) |             |
+| P5 Max        |   680   |   940   |   20%   |   39%   |  4  |  30 sec  | [link](https://sixtyupgrades.com/set/gmkocjtgEjHeEe5B5z43jv) |             |
 
 **Table 1: Stats for gear and buff scenarios.**
 
