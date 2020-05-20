@@ -2,47 +2,38 @@
 
 ## Fire Mage Simulations
 
-These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, talents, Curse of the Elements, spell travel time, power infusion, Mind Quickening Gem, and DMF double dip (turned off by default).  The effects of nightfall, other active trinkets (including Arcanite Dragonling), spell batching, and unmitigable boss resistance are not included.
+These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, talents, Curse of the Elements, spell travel time, power infusion (PI), Mind Quickening Gem (MQG), and Dark Moon Faire double dip (turned off by default).  The effects of nightfall, other active trinkets (including Arcanite Dragonling), spell batching, and unmitigable boss resistance are not included.
 
 The primary purpose of these simulations is to determine the balance between spell power, +hit chance, and +crit chance for the purpose of gear selection.  In order to determine these equivalencies, the rotation must also be optimized at every possible stat point and raid configuration.  Doing so would require simulations at too many permutations.  Instead, for the purpose of rotation optimization, the problem is divided into three tiers of gear and raid configurations: phase four building, phase four near-max, and phase five maxed out.
 
-|               |  Min SP |  Max SP |   Hit   | Min Crit| Max Crit| #PI | Duration | Gear |
-|---------------|:-------:|:-------:|:-------:|:-------:|:-------:|:---:|:--------:|:----:|
-| P4 Building   |   472   |   632   |   97%   |   15%   |   35%   |  0  |  2 mins  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
-| P4 Near-Max   |   525   |   785   |   96%   |   20%   |   40%   |  2  |  60 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
-| P5 Max        |   683   |   943   |   99%   |   19%   |   39%   |  4  |  30 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
+|               |  Min SP |  Max SP | Min Crit| Max Crit| #PI | Duration | Gear |
+|---------------|:-------:|:-------:|:-------:|:-------:|:---:|:--------:|:----:|
+| P4 Building   |   472   |   632   |   15%   |   35%   |  0  |  2 mins  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
+| P4 Near-Max   |   525   |   785   |   20%   |   40%   |  2  |  60 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
+| P5 Max        |   683   |   943   |   19%   |   39%   |  4  |  30 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
 
 **Table 1: Stats for gear and buff scenarios.**
 
-Here, min and max reflect the range of stats from raid buffed to raid + world + consumable buffed (within reason).  The world buffs are: DMT Crit, Ony, Zandalar (effectively +1% crit), and Songflower.  The consumables are Brilliant Wizard Oil, Elixir of Greater Firepower, Greater Arcane Elixir, and Flask of Supreme Power.  These are the stat ranges used to determine the rotations for the respective gear levels.  At each gear level the equivalencies will be calculated over a much larger range of stats, still with the fixed rotations.  
+Here, min and max reflect the range of stats from raid buffed to raid + world + consumable buffed (within reason).  The world buffs are: Dire Maul Tribute Crit, Ony, Zandalar (effectively +1% crit), and Songflower.  The consumables are Brilliant Wizard Oil, Elixir of Greater Firepower, Greater Arcane Elixir, and Flask of Supreme Power.  These are the stat ranges used to determine the rotations for the respective gear levels.  At each gear level the equivalencies will be calculated over a much larger range of stats, still with the fixed rotations.  
+
+The simulation starts immediately before the first scorch finishes casting.  Each of the mages is given a normally distributed initial delay with standard deviation 1.0 seconds.  Between casts an additional normally distributed delay of 0.05 seconds is imposed.  The duration of a session is again normally distributed with an average of 120 seconds and a 12 second deviation.  If a fixed encounter duration is imposed rather than a distribution, the selected encounter duration highly influences relative rotation values due to cyclical advantages of spell timing.
 
 ### Rotations
 
 In the previous iteration of this simulation, fire blast was found to be the best buffer spell between scorch stacking and ignite stacking from a pure dps perpective.  Here, fire blast is excluded from the rotations considered for a few reasons: 1) the fire blast buffer is too thin to be effective given real world coordination, 2) its range is a problem -- 26 yards would waste time moving to the boss (although untalented frostbolt's 30 yards isn't much better), and 3) fire blast should generally be kept out of rotations due to mana inefficiency.
 
-The baseline rotation is:
-**```scorch to stack -> *cooldowns* -> *buffer* -> fireball (repeated)```**
-with one mage keeping the scorch stack up with a scorch when the stack size is less than five or the time remaining is less than 5 seconds.  *Cooldowns* are combustion, MQG (when available, five are allocated), and PI (when available, see Table 1 for allocation).  Many experiments were performed to explore possibilities such as expanding the buffer for not PI mages to guarentee a PI double-dip ignite stack and having a high crit chance mage spam scorch to keep the buffed ignite stack up.  None of these experments produced higher average damage than the baseline regardless of number of mages, crit chance, etc..
-
-The only variation in optimal rotation was including frostbolt as the *buffer* spell, which was better in world buffed cases -- see Max Crit column in Table 1.  For lower crit chance situations it was better to not include a buffer.  The cross-over point is around 30% crit chance as shown in Figures 1, 2, and 3.
-
-
-
-
-Several options for *spells* were explored: **combustion -> pyroblast**, **combustion -> frostbolt**, and **fire blast -> combustion**.  [Here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/plots/rotation) are the highest average dps values for *spell*.  
-
-Most evaluations depend on current spell power, hit chance, crit chance, and number of mages.  For example the highest dps rotation for fixed 700 spell power and a 95% hit chance is:
-![rotation](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/rotation/rotation_700_95.png)
-and this plot will change depending on the hit and spell power values.
+The baseline rotation is now:
+**```scorch to stack -> combustion -> *buffer* -> *cooldowns* -> fireball (repeated)```**
+with a designated scorch mage (see below). *Cooldowns* are MQG (when available, five are allocated for all gear levels), and PI (when available, see Table 1 for allocation).  Many experiments were performed to explore possibilities such as expanding the buffer for non PI mages to guarentee a PI double-dip ignite stack and having a high crit chance mage spam scorch to keep the buffed ignite stack up.  None of these experments produced higher average damage than the baseline regardless of number of mages, crit chance, etc..
 
 There will always be a designated scorch mage who, after the initial rotation, casts scorch instead of fireball if:
 1. The scorch debuff has less than five seconds to expiration
 2. The scorch debuff stack is not at its full value of 5
-If the number of mages is less than 5, at least 2 scorches should be initially cast (see below).  Two mages should cast 3 scorches and one mage should cast 5 scorches.
+If the number of mages is less than 6, at least 2 scorches should be initially cast (see below).  Two mages should cast 3 scorches and one mage should cast 6 scorches.
 
-The simulation starts immediately before the first scorch finishes casting.  Each of the mages is given a normally distributed initial delay with standard deviation 1.0 seconds.  Between casts an additional normally distributed delay of 0.05 seconds is imposed.  The duration of a session is again normally distributed with an average of 120 seconds and a 12 second deviation.  If a fixed encounter duration is imposed rather than a distribution, the selected encounter duration highly influences relative rotation values due to cyclical advantages of spell timing.
+The only variation in optimal rotation was including frostbolt as the *buffer* spell, which was better in world buffed cases -- see "Max Crit" column in Table 1.  For lower crit chance situations it was better to not include a buffer.  The cross-over point is around 30% crit chance as shown in Figures 1, 2, and 3.
 
-A [posted log](https://github.com/ronkuby-mage/fire-spec-simulation/blob/master/log_example.txt) can be reviewed to verify mechanics.  Most of the status information in the logs is shown when a cast damages the boss.  This status information reports the condition after the spell has affected both boss and player.  Logs can be activated by setting the ```_LOG_SIM``` variable to an integer n, where n >= 0 and n < ```_SIM_SIZE```.
+
 
 ### Spell power equivalency of critical strike rating
 
