@@ -47,9 +47,9 @@ The only variation in optimal rotation was including frostbolt as the *buffer* s
 **Figure 3: Rotation ratio for high-end performance.**
 
 To summarize, for **not world buffed**, the rotation is
-**```scorch to stack -> combustion -> pi -> mqg -> fireball (repeated)```**
-for **world buffed**, the rotation is:
-**```scorch to stack -> combustion -> frostbolt -> pi -> mqg -> fireball (repeated)```**
+**```scorch to stack -> combustion -> pi -> mqg -> fireball (repeated)```**.
+For **world buffed**, the rotation is:
+**```scorch to stack -> combustion -> frostbolt -> pi -> mqg -> fireball (repeated)```**.
 
 ### Spell power equivalency of critical strike rating
 
