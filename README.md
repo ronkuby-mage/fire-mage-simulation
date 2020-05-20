@@ -46,10 +46,18 @@ The only variation in optimal rotation was including frostbolt as the *buffer* s
 ![high end gear](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_high_e1_u30_h99_s950_ss50000.png)
 **Figure 3: Rotation ratio for high-end performance.**
 
+To summarize, for **not world buffed**, the rotation is
+**```scorch to stack -> combustion -> pi -> mqg -> fireball (repeated)```**
+for **world buffed**, the rotation is:
+**```scorch to stack -> combustion -> frostbolt -> pi -> mqg -> fireball (repeated)```**
+
 ### Spell power equivalency of critical strike rating
 
-With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  The equivalency value is dependent on current spell power, hit chance, crit chance, and number of mages.  Each plot below shows the values for a range of crit chance and spell power values.  To find the appropriate plot, select from the table based on your current hit chance and number of mages:
+With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  The equivalency value is dependent on current spell power, hit chance, crit chance, number of mages, encounter duration, and selected rotation.  Each plot below shows the values for a range of crit chance and spell power values.  To find the appropriate plot, select from the table based on your current hit chance and number of mages:
 
+#### Low-end equivalencies
+
+**Not world buffed**
 |             | 89% Hit | 91% Hit | 93% Hit | 95% Hit | 97% Hit | 99% Hit |
 |-------------|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | One Mage    |  [89_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_89_1.png) |  [91_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_91_1.png) |  [93_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_93_1.png) |  [95_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_95_1.png) |  [97_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_97_1.png) |  [99_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_99_1.png) |
