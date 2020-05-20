@@ -1,4 +1,8 @@
-## [Skip to critical strike chance to spell power conversion table](#spell-power-equivalency-of-critical-strike-rating)
+**Steps to determine stat weighting:**
+1) Look at Table 1 and determine which configuration best fits your raid in terms of boss kill time and average mage gear level.
+2) Follow the "stats" link.
+3) Select whether you and your raid has world buffs or not -- this will also determine the optimal rotation.
+4) Pick the applicable (# mages)/(hit %) cell.
 
 ## Fire Mage Simulations
 
