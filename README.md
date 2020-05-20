@@ -1,6 +1,6 @@
 **Steps to determine stat weighting:**
 1) Use Table 1 to determine which configuration best fits your raid in terms of boss kill time and average mage gear level.
-2) Follow the "stats" link.
+2) Follow the link in the "stat weights" column.
 3) Select whether your raid has world buffs or not -- this will also determine the optimal rotation.
 4) Pick the applicable (# mages)/(hit %) cell.
 
@@ -10,11 +10,11 @@ These simulations play out scenarios in which multiple fire mages are casting ag
 
 The primary purpose of these simulations is to determine the balance between spell power, +hit chance, and +crit chance for the purpose of gear selection.  In order to determine these equivalencies, the rotation must also be optimized at every possible stat point and raid configuration.  Doing so would require simulations at too many permutations.  Instead, for the purpose of rotation optimization, the problem is divided into three tiers of gear and raid configurations: phase four building, phase four near-max, and phase five maxed out.
 
-|               |  Min SP |  Max SP | Min Crit| Max Crit| #PI | Duration | Gear |
-|---------------|:-------:|:-------:|:-------:|:-------:|:---:|:--------:|:----:|
-| P4 Building   |   472   |   632   |   15%   |   35%   |  0  |  2 mins  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
-| P4 Near-Max   |   525   |   785   |   20%   |   40%   |  2  |  60 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
-| P5 Max        |   683   |   943   |   19%   |   39%   |  4  |  30 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |
+|               |  Min SP |  Max SP | Min Crit| Max Crit| #PI | Duration | Gear | Stat Weights |
+|---------------|:-------:|:-------:|:-------:|:-------:|:---:|:--------:|:----:|:------------:|
+| P4 Building   |   472   |   632   |   15%   |   35%   |  0  |  2 mins  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |             |
+| P4 Near-Max   |   525   |   785   |   20%   |   40%   |  2  |  60 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |             |
+| P5 Max        |   683   |   943   |   19%   |   39%   |  4  |  30 sec  | [link](https://sixtyupgrades.com/set/r5UDRwhdCR8kkm7DtGv7BG) |             |
 
 **Table 1: Stats for gear and buff scenarios.**
 
