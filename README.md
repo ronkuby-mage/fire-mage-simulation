@@ -33,7 +33,14 @@ If the number of mages is less than 6, at least 2 scorches should be initially c
 
 The only variation in optimal rotation was including frostbolt as the *buffer* spell, which was better in world buffed cases -- see "Max Crit" column in Table 1.  For lower crit chance situations it was better to not include a buffer.  The cross-over point is around 30% crit chance as shown in Figures 1, 2, and 3.
 
+![low end gear](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_low_e1_u120_h97_s550_ss50000.png)
+**Figure 1: Rotation ratio for low-end performance.**
 
+![mid end gear](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_mid_e1_u60_h96_s650_ss50000.png)
+**Figure 2: Rotation ratio for mid-end performance.**
+
+![high end gear](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_high_e1_u30_h99_s950_ss50000.png)
+**Figure 3: Rotation ratio for high-end performance.**
 
 ### Spell power equivalency of critical strike rating
 
