@@ -15,6 +15,7 @@ The primary purpose of these simulations is to determine the balance between spe
 | P4 Building   |   472   |   632   |   17%   |   36%   |  0  |  2 mins  | [link](https://sixtyupgrades.com/set/6XTe9QWx4WXtvmGGTcu69P) |             |
 | P4 Max        |   560   |   820   |   22%   |   41%   |  2  |  60 sec  | [link](https://sixtyupgrades.com/set/pgo77XFrexCt3eJ89Sjnza) |             |
 | P5 Max        |   680   |   940   |   20%   |   39%   |  4  |  30 sec  | [link](https://sixtyupgrades.com/set/gmkocjtgEjHeEe5B5z43jv) |             |
+| P6 Max        |   714   |   974   |   26%   |   45%   |     |  30 sec  | [link](https://sixtyupgrades.com/set/aVR9Bwt1jsfieUzTPc9Xpf) |             |
 
 **Table 1: Stats for gear and buff scenarios.**
 
