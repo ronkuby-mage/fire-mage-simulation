@@ -1,8 +1,7 @@
 **Steps to determine stat weighting:**
-1) Use Table 1 to determine which configuration best fits your raid in terms of boss kill time and average mage gear level.
-2) Follow the link in the "stat weights" column.
-3) Select whether your raid has world buffs or not -- this will also determine the optimal rotation.
-4) Pick the applicable (# mages)/(hit %) cell.
+1) Use Table 1 to determine which configuration (row) best fits your raid in terms of boss kill time and average mage gear level.
+2) Follow the link in the "stat weights" column according to whether your raid had world buffs -- this will also determine the optimal rotation.
+3) Pick the applicable cell according to the number of mages and average hit %.
 
 ## Fire Mage Simulations
 
@@ -12,7 +11,7 @@ The primary purpose of these simulations is to determine the balance between spe
 
 |               |  Min SP |  Max SP | Min Crit| Max Crit| #PI | Duration | Gear | Stat Weights |
 |---------------|:-------:|:-------:|:-------:|:-------:|:---:|:--------:|:----:|:------------:|
-| P4 Building   |   472   |   632   |   17%   |   36%   |  0  |  2 mins  | [link](https://sixtyupgrades.com/set/6XTe9QWx4WXtvmGGTcu69P) |             |
+| P4 Building   |   472   |   632   |   17%   |   36%   |  0  |  2 mins  | [link](https://sixtyupgrades.com/set/6XTe9QWx4WXtvmGGTcu69P) | [not-WB](https://)   [WB](https://) |
 | P4 Max        |   560   |   820   |   22%   |   41%   |  2  |  60 sec  | [link](https://sixtyupgrades.com/set/pgo77XFrexCt3eJ89Sjnza) |             |
 | P5 Max        |   680   |   940   |   20%   |   39%   |  4  |  30 sec  | [link](https://sixtyupgrades.com/set/gmkocjtgEjHeEe5B5z43jv) |             |
 | P6 Max        |   714   |   974   |   26%   |   45%   |     |  30 sec  | [link](https://sixtyupgrades.com/set/aVR9Bwt1jsfieUzTPc9Xpf) |             |
