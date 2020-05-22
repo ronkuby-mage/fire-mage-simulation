@@ -1,13 +1,13 @@
 **Steps to determine stat weighting:**
-1) Use Table 1 to determine which configuration (row) best fits your raid in terms of boss kill time and average mage gear level.
-2) Follow the link in the "stat weights" column according to whether your raid had world buffs -- this will also determine the optimal rotation.
+1) Use Table 1 to determine which configuration (row) best fits your raid in terms of boss kill time.
+2) Follow the link in the "stat weights" column according to whether your raid has world buffs -- this will also determine the optimal rotation.
 3) Pick the applicable cell according to the number of mages and average hit %.
 
 ## Fire Mage Simulations
 
 These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, talents, Curse of the Elements, spell travel time, power infusion (PI), Mind Quickening Gem (MQG), and Dark Moon Faire double dip (turned off by default).  The effects of nightfall, other active trinkets (including Arcanite Dragonling), spell batching, and unmitigable boss resistance are not included.
 
-The primary purpose of these simulations is to determine the balance between spell power, +hit chance, and +crit chance for the purpose of gear selection.  In order to determine these equivalencies, the rotation must also be optimized at every possible stat point and raid configuration.  Doing so would require simulations at too many permutations.  Instead, for the purpose of rotation optimization, the problem is divided into three tiers of gear and raid configurations: phase four building, phase four near-max, and phase five maxed out.
+The primary purpose of these simulations is to determine the balance between spell power, +hit chance, and +crit chance for the purpose of gear selection.  In order to determine these equivalencies, the rotation must also be optimized at every possible stat point and raid configuration.  Doing so would require simulations at too many permutations.  Instead, for the purpose of rotation optimization, the problem is divided into tiers of gear and raid configurations.
 
 |               |  Min SP |  Max SP | Min Crit| Max Crit| #PI | Duration | Gear | Stat Weights |
 |---------------|:-------:|:-------:|:-------:|:-------:|:---:|:--------:|:----:|:------------:|
