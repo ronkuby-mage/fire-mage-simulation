@@ -39,13 +39,13 @@ If the number of mages is less than 6, at least 2 scorches should be initially c
 The only variation in optimal rotation was including frostbolt as the *buffer* spell, which was better in world buffed cases -- see "Max Crit" column in Table 1.  For lower crit chance situations it was better to not include a buffer.  The cross-over point is around 30% crit chance as shown in Figures 1, 2, and 3.
 
 ![low end gear](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_low_e1_u120_h97_s550_ss50000.png)
-**Figure 1: Rotation ratio for low-end performance.**
+**Figure 1: Rotation ratio for two minute encounters.**
 
 ![mid end gear](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_mid_e1_u60_h96_s650_ss50000.png)
-**Figure 2: Rotation ratio for mid-end performance.**
+**Figure 2: Rotation ratio for 60 second encounters.**
 
 ![high end gear](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_high_e1_u30_h99_s950_ss50000.png)
-**Figure 3: Rotation ratio for high-end performance.**
+**Figure 3: Rotation ratio for 30 second encounters.**
 
 To summarize, for **not world buffed**, the rotation is
 **```scorch to stack -> combustion -> pi -> mqg -> fireball (repeated)```**.
@@ -56,7 +56,7 @@ For **world buffed**, the rotation is:
 
 With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  The equivalency value is dependent on current spell power, hit chance, crit chance, number of mages, encounter duration, and selected rotation.  Each plot below shows the values for a range of crit chance and spell power values.  To find the appropriate plot, select from the table based on your current hit chance and number of mages:
 
-#### Low-end equivalencies
+#### Two minute encounter equivalencies
 
 **Not world buffed**
 |             | 89% Hit | 91% Hit | 93% Hit | 95% Hit | 97% Hit | 99% Hit |
