@@ -11,12 +11,12 @@ The primary purpose of these simulations is to determine the balance between spe
 
 | Gear Sample   |  Min SP |  Max SP | Min Crit| Max Crit| #PI | **Duration** |
 |---------------|:-------:|:-------:|:-------:|:-------:|:---:|:------------:|
-| [P4 Building](https://sixtyupgrades.com/set/6XTe9QWx4WXtvmGGTcu69P) |   472   |   632   |   17%   |   36%   |  0  |  [**2 minutes**]  | [see here] |
+| [P4 Building](https://sixtyupgrades.com/set/6XTe9QWx4WXtvmGGTcu69P) |   472   |   632   |   17%   |   36%   |  0  |  [**2 minutes**](#two-minute-encounter)|
 | [P4 Max](https://sixtyupgrades.com/set/pgo77XFrexCt3eJ89Sjnza)      |   560   |   820   |   22%   |   41%   |  2  |  [**60 seconds**]  | [see here] |
 | [P5 Max](https://sixtyupgrades.com/set/gmkocjtgEjHeEe5B5z43jv)      |   680   |   940   |   20%   |   39%   |  4  |  [**30 seconds**]  | [see here] |
 | [P6 Max](https://sixtyupgrades.com/set/aVR9Bwt1jsfieUzTPc9Xpf)      |   714   |   974   |   26%   |   45%   |     |              |                 |
 
-**Table 1: Stats for gear and buff scenarios.**
+**Table 1: Stats and buffs for encounter scenarios.  The most relevant factor for determining stat weighting is fight duration.**
 
 Here, min and max reflect the range of stats from raid buffed to raid + world + consumable buffed (within reason).  The world buffs are: Dire Maul Tribute Crit, Ony, Zandalar (effectively +1% crit), and Songflower.  The consumables are Brilliant Wizard Oil, Elixir of Greater Firepower, Greater Arcane Elixir, and Flask of Supreme Power.  These are the stat ranges used to determine the rotations for the respective gear levels.  At each gear level the equivalencies will be calculated over a much larger range of stats, still with the fixed rotations.  
 
@@ -37,7 +37,8 @@ If the number of mages is less than 6, at least 2 scorches should be initially c
 
 The only variation in optimal rotation was including frostbolt as the *buffer* spell, which was better in world buffed cases -- see "Max Crit" column in Table 1.  For lower crit chance situations it was better to not include a buffer.  The cross-over point is around 30% crit chance as shown in Figures 1, 2, and 3.
 
-![low end gear](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_low_e1_u120_h97_s550_ss50000.png)
+#### Two Minute Encounter
+![two minutes](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_low_e1_u120_h97_s550_ss50000.png)
 **Figure 1: Rotation ratio for two minute encounters.**
 
 ![mid end gear](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_mid_e1_u60_h96_s650_ss50000.png)
