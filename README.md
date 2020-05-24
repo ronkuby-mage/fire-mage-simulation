@@ -9,12 +9,12 @@ These simulations play out scenarios in which multiple fire mages are casting ag
 
 The primary purpose of these simulations is to determine the balance between spell power, +hit chance, and +crit chance for the purpose of gear selection.  In order to determine these equivalencies, the rotation must also be optimized at every possible stat point and raid configuration.  Doing so would require simulations at too many permutations.  Instead, for the purpose of rotation optimization, the problem is divided into tiers of gear and raid configurations.
 
-| Gear Sample   |  Min SP |  Max SP | Min Crit| Max Crit| #PI | **Duration** | Rotation/Stat Weights |
-|---------------|:-------:|:-------:|:-------:|:-------:|:---:|:--------:|:---------------------:|
-| [P4 Building](https://sixtyupgrades.com/set/6XTe9QWx4WXtvmGGTcu69P) |   472   |   632   |   17%   |   36%   |  0  |  <style >2 mins{background-color:blue}</style>  | [see here] |
-| [P4 Max](https://sixtyupgrades.com/set/pgo77XFrexCt3eJ89Sjnza)      |   560   |   820   |   22%   |   41%   |  2  |  60 sec  | [see here] |
-| [P5 Max](https://sixtyupgrades.com/set/gmkocjtgEjHeEe5B5z43jv)      |   680   |   940   |   20%   |   39%   |  4  |  30 sec  | [see here] |
-| [P6 Max](https://sixtyupgrades.com/set/aVR9Bwt1jsfieUzTPc9Xpf)      |   714   |   974   |   26%   |   45%   |     |          |                 |
+| Gear Sample   |  Min SP |  Max SP | Min Crit| Max Crit| #PI | **Duration** |
+|---------------|:-------:|:-------:|:-------:|:-------:|:---:|:------------:|
+| [P4 Building](https://sixtyupgrades.com/set/6XTe9QWx4WXtvmGGTcu69P) |   472   |   632   |   17%   |   36%   |  0  |  [**2 minutes**]  | [see here] |
+| [P4 Max](https://sixtyupgrades.com/set/pgo77XFrexCt3eJ89Sjnza)      |   560   |   820   |   22%   |   41%   |  2  |  [**60 seconds**]  | [see here] |
+| [P5 Max](https://sixtyupgrades.com/set/gmkocjtgEjHeEe5B5z43jv)      |   680   |   940   |   20%   |   39%   |  4  |  [**30 seconds**]  | [see here] |
+| [P6 Max](https://sixtyupgrades.com/set/aVR9Bwt1jsfieUzTPc9Xpf)      |   714   |   974   |   26%   |   45%   |     |              |                 |
 
 **Table 1: Stats for gear and buff scenarios.**
 
