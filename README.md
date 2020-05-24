@@ -1,6 +1,7 @@
 **Steps to determine stat weighting:**
 1) Use Table 1 to determine which configuration (row) best fits your raid in terms of boss kill time.
-2) Follow the link in the "stat weights" column according to whether your raid has world buffs -- this will also determine the optimal rotation.
+2) Follow the link in the "duration" column according to the expected encounter duration.
+3) Choose the optimal rotation based on average raid crit % and number of mages.
 3) Pick the applicable cell according to the number of mages and average hit %.
 
 ## Fire Mage Simulations
@@ -26,7 +27,7 @@ The simulation starts when the first scorch starts casting.  Each of the mages i
 
 In the previous iteration of this simulation, fire blast was found to be the best buffer spell between scorch stacking and ignite stacking from a pure dps perpective.  Here, fire blast is excluded from the rotations considered for a few reasons: 1) the fire blast buffer is too thin to be effective given real world coordination, 2) its range is a problem -- 26 yards would waste time moving to the boss (although untalented frostbolt's 30 yards isn't much better), and 3) fire blast should generally be kept out of rotations due to mana inefficiency.
 
-The baseline rotation is now:
+The baseline rotation is:
 **```scorch to stack -> combustion -> *buffer* -> *cooldowns* -> fireball (repeated)```**
 with a designated scorch mage (see below). *Cooldowns* are MQG (when available, five are allocated for all gear levels), and PI (when available, see Table 1 for allocation).  Many experiments were performed to explore possibilities such as expanding the buffer for non PI mages to guarentee a PI double-dip ignite stack and having a high crit chance mage spam scorch to keep the buffed ignite stack up.  None of these experments produced higher average damage than the baseline regardless of number of mages, crit chance, etc..
 
@@ -39,7 +40,7 @@ The only variation in optimal rotation was including frostbolt as the *buffer* s
 
 #### Two Minute Encounter
 ![two minutes](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_low_e1_u120_h97_s550_ss50000.png)
-**Figure 1: Rotation ratio for two minute encounters.**
+**Figure 1**: Rotation ratio for two minute encounters.  [Stat weights and optimal rotaiton for ratio >= 1.0](#two-minute-no-world-buffs), and [stat weights and optimal rotation for ratio < 1.0].  This selection will be dominated by whether the raid has world buffs.
 
 ![mid end gear](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_mid_e1_u60_h96_s650_ss50000.png)
 **Figure 2: Rotation ratio for 60 second encounters.**
@@ -56,7 +57,7 @@ For **world buffed**, the rotation is:
 
 With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  The equivalency value is dependent on current spell power, hit chance, crit chance, number of mages, encounter duration, and selected rotation.  Each plot below shows the values for a range of crit chance and spell power values.  To find the appropriate plot, select from the table based on your current hit chance and number of mages:
 
-#### Two minute encounter equivalencies
+#### Two minute no world buffs
 
 **Not world buffed**
 |             | 89% Hit | 91% Hit | 93% Hit | 95% Hit | 97% Hit | 99% Hit |
@@ -70,6 +71,7 @@ With finite-differences the simulations are used to determine the equivalency be
 | Seven Mages |  [89_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_89_7.png) |  [91_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_91_7.png) |  [93_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_93_7.png) |  [95_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_95_7.png) |  [97_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_97_7.png) |  [99_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_99_7.png) |
 | Eight Mages |  [89_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_89_8.png) |  [91_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_91_8.png) |  [93_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_93_8.png) |  [95_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_95_8.png) |  [97_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_97_8.png) |  [99_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_99_8.png) |
 | Nine Mages |  [89_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_89_9.png) |  [91_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_91_9.png) |  [93_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_93_9.png) |  [95_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_95_9.png) |  [97_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_97_9.png) |  [99_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_99_9.png) |
+**```scorch to stack -> combustion -> pi -> mqg -> fireball (repeated)```**
 
 Here is an example equivalency for 5 mages:
 ![seven mage equivalence](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_95_5.png)
