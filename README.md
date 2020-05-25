@@ -4,7 +4,7 @@
 3) Choose the optimal rotation based on average raid crit % and number of mages.
 3) Pick the applicable cell according to the number of mages and average hit %.
 
-## Fire Mage Simulations
+# Fire Mage Simulations
 
 These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, talents, Curse of the Elements, spell travel time, Power Infusion (PI), Mind Quickening Gem (MQG), and Dark Moon Faire double dip (turned off by default).  The effects of nightfall, other active trinkets (including Arcanite Dragonling), spell batching, and unmitigable boss resistance are not included.
 
@@ -23,7 +23,7 @@ Here, min and max reflect the range of stats from raid buffed to raid + world + 
 
 The simulation starts when the first scorch starts casting.  Each of the mages is given a normally distributed initial delay with standard deviation 1.0 seconds.  Between casts an additional normally distributed delay of 0.05 seconds is imposed.  The duration of a session is again normally distributed with the average shown in Table 1.  If a fixed encounter duration is imposed rather than a distribution, the selected encounter duration highly influences relative rotation values due to cyclical advantages of spell timing.
 
-### Rotations
+## Rotations
 
 In the previous iteration of this simulation, fire blast was found to be the best buffer spell between scorch stacking and ignite stacking from a pure dps perpective.  Here, fire blast is excluded from the rotations considered for a few reasons: 1) the fire blast buffer is too thin to be effective given real world coordination, 2) its range is a problem -- 26 yards would waste time moving to the boss (although untalented frostbolt's 30 yards isn't much better), and 3) fire blast should generally be kept out of rotations due to mana inefficiency.
 
@@ -37,7 +37,7 @@ There will always be a designated scorch mage who, after the initial rotation, c
 
 The only variation in optimal rotation was including frostbolt as the *buffer* spell, which was better in world buffed cases -- see "Max Crit" column in Table 1.  For lower crit chance situations it was better to not include a buffer.  The cross-over point is around 30% crit chance as shown in Figures 1, 2, and 3.
 
-#### Two Minute Encounter
+### Two Minute Encounter
 ![two minutes](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_low_e1_u120_h97_s550_ss50000.png)
 **Figure 1**: Rotation ratio for two minute encounters.  [Stat weights and optimal rotaiton for ratio >= 1.0](#two-minute-no-world-buffs), and [stat weights and optimal rotation for ratio < 1.0].  This selection will be dominated by whether the raid has world buffs.
 
@@ -52,11 +52,11 @@ To summarize, for **not world buffed**, the rotation is
 For **world buffed**, the rotation is:
 **```scorch to stack -> combustion -> frostbolt -> pi -> mqg -> fireball (repeated)```**.
 
-### Spell power equivalency of critical strike rating
+## Spell power equivalency of critical strike rating
 
 With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  The equivalency value is dependent on current spell power, hit chance, crit chance, number of mages, encounter duration, and selected rotation.  Each plot below shows the values for a range of crit chance and spell power values.  To find the appropriate plot, select from the table based on your current hit chance and number of mages:
 
-#### Two minute no world buffs
+### Two minute no world buffs
 |             | 89% Hit | 91% Hit | 93% Hit | 95% Hit | 97% Hit | 99% Hit |
 |-------------|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | One Mage    |  [89_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_89_1.png) |  [91_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_91_1.png) |  [93_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_93_1.png) |  [95_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_95_1.png) |  [97_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_97_1.png) |  [99_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_99_1.png) |
@@ -71,11 +71,29 @@ With finite-differences the simulations are used to determine the equivalency be
 
 **```scorch to stack -> combustion -> pi -> mqg -> fireball (repeated)```**
 
-### Crit equivalency comparisons
+## Crit equivalency comparisons
 
 Here are some results from other simulations:
 * [Quasexort](https://docs.google.com/spreadsheets/d/1dqFuQeNVa403ulrmuW_8Ww-5UszOde0RPMBe2g7t1g4)
 * [elio](https://github.com/ignitelio/ignite/blob/master/magus2.ipynb)
+
+## Legacy plots
+
+### Spell power equivalency of hit rating
+
+A similar equivalency is calculated for hit.  Here are the plots:
+
+|             | 89% Hit | 91% Hit | 93% Hit | 95% Hit | 97% Hit | 99% Hit |
+|-------------|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
+| One Mage    |  [89_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_89_1.png) |  [91_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_91_1.png) |  [93_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_93_1.png) |  [95_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_95_1.png) |  [97_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_97_1.png) |  [99_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_99_1.png) |
+| Two Mages   |  [89_2](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_89_2.png) |  [91_2](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_91_2.png) |  [93_2](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_93_2.png) |  [95_2](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_95_2.png) |  [97_2](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_97_2.png) |  [99_2](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_99_2.png) |
+| Three Mages |  [89_3](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_89_3.png) |  [91_3](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_91_3.png) |  [93_3](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_93_3.png) |  [95_3](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_95_3.png) |  [97_3](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_97_3.png) |  [99_3](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_99_3.png) |
+| Four Mages |  [89_4](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_89_4.png) |  [91_4](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_91_4.png) |  [93_4](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_93_4.png) |  [95_4](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_95_4.png) |  [97_4](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_97_4.png) |  [99_4](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_99_4.png) |
+| Five Mages |  [89_5](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_89_5.png) |  [91_5](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_91_5.png) |  [93_5](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_93_5.png) |  [95_5](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_95_5.png) |  [97_5](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_97_5.png) |  [99_5](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_99_5.png) |
+| Six Mages |  [89_6](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_89_6.png) |  [91_6](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_91_6.png) |  [93_6](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_93_6.png) |  [95_6](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_95_6.png) |  [97_6](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_97_6.png) |  [99_6](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_99_6.png) |
+| Seven Mages |  [89_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_89_7.png) |  [91_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_91_7.png) |  [93_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_93_7.png) |  [95_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_95_7.png) |  [97_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_97_7.png) |  [99_7](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_99_7.png) |
+| Eight Mages |  [89_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_89_8.png) |  [91_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_91_8.png) |  [93_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_93_8.png) |  [95_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_95_8.png) |  [97_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_97_8.png) |  [99_8](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_99_8.png) |
+| Nine Mages |  [89_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_89_9.png) |  [91_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_91_9.png) |  [93_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_93_9.png) |  [95_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_95_9.png) |  [97_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_97_9.png) |  [99_9](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/hit_equiv/hit_equiv_99_9.png) |
 
 ### DPS by number of mages
 
@@ -83,5 +101,7 @@ DPS per mage as a function of number of mages is plotted for a few values of spe
 ![dps per mage, 700 sp](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/dps/dps_700_97.png)
 Assuming the number of mages is fixed, these curves are only useful towards determining ones expected dps.
 
+## Acknowledgement
 *Thanks to elio for tracking down the error in ignite timing and providing parallel code sample!*
+
 *Thanks to alzy for the sim result comparison, which helped pin down a bug in the scorch refresh logic!*
