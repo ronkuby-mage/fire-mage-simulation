@@ -71,25 +71,11 @@ With finite-differences the simulations are used to determine the equivalency be
 
 **```scorch to stack -> combustion -> pi -> mqg -> fireball (repeated)```**
 
-Here is an example equivalency for 5 mages:
-![seven mage equivalence](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_95_5.png)
-Compare with other simulations:
+### Crit equivalency comparisons
+
+Here are some results from other simulations:
 * [Quasexort](https://docs.google.com/spreadsheets/d/1dqFuQeNVa403ulrmuW_8Ww-5UszOde0RPMBe2g7t1g4)
 * [elio](https://github.com/ignitelio/ignite/blob/master/magus2.ipynb)
-
-### Alternative rotations
-
-The comparative average damage from several alternative rotations is plotted [here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/plots/rotation).  In cases of 3 or 4 mages, starting with two scorches yields higher DPS than the baseline of a single scorch to start:
-![two scorches vs one](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/legacy/two_scorches_700.png)
-The superiority of an extra scorch in these conditions is not surprising because otherwise some of the initial crits will not benefit from a full scorch stack.
-
-Replacing pyroblast with an (approximate) frostbolt + fireball results in up to 1% dps improvement:
-![frostbolt+fireball vs pyroblast](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/legacy/frostbolt_700.png)
-The frostbolt is rank 11 and untalented aside from elemental precision.
-
-Replacing pyroblast with fire blast + fireball results in up to 2% dps improvement:
-![combustion first vs later](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/legacy/fire_blast_open_700.png)
-**```scorch -> fire blast -> combustion -> -> fireball (repeated)```** is the highest tested opening rotation.
 
 ### DPS by number of mages
 
@@ -98,4 +84,4 @@ DPS per mage as a function of number of mages is plotted for a few values of spe
 Assuming the number of mages is fixed, these curves are only useful towards determining ones expected dps.
 
 *Thanks to elio for tracking down the error in ignite timing and providing parallel code sample!*
-*Thanks to alzy for the sim result comparison, which helped pin down a bug in the scorch refresg logic!*
+*Thanks to alzy for the sim result comparison, which helped pin down a bug in the scorch refresh logic!*
