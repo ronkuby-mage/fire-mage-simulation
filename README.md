@@ -50,9 +50,6 @@ The only variation in optimal rotation was including frostbolt as the *buffer* s
 ![thirty seconds](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/decision-tree/plots/rotation/fireball_high_e1_u30_h99_s950_ss50000.png)
 **Figure 3:** Rotation ratio for thrity seconds encounters.  [Stat weights and optimal rotation for ratio >= 1.0](#thirty-seconds-no-ignite-buffer), and [stat weights and optimal rotation for ratio < 1.0](#thrity-seconds-frostbolt-buffer).  This selection will be dominated by whether the raid has world buffs.
 
-For **world buffed**, the rotation is:
-
-
 ## Spell power equivalency of critical strike rating
 
 With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  The equivalency value is dependent on current spell power, hit chance, crit chance, number of mages, encounter duration, and selected rotation.  Each plot below shows the values for a range of crit chance and spell power values.  To find the appropriate plot, select from the table based on your current hit chance and number of mages:
