@@ -1,0 +1,79 @@
+{
+    "stats": {
+	"spell_power": {
+	    "mean": 850.0,
+	    "var": 0.0,
+	    "clip": [
+		0.0,
+		2000.0
+	    ]
+	},
+	"hit_chance": {
+	    "mean": 0.99,
+	    "var": 0.0,
+	    "clip": [
+		0.89,
+		0.99
+	    ]
+	},
+	"crit_chance": {
+	    "mean": 0.40,
+	    "var": 0.0,
+	    "clip": [
+		0.0,
+		1.0
+	    ]
+	}
+    },
+    "configuration": [
+	{
+	    "num_mages": 5,
+	    "num_mqg": 5,
+	    "num_pi": 5
+	}
+    ],
+    "plot": {
+	"lines": "spell_power",
+	"x_axis": "crit_chance",
+	"y_axis": "test"
+    },
+    "rotation": {
+	"baseline": {
+	    "description": "fireball",
+	    "initial": {
+		"common": [
+		    "stack_scorch",
+		    "frostbolt",
+		    "combustion",
+		    "pi",
+		    "fireball"
+		],
+		"have_pi": [
+		    "mqg"
+		],
+		"other": [
+		    "mqg"
+		]
+	    },
+	    "continuing": {
+		"default": "fireball",
+		"special": {
+		    "slot": 0,
+		    "value": "maintain_scorch"
+		}
+	    }
+	}
+    },
+    "timing": {
+	"duration": {
+	    "mean": 100.0,
+	    "var": 0.0,
+	    "clip": [
+		15.0,
+		120.0
+	    ]
+	},
+	"delay": 0.0,
+	"response": 0.001
+    }
+}

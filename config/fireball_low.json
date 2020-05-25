@@ -1,0 +1,143 @@
+{
+    "stats": {
+	"spell_power": {
+	    "mean": 550.0,
+	    "var": 0.0,
+	    "clip": [
+		0.0,
+		2000.0
+	    ]
+	},
+	"hit_chance": {
+	    "mean": 0.97,
+	    "var": 0.0,
+	    "clip": [
+		0.89,
+		0.99
+	    ]
+	},
+	"crit_chance": {
+	    "mean": [
+		0.10,
+		0.15,
+		0.20,
+		0.25,
+		0.30,
+		0.35,
+		0.40,
+		0.45,
+		0.50
+	    ],
+	    "var": 0.0,
+	    "clip": [
+		0.0,
+		1.0
+	    ]
+	}
+    },
+    "configuration": [
+	{
+	    "num_mages": 3,
+	    "num_mqg": 3,
+	    "num_pi": 0
+	},
+	{
+	    "num_mages": 4,
+	    "num_mqg": 4,
+	    "num_pi": 0
+	},
+	{
+	    "num_mages": 5,
+	    "num_mqg": 5,
+	    "num_pi": 0
+	},
+	{
+	    "num_mages": 6,
+	    "num_mqg": 5,
+	    "num_pi": 0
+	},
+	{
+	    "num_mages": 7,
+	    "num_mqg": 5,
+	    "num_pi": 0
+	},
+	{
+	    "num_mages": 8,
+	    "num_mqg": 5,
+	    "num_pi": 0
+	},
+	{
+	    "num_mages": 9,
+	    "num_mqg": 5,
+	    "num_pi": 0
+	}
+    ],
+    "plot": {
+	"lines": "num_mages",
+	"x_axis": "crit_chance",
+	"y_axis": "rotation"
+    },
+    "rotation": {
+	"baseline": {
+	    "description": "frostbolt",
+	    "initial": {
+		"common": [
+		    "stack_scorch",
+		    "combustion"
+		],
+		"have_pi": [
+		    "frostbolt",
+		    "cooldowns"
+		],
+		"other": [
+		    "frostbolt",
+		    "cooldowns"
+		]
+	    },
+	    "continuing": {
+		"default": "fireball",
+		"special": {
+		    "slot": 0,
+		    "value": "maintain_scorch"
+		}
+	    }
+	},
+	"compare": [
+	    {
+		"name": "wait",
+		"description": "fireball",
+		"initial": {
+		    "common": [
+			"stack_scorch",
+			"combustion"
+		    ],
+		    "have_pi": [
+			"cooldowns"
+		    ],
+		    "other": [
+			"cooldowns"
+		    ]
+		},
+		"continuing": {
+		    "default": "fireball",
+		    "special": {
+			"slot": 0,
+			"value": "maintain_scorch"
+		    }
+		}
+	    }
+	]
+    },
+    "timing": {
+	"duration": {
+	    "mean": 120.0,
+	    "var": 6.0,
+	    "clip": [
+		90.0,
+		150.0
+	    ]
+	},
+	"delay": 1.0,
+	"response": 0.05
+    }
+}

@@ -1,313 +1,347 @@
 import numpy as np
-from constants import Constant, init_arrays, log_message
+import constants
+from decisions import Decider
 
-def advance(arrays, plus_damage, hit_chance, crit_chance, rotation, sim_size):
-    C = Constant(sim_size=sim_size)
+class Encounter():
 
-    total_damage = arrays['total_damage']
-    ignite_count = arrays['ignite_count']
-    ignite_time = arrays['ignite_time']
-    ignite_tick = arrays['ignite_tick']
-    ignite_value = arrays['ignite_value']
-    scorch_count = arrays['scorch_count']
-    scorch_time = arrays['scorch_time']
-    running_time = arrays['running_time']
-    cast_timer = arrays['cast_timer']
-    cast_type = arrays['cast_type']
-    comb_stack = arrays['comb_stack']
-    comb_left = arrays['comb_left']
-    spell_timer = arrays['spell_timer']
-    spell_type = arrays['spell_type']
-    cast_number = arrays['cast_number']
-    duration = arrays['duration']
-    arrays['damage'] = np.zeros((C._SIM_SIZE, 1))
-    damage = arrays['damage']
+    def __init__(self, array_generator, rotation, response, config):
+        self._array_generator = array_generator
+        self._rotation = rotation
+        self._response = response
+        self._config = config
 
-    epsilon = 0.000001
+    def _subtime(self, sub, add_time):
+        C = self._C
+        running_time = self._arrays['global']['running_time']
+        player = self._arrays['player']
+        boss = self._arrays['boss']
 
-    num_mages = cast_timer.shape[1]
-    extra_scorches = C._EXTRA_SCORCHES[num_mages]
+        running_time[sub] += add_time
+        player['cast_timer'][sub, :] -= add_time[:, None]
+        player['spell_timer'][sub, :] -= add_time[:, None]
+        boss['ignite_timer'][sub] -= add_time
+        boss['tick_timer'][sub] -= add_time
+        boss['scorch_timer'][sub] -= add_time
+        for buff in range(C._BUFFS):
+            player['buff_timer'][buff][sub, :] -= add_time[:, None]
+        for debuff in range(C._DEBUFFS):
+            boss['debuff_timer'][debuff][sub] -= add_time
 
-    still_going = np.where(running_time < duration)[0]
-    if still_going.size == 0:
-        return False
+    def _do_cast(self, still_going, cast_array):
+        C = self._C
+        player = self._arrays['player']
+        
+        cast_ends = np.where(cast_array)[0]
+        if cast_ends.size > 0:
+            cst = still_going[cast_ends]
+            next_hit = np.argmin(player['cast_timer'][cst, :], axis=1)
+            add_time = np.min(player['cast_timer'][cst, :], axis=1)
+            self._subtime(cst, add_time)
 
-    cast_time = np.min(cast_timer[still_going], axis=1, keepdims=True)
-    spell_time = np.min(spell_timer[still_going], axis=1, keepdims=True)
-    ignite_copy = np.copy(ignite_time[still_going])
+            if C._LOG_SIM >= 0:
+                if C._LOG_SIM in cst:
+                    message = '         ({:6.2f}): player {:d} finished casting {:s}'
+                    sub_index = cst.tolist().index( C._LOG_SIM)
+                    message = message.format(self._arrays['global']['running_time'][C._LOG_SIM],
+                                             next_hit[sub_index] + 1,
+                                             C._LOG_SPELL[player['cast_type'][cst[sub_index], next_hit[sub_index]]])
+                    print(message)
 
-    zi_array = np.logical_and(np.logical_and(ignite_copy < cast_time,
-                                             ignite_count[still_going]),
-                              np.logical_or(ignite_copy < scorch_time[still_going],
-                                            np.logical_not(scorch_count[still_going])))
-    zi_array = np.logical_and(zi_array, ignite_copy < ignite_tick[still_going])
-    zi_array = np.logical_and(zi_array, ignite_copy < spell_time)
-    zero_ignite = np.where(zi_array)[0]
-    if zero_ignite.size > 0:
-        running_time[still_going[zero_ignite]] += ignite_time[still_going[zero_ignite]]
-        cast_timer[still_going[zero_ignite], :] -= ignite_time[still_going[zero_ignite]]
-        spell_timer[still_going[zero_ignite], :] -= ignite_time[still_going[zero_ignite]]
-        scorch_time[still_going[zero_ignite]] -= ignite_time[still_going[zero_ignite]]
-        if C._LOG_SIM >= 0:
-            if C._LOG_SIM in still_going[zero_ignite]:
-                sub_index = still_going[zero_ignite].tolist().index(C._LOG_SIM)
-                message = ' {:7.0f} ({:6.2f}): ignite expired'
-                print(message.format(total_damage[C._LOG_SIM][0] + damage[C._LOG_SIM][0], running_time[C._LOG_SIM][0]))
-        ignite_count[still_going[zero_ignite]] = 0
-        ignite_time[still_going[zero_ignite]] = 0.0
-        ignite_value[still_going[zero_ignite]] = 0.0
-        ignite_tick[still_going[zero_ignite]] = 0.0
+            # transfer to spell
+            instant_array = player['cast_type'][cst, next_hit] >= C._CAST_GCD
+            no_instant = np.where(np.logical_not(instant_array))[0]
+            player['spell_type'][cst[no_instant], next_hit[no_instant]] = player['cast_type'][cst[no_instant], next_hit[no_instant]]
+            player['spell_timer'][cst[no_instant], next_hit[no_instant]] = C._SPELL_TIME[player['cast_type'][cst[no_instant], next_hit[no_instant]]]
 
-    ti_array = np.logical_and(ignite_tick[still_going] < cast_time,
-                              ignite_tick[still_going] < scorch_time[still_going])
-    ti_array = np.logical_and(ti_array, ignite_count[still_going])
-    ti_array = np.logical_and(ti_array, ignite_tick[still_going] < spell_time)
-    tick_ignite = np.where(ti_array)[0]
-    if tick_ignite.size > 0:
-        running_time[still_going[tick_ignite]] += ignite_tick[still_going[tick_ignite]]
-        cast_timer[still_going[tick_ignite], :] -= ignite_tick[still_going[tick_ignite]]
-        spell_timer[still_going[tick_ignite], :] -= ignite_tick[still_going[tick_ignite]]
-        scorch_time[still_going[tick_ignite]] -= ignite_tick[still_going[tick_ignite]]
-        ignite_time[still_going[tick_ignite]] -= ignite_tick[still_going[tick_ignite]]
-        ignite_tick[still_going[tick_ignite]] = C._IGNITE_TICK
-        multiplier = 1.0 + 0.03*scorch_count[still_going[tick_ignite]]
-        damage[still_going[tick_ignite]] += ignite_value[still_going[tick_ignite]]*multiplier
-        if  C._LOG_SIM >= 0:
-            if  C._LOG_SIM in still_going[tick_ignite]:
-                sub_index = still_going[tick_ignite].tolist().index( C._LOG_SIM)
-                message = ' {:7.0f} ({:6.2f}): ignite ticked   {:4.0f} damage done'
-                print(message.format(total_damage[ C._LOG_SIM][0] + damage[ C._LOG_SIM][0], running_time[ C._LOG_SIM][0], ignite_value[ C._LOG_SIM][0]*multiplier[sub_index][0]))
+            # apply instant spells
+            combustion = np.where(player['cast_type'][cst, next_hit] == C._CAST_COMBUSTION)[0]
+            player['comb_left'][cst[combustion], next_hit[combustion]] = C._COMBUSTIONS
+            player['comb_stack'][cst[combustion], next_hit[combustion]] = 0
+            player['comb_avail'][cst[combustion], next_hit[combustion]] -= 1
 
-    ig_array = np.logical_or(zi_array, ti_array)
-    se_array = np.logical_and(np.logical_and(np.logical_not(ig_array),
-                                             scorch_time[still_going] < cast_time),
-                              scorch_count[still_going])
+            for buff in range(C._BUFFS):
+                tbuff = np.where(player['cast_type'][cst, next_hit] == C._BUFF_CAST_TYPE[buff])[0]
+                player['buff_timer'][buff][cst[tbuff], next_hit[tbuff]] = C._BUFF_DURATION[buff]
+                player['buff_avail'][buff][cst[tbuff], next_hit[tbuff]] -= 1
+
+            # determine gcd        
+            gcd_array = player['gcd'][cst, next_hit] > 0.0
+            yes_gcd = np.where(gcd_array)[0]
+            no_gcd = np.where(np.logical_not(gcd_array))[0]
+        
+            # push gcd
+            player['cast_type'][cst[yes_gcd], next_hit[yes_gcd]] = C._CAST_GCD
+            player['cast_timer'][cst[yes_gcd], next_hit[yes_gcd]] =\
+                 player['gcd'][cst[yes_gcd], next_hit[yes_gcd]]
+            player['gcd'][cst[yes_gcd], next_hit[yes_gcd]] = 0.0
+
+            # inc cast number
+            self._arrays['global']['decision'][cst[no_gcd]] = True
+            player['cast_number'][cst[no_gcd], next_hit[no_gcd]] += 1 # attempt at batching
+
+    def _do_spell(self, still_going, spell_array):
+        C = self._C
+        player = self._arrays['player']
+        boss = self._arrays['boss']
+
+        epsilon = 1.0e-6
     
-    se_array = np.logical_and(se_array, ignite_copy < spell_time)
-    scorch_expire = np.where(se_array)[0]
-    if scorch_expire.size > 0:
-        if  C._LOG_SIM >= 0:
-            if  C._LOG_SIM in still_going[scorch_expire]:
-                message = '         ({:6.2f}): scorch expired {:4.2f}'
-                print(message.format(running_time[ C._LOG_SIM][0], scorch_time[still_going[scorch_expire]][0][0]))
-        running_time[still_going[scorch_expire]] += scorch_time[still_going[scorch_expire]]
-        cast_timer[still_going[scorch_expire], :] -= scorch_time[still_going[scorch_expire]]
-        spell_timer[still_going[scorch_expire], :] -= scorch_time[still_going[scorch_expire]]
-        ignite_time[still_going[scorch_expire]] -= scorch_time[still_going[scorch_expire]]
-        ignite_tick[still_going[scorch_expire]] -= scorch_time[still_going[scorch_expire]]
-        scorch_count[still_going[scorch_expire]] = 0
-        scorch_time[still_going[scorch_expire]] = 0.0
+        spell_lands = np.where(spell_array)[0]
+        if spell_lands.size > 0:
+            spl = still_going[spell_lands]
+            lnext_hit = np.argmin(player['spell_timer'][spl, :], axis=1)
+            add_time = np.min(player['spell_timer'][spl, :], axis=1)
+            self._subtime(spl, add_time)
 
-    cast_array = np.logical_not(np.logical_or(ig_array, se_array))
-    cast_array = np.logical_and(cast_array, cast_time < spell_time)
-    cast_ends = np.where(cast_array)[0]
-    if cast_ends.size > 0:
-        cst = still_going[cast_ends]
-        next_hit = np.argmin(cast_timer[cst, :], axis=1)
-        add_time = np.min(cast_timer[cst, :], axis=1, keepdims=True)
-        running_time[cst] += add_time
-        ignite_time[cst] -= add_time
-        ignite_tick[cst] -= add_time
-        cast_timer[cst] -= add_time
-        spell_timer[cst] -= add_time
-        scorch_time[cst] -= add_time
-       
-        react_time = np.abs(C._CONTINUING_SIGMA*np.random.randn(cst.size))
-        cast_copy = np.copy(cast_type[cst, next_hit])
+            # reset timer
+            player['spell_timer'][spl, lnext_hit] = C._LONG_TIME
 
-        if C._LOG_SIM >= 0:
-            if  C._LOG_SIM in cst:
-                message = '         ({:6.2f}): player {:d} finished casting {:s}'
-                sub_index = cst.tolist().index( C._LOG_SIM)
-                message = message.format(running_time[ C._LOG_SIM][0],
-                                         next_hit[sub_index] + 1,
-                                         C._LOG_SPELL[cast_copy[sub_index]])
-                print(message)
+            if C._LOG_SIM >= 0:
+                if C._LOG_SIM in spl:
+                    message = ' ({:6.2f}): player {:d} {:s} landed '
+                    sub_index = spl.tolist().index( C._LOG_SIM)
+                    message = message.format(self._arrays['global']['running_time'][C._LOG_SIM],
+                                             lnext_hit[sub_index] + 1,
+                                             C._LOG_SPELL[player['spell_type'][C._LOG_SIM, lnext_hit[sub_index]]])
+                    message2 = 'misses         '
 
-        # special spell next
-        special_array = cast_number[cst, next_hit] == extra_scorches
-        special = np.where(special_array)[0]
-        if rotation == C._FIRE_BLAST:
-            cast_timer[cst[special], next_hit[special]] = epsilon + react_time[special]
-            cast_type[cst[special], next_hit[special]] = C._CAST_FIRE_BLAST
-        elif rotation == C._FROSTBOLT:
-            cast_timer[cst[special], next_hit[special]] = C._FIREBALL_CASTTIME + C._FROSTBOLT_CASTTIME + react_time[special]
-            cast_type[cst[special], next_hit[special]] = C._CAST_FIREBALL
-            damage[cst[special]] += hit_chance*(1 + C._FROSTBOLT_CRIT_DAMAGE*(crit_chance - C._FROSTBOLT_CRIT_MOD))*(C._FROSTBOLT_DAMAGE + C._FROSTBOLT_MODIFIER*(plus_damage - C._FROSTBOLT_PLUS))*C._FROSTBOLT_OVERALL
-        else:
-            cast_timer[cst[special], next_hit[special]] = C._PYROBLAST_CASTTIME + react_time[special]
-            cast_type[cst[special], next_hit[special]] = C._CAST_PYROBLAST
-
-        # scorch next
-        scorcher = np.logical_not(np.logical_or(next_hit, special_array)) # scorch mage only
-        scorch_array = np.logical_and(scorcher,
-                                      np.logical_or(np.squeeze(scorch_count[cst]) < C._SCORCH_STACK,
-                                                    np.squeeze(scorch_time[cst]) < C._MAX_SCORCH_REMAIN))
-        scorch_array = np.logical_and(scorch_array, cast_copy != C._CAST_SCORCH)
-        scorch_array = np.logical_and(scorch_array, cast_number[cst, next_hit] > extra_scorches + 1)
-        # now scorch array is just for scorcher
-        scorch_array = np.logical_or(scorch_array, cast_number[cst, next_hit] < extra_scorches)
-        # now everyone
-        scorch = np.where(scorch_array)[0]
-        cast_timer[cst[scorch], next_hit[scorch]] = C._SCORCH_CASTTIME + react_time[scorch]
-        cast_type[cst[scorch], next_hit[scorch]] = C._CAST_SCORCH
-
-        # fireball next
-        fireball = np.where(np.logical_not(np.logical_or(scorch_array, special_array)))[0]
-        cast_timer[cst[fireball], next_hit[fireball]] = C._FIREBALL_CASTTIME + react_time[fireball]
-        cast_type[cst[fireball], next_hit[fireball]] = C._CAST_FIREBALL
-
-        spell_type[cst, next_hit] = cast_copy
-        spell_timer[cst, next_hit] = C._SPELL_TIME[cast_copy]
-        if rotation == C._FIRE_BLAST:
-            gcd = np.where(cast_number[cst, next_hit] == extra_scorches + 1)[0]
-            cast_timer[cst[gcd], next_hit[gcd]] += C._GLOBAL_COOLDOWN
-        cast_number[cst, next_hit] += 1
-
-    spell_lands = np.where(np.logical_not(np.logical_or(np.logical_or(ig_array, se_array), cast_array)))[0]
-    if spell_lands.size > 0:
-        spl = still_going[spell_lands]
-        next_hit = np.argmin(spell_timer[spl, :], axis=1)
-        add_time = np.min(spell_timer[spl, :], axis=1, keepdims=True)
-        running_time[spl] += add_time
-        ignite_time[spl] -= add_time
-        ignite_tick[spl] -= add_time
-        cast_timer[spl] -= add_time
-        spell_timer[spl] -= add_time
-        scorch_time[spl] -= add_time
-
-        spell_copy = spell_type[spl, next_hit]
-
-        if  C._LOG_SIM >= 0:
-            if  C._LOG_SIM in spl:
-                message = ' ({:6.2f}): player {:d} {:s} landed '
-                sub_index = spl.tolist().index( C._LOG_SIM)
-                message = message.format(running_time[ C._LOG_SIM][0],
-                                         next_hit[sub_index] + 1,
-                                         C._LOG_SPELL[spell_copy[sub_index]])
-                message2 = 'misses         '
-
-        for spell in range(C._CASTS):
-            
-            is_spell = np.where(spell_copy == spell)[0]
-            spell_hits = np.where(np.random.rand(is_spell.size) < hit_chance)[0]
+            spell_hits = np.where(np.random.rand(spell_lands.size) < player['hit_chance'][spl, lnext_hit])[0]
             if spell_hits.size > 0:
 
-                sph = spl[is_spell][spell_hits]
-                spell_damage = C._SPELL_BASE[spell] + \
-                               C._SPELL_RANGE[spell]*np.random.rand(sph.size, 1) +\
-                               C._MULTIPLIER[spell]*plus_damage
-                spell_damage *= (1.0 + 0.03*scorch_count[sph])*C._DAMAGE_MULTIPLIER
+                sph = spl[spell_hits]
+                next_hit = lnext_hit[spell_hits]
+                spell_type = player['spell_type'][sph, next_hit]
+
+                spell_damage = C._SPELL_BASE[spell_type] + \
+                               C._SPELL_RANGE[spell_type]*np.random.rand(sph.size) +\
+                               C._SP_MULTIPLIER[spell_type]*player['spell_power'][sph, next_hit]
+                spell_damage *= C._COE_MULTIPLIER*C._DAMAGE_MULTIPLIER[spell_type] # CoE + talents
+                scorch = C._IS_FIRE[spell_type]*C._SCORCH_MULTIPLIER*boss['scorch_count'][sph]
+                spell_damage *= 1.0 + scorch*(boss['scorch_timer'][sph] > 0.0).astype(np.float)
+                pi = (player['buff_timer'][C._BUFF_POWER_INFUSION][sph, next_hit] > 0.0).astype(np.float)
+                spell_damage *= 1.0 + C._POWER_INFUSION*pi
+                spell_damage *= C._DMF_BUFF
+                self._damage[sph] += spell_damage
                 # ADD ADDITIONAL OVERALL MULTIPLIERS TO _DAMAGE_MULTIPLIER
 
                 # handle critical hit/ignite ** READ HERE FOR MOST OF THE IGNITE MECHANICS **
-                ccrit_chance = crit_chance + C._PER_COMBUSTION*comb_stack[sph, next_hit[is_spell][spell_hits]]*comb_left[sph, next_hit[is_spell][spell_hits]]
-                crit_array = np.random.rand(sph.size) < ccrit_chance
-                lcrits = np.where(crit_array)[0]
-                crits = sph[lcrits]
+                comb_crit = C._PER_COMBUSTION*player['comb_stack'][sph, next_hit]
+                comb_crit *= (player['comb_left'][sph, next_hit] > 0).astype(np.float)
+                comb_crit *= C._IS_FIRE[spell_type]
+                crit_chance = player['crit_chance'][sph, next_hit] + comb_crit + C._INCIN_BONUS[spell_type]
+                crit_array = np.random.rand(sph.size) < crit_chance
+                
+                ignite_array = crit_array & C._IS_FIRE[spell_type].astype(np.bool)
+                lcl_icrits = np.where(ignite_array)[0]
+                gbl_icrits = sph[lcl_icrits]
+                inext_hit = next_hit[lcl_icrits]
+            
+                # remove ignite if expired
+                rem_val = np.where(boss['ignite_timer'][gbl_icrits] <= 0.0)[0]
+                boss['ignite_count'][gbl_icrits[rem_val]] = 0
+                boss['ignite_value'][gbl_icrits[rem_val]] = 0.0
+            
                 # refresh ignite to full 4 seconds
-                ignite_time[crits] = C._IGNITE_TIME + epsilon
+                boss['ignite_timer'][gbl_icrits] = C._IGNITE_TIME + epsilon
+            
                 # if we dont have a full stack
-                mod_val = np.where(ignite_count[crits] < C._IGNITE_STACK)[0]
+                mod_val = np.where(boss['ignite_count'][gbl_icrits] < C._IGNITE_STACK)[0]
                 # add to the ignite tick damage -- 1.5 x  0.2 x spell hit damage
-                ignite_value[crits[mod_val]] += C._CRIT_DAMAGE*C._IGNITE_DAMAGE*spell_damage[lcrits[mod_val]]
-                mod_val2 = np.where(ignite_count[crits] == 0)[0]
-                # set the tick
-                ignite_tick[crits[mod_val2]] = C._IGNITE_TICK
-                # increment to max of five (will do nothing if alreeady at 5)
-                ignite_count[crits] = np.minimum(ignite_count[crits] + 1, C._IGNITE_STACK)
-                damage[crits] += C._CRIT_DAMAGE*spell_damage[lcrits]
-                comb_left[crits, next_hit[is_spell][spell_hits][lcrits]] = np.maximum(comb_left[crits, next_hit[is_spell][spell_hits][lcrits]] - 1, 0)
+                boss['ignite_value'][gbl_icrits[mod_val]] += (1.0 + C._ICRIT_DAMAGE)*C._IGNITE_DAMAGE*spell_damage[lcl_icrits[mod_val]]
+                boss['ignite_multiplier'][gbl_icrits[mod_val]] = C._DMF_BUFF*(1.0 + C._POWER_INFUSION*pi[lcl_icrits[mod_val]])
 
-                # normal hit
-                nocrits = np.where(np.logical_not(crit_array))[0]
-                damage[sph[nocrits]] += spell_damage[nocrits]
+                # first in stack, set the tick
+                mod_val2 = np.where(boss['ignite_count'][gbl_icrits] == 0)[0]
+                boss['tick_timer'][gbl_icrits[mod_val2]] = C._IGNITE_TICK
 
-                if  C._LOG_SIM >= 0:
-                    if  C._LOG_SIM in sph:
+                # increment to max of five (will do nothing if already at 5)
+                boss['ignite_count'][gbl_icrits] = np.minimum(boss['ignite_count'][gbl_icrits] + 1, C._IGNITE_STACK)
+
+                # add crit to damage
+                self._damage[gbl_icrits] += C._ICRIT_DAMAGE*spell_damage[lcl_icrits]
+            
+                # remove from combustion
+                player['comb_left'][gbl_icrits, inext_hit] = np.maximum(player['comb_left'][gbl_icrits, inext_hit] - 1, 0)
+
+                # normal crit
+                lcl_crits = np.where(crit_array & np.logical_not(C._IS_FIRE[spell_type]))[0]
+                self._damage[sph[lcl_crits]] += C._CRIT_DAMAGE*spell_damage[lcl_crits]
+
+                if C._LOG_SIM >= 0:
+                    if C._LOG_SIM in sph:
                         sub_index = sph.tolist().index(C._LOG_SIM)
-                        if  C._LOG_SIM in crits:
-                            message2 = 'crits for {:4.0f} '.format(C._CRIT_DAMAGE*spell_damage[sub_index][0])
+                        if  sub_index in lcl_crits:
+                            message2 = 'crits for {:4.0f} '.format((1.0 + C._CRIT_DAMAGE)*spell_damage[sub_index])
+                        elif sub_index in lcl_icrits:
+                            message2 = 'crits for {:4.0f} '.format((1.0 + C._ICRIT_DAMAGE)*spell_damage[sub_index])
                         else:
-                            message2 = ' hits for {:4.0f} '.format(spell_damage[sub_index][0])
+                            message2 = ' hits for {:4.0f} '.format(spell_damage[sub_index])
 
                 # scorch
-                if C._IS_SCORCH[spell]:
-                    scorch_time[sph] = C._SCORCH_TIME
-                    scorch_count[sph] = np.minimum(scorch_count[sph] + 1, C._SCORCH_STACK)
+                scorch_out = sph[np.where(boss['scorch_timer'][sph] <= 0.0)[0]]
+                boss['scorch_count'][scorch_out] = 0
+            
+                scorch = sph[np.where(C._IS_SCORCH[spell_type])[0]]
+                boss['scorch_timer'][scorch] = C._SCORCH_TIME
+                boss['scorch_count'][scorch] = np.minimum(boss['scorch_count'][scorch] + 1, C._SCORCH_STACK)
                     
-                comb_stack[sph, next_hit[is_spell][spell_hits]] += 1
-        spell_timer[spl, next_hit] = C._DURATION_AVERAGE
+                fire = np.where(C._IS_FIRE[spell_type])[0]
+                player['comb_stack'][sph[fire], next_hit[fire]] += 1
 
-        # cast combustion before pyroblast (don't apply to scorch)
-        comb_array = cast_number[spl, next_hit] == int(rotation == C._FIRE_BLAST) + extra_scorches + 1
-        do_comb = np.where(comb_array)[0]
-        if  C._LOG_SIM >= 0:
-            cmessage = ''
-            if C._LOG_SIM in spl[do_comb]:
-                sub_index = spl[do_comb].tolist().index(C._LOG_SIM)
-                cmessage = '         (------): combustion cast by player {:d}'.format(next_hit[do_comb[sub_index]] + 1)
-        comb_left[spl[do_comb], next_hit[do_comb]] = C._COMBUSTIONS
-        comb_stack[spl[do_comb], next_hit[do_comb]] = 0
+            if C._LOG_SIM >= 0:
+                if C._LOG_SIM in spl:
+                    sub_index = spl.tolist().index(C._LOG_SIM)
+                    dam_done = ' {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM] + self._damage[C._LOG_SIM])
+                    message = message + message2
+                    buffs = player['buff_timer']
+                    is_mqg = 'msg' if buffs[C._BUFF_MQG][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
+                    is_pi =  'pi' if buffs[C._BUFF_POWER_INFUSION][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '  '
+                    status = ' ic {:d} it {:4.2f} in {:s} id {:4.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d} {:s} {:s}'
+                    ival = boss['tick_timer'][C._LOG_SIM]
+                    istat = '{:4.2f}'.format(ival) if ival > 0.0 and ival <= 2.0 else ' off'
+                    status = status.format(boss['ignite_count'][C._LOG_SIM],
+                                           max([boss['ignite_timer'][C._LOG_SIM], 0.0]),
+                                           istat,
+                                           boss['ignite_value'][C._LOG_SIM],
+                                           boss['scorch_count'][C._LOG_SIM],
+                                           max([boss['scorch_timer'][C._LOG_SIM], 0.0]),
+                                           player['comb_stack'][C._LOG_SIM, lnext_hit[sub_index]],
+                                           player['comb_left'][C._LOG_SIM, lnext_hit[sub_index]],
+                                           is_mqg,
+                                           is_pi)
+                    print(dam_done + message + status)
 
+    def _do_tick(self, still_going, tick_array):
+        C = self._C
+        boss = self._arrays['boss']
 
-        if  C._LOG_SIM >= 0:
-            if C._LOG_SIM in spl:
-                if cmessage:
-                    print(cmessage)
-                sub_index = spl.tolist().index(C._LOG_SIM)
-                dam_done = ' {:7.0f}'.format(total_damage[ C._LOG_SIM][0] + damage[C._LOG_SIM][0])
-                message3 = C._LOG_SPELL[cast_type[C._LOG_SIM][next_hit[sub_index]]]
-                message = message + message2 + 'next is ' + message3
-                status = ' ic {:d} it {:4.2f} in {:4.2f} id {:4.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d}'
-                status = status.format(ignite_count[C._LOG_SIM][0],
-                                       max([ignite_time[C._LOG_SIM][0], 0.0]),
-                                       max([ignite_tick[C._LOG_SIM][0], 0.0]),
-                                       ignite_value[C._LOG_SIM][0],
-                                       scorch_count[C._LOG_SIM][0],
-                                       max([scorch_time[C._LOG_SIM][0], 0.0]),
-                                       comb_stack[C._LOG_SIM][next_hit[sub_index]],
-                                       comb_left[C._LOG_SIM][next_hit[sub_index]])
-                print(dam_done + message + status)
+        tick_hits = np.where(tick_array)[0]
+        if tick_hits.size > 0:
+            tic = still_going[tick_hits]
+            add_time = boss['tick_timer'][tic]
+            self._subtime(tic, add_time)
+        
+            ignite_expire = boss['ignite_timer'][tic] <= 0.0
+            yes_expire = tic[np.where(ignite_expire)[0]]
+            boss['tick_timer'][yes_expire] = C._LONG_TIME
+            
+            no_expire = tic[np.where(np.logical_not(ignite_expire))[0]]
+            boss['tick_timer'][no_expire] = C._IGNITE_TICK
 
+            scorch = C._SCORCH_MULTIPLIER*boss['scorch_count'][no_expire]
+            multiplier = C._COE_MULTIPLIER*boss['ignite_multiplier'][no_expire]
+            multiplier *= 1.0 + scorch*(boss['scorch_timer'][no_expire] > 0.0).astype(np.float)
+            self._damage[no_expire] += multiplier*boss['ignite_value'][no_expire]
+            if C._LOG_SIM >= 0:
+                self._ignite[no_expire] += multiplier*boss['ignite_value'][no_expire]
+                if C._LOG_SIM in no_expire:
+                    sub_index = no_expire.tolist().index(C._LOG_SIM)
+                    message = ' {:7.0f} ({:6.2f}): ignite ticked   {:4.0f} damage done'
+                    print(message.format(self._arrays['global']['total_damage'][C._LOG_SIM] + self._damage[C._LOG_SIM],
+                                         self._arrays['global']['running_time'][C._LOG_SIM],
+                                         multiplier[sub_index]*boss['ignite_value'][C._LOG_SIM]))
+
+    def _advance(self):
+        C = self._C
+
+        going_array = (self._arrays['global']['running_time'] < self._arrays['global']['duration'])
+        going_array &= np.logical_not(self._arrays['global']['decision'])
+        still_going = np.where(going_array)[0]
+        if still_going.size == 0:
+            return False
+
+        # cast finished
+        cast_timer = np.copy(np.min(self._arrays['player']['cast_timer'][still_going, :], axis=1))
+        spell_timer = np.copy(np.min(self._arrays['player']['spell_timer'][still_going, :], axis=1))
+        tick_timer = np.copy(self._arrays['boss']['tick_timer'][still_going])
+        cast_array = (cast_timer < spell_timer) & (cast_timer < tick_timer)
+        self._do_cast(still_going, cast_array)
+
+        # spell hits
+        spell_array = np.logical_not(cast_array) & (spell_timer < tick_timer)
+        self._do_spell(still_going, spell_array)
+
+        tick_array = np.logical_not(cast_array | spell_array)
+        self._do_tick(still_going, tick_array)
     
-    return True
+        return True
     
-def get_damage(sp, hit, crit, num_mages, rotation, response, sim_size):
-    C = Constant(sim_size=sim_size)
-    arrays = init_arrays(C, num_mages, response)
-    if  C._LOG_SIM >= 0:
-        log_message(sp, hit, crit)
+    def _apply_decisions(self, still_going, decisions, next_hit):
+        C = self._C
+        player = self._arrays['player']
 
-    while advance(arrays, sp, hit, crit, rotation, sim_size):
-        still_going = np.where(arrays['running_time'] < arrays['duration'])[0]
-        arrays['total_damage'][still_going] += arrays['damage'][still_going]
-    if  C._LOG_SIM >= 0:
-        print('total damage = {:7.0f}'.format(arrays['total_damage'][ C._LOG_SIM][0]))
+        react_time = np.abs(self._response*np.random.randn(still_going.size))    
 
-    return (arrays['total_damage']/arrays['duration']).mean()
+        player['cast_timer'][still_going, next_hit] = react_time
+        player['cast_type'][still_going, next_hit] = decisions
 
-def get_crit_damage_diff(sp, hit, crit, num_mages, rotation, response, sim_size):
-    dcrit = 0.025
-    dsp = 25.0
-    factor = dsp/dcrit/100.0
+        # spell on global cooldown
+        gcd = np.where(decisions < C._CAST_GCD)[0]
+        player['cast_timer'][still_going[gcd], next_hit[gcd]] += C._CAST_TIME[decisions[gcd]]
+        # mind quickening gem
+        mqg = (player['buff_timer'][C._BUFF_MQG][still_going[gcd], next_hit[gcd]] > 0.0).astype(np.float)
+        player['cast_timer'][still_going[gcd], next_hit[gcd]] /= (1.0 + C._MQG*mqg)
+    
+        player['gcd'][still_going[gcd], next_hit[gcd]] = np.maximum(0.0, C._GLOBAL_COOLDOWN + react_time[gcd] - player['cast_timer'][still_going[gcd], next_hit[gcd]])
 
-    dm_sp = get_damage(sp - dsp, hit, crit, num_mages, rotation, response, sim_size)
-    dp_sp = get_damage(sp + dsp, hit, crit, num_mages, rotation, response, sim_size)
-    dm_crit = get_damage(sp, hit, crit - dcrit, num_mages, rotation, response, sim_size)
-    dp_crit = get_damage(sp, hit, crit + dcrit, num_mages, rotation, response, sim_size)
+        if C._LOG_SIM >= 0:
+            if C._LOG_SIM in still_going:
+                message = '         ({:6.2f}): player {:d} started  casting {:s}'
+                sub_index = still_going.tolist().index(C._LOG_SIM)
+                message = message.format(self._arrays['global']['running_time'][C._LOG_SIM] + react_time[sub_index],
+                                         next_hit[sub_index] + 1,
+                                         C._LOG_SPELL[player['cast_type'][still_going[sub_index], next_hit[sub_index]]])
+                print(message)
+        self._arrays['global']['decision'] = np.zeros(self._arrays['global']['decision'].shape, dtype=np.bool)
+    
+    def run(self):
+        C = constants.Constant()
+        self._C = C
+        self._arrays = self._array_generator.run(C)
 
-    return factor*(dp_crit - dm_crit)/(dp_sp - dm_sp)
+        decider = Decider(C,
+                          self._rotation,
+                          self._arrays['player']['cast_number'].shape,
+                          self._config)
+        running_time = self._arrays['global']['running_time']
+        duration = self._arrays['global']['duration']
+        player = self._arrays['player']
+        
 
-def get_hit_damage_diff(sp, hit, crit, num_mages, rotation, response, sim_size):
-    dhit = 0.01
-    dsp = 25.0
-    factor = dsp/dhit/100.0
+        # prep for first player to "move"
+        first_act = np.min(player['cast_timer'], axis=1)
+        duration += first_act
+        player['cast_timer'] -= first_act[:, None]
+        next_hit = np.argmin(player['cast_timer'], axis=1)
+        player['cast_number'][np.arange(player['cast_timer'].shape[0]), next_hit] += 1
 
-    dm_sp = get_damage(sp - dsp, hit, crit, num_mages, rotation, response, sim_size)
-    dp_sp = get_damage(sp + dsp, hit, crit, num_mages, rotation, response, sim_size)
-    dm_hit = get_damage(sp, hit - dhit, crit, num_mages, rotation, response, sim_size)
-    dp_hit = get_damage(sp, hit + dhit, crit, num_mages, rotation, response, sim_size)
+        if C._LOG_SIM >= 0:
+            self._ignite = np.zeros(self._arrays['global']['total_damage'].size)
+            constants.log_message()
+        still_going = np.arange(running_time.size)
+        while True:
+            self._damage = np.zeros(self._arrays['global']['total_damage'].size)
+            decisions, next_hit = decider.get_decisions(self._arrays, still_going)
+            self._apply_decisions(still_going, decisions, next_hit)
+            while self._advance():
+                still_going = np.where(running_time < duration)[0]
+            self._arrays['global']['total_damage'][still_going] += self._damage[still_going]
+            if not still_going.size:
+                break
+        
+        if C._LOG_SIM >= 0:
+            print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]))
+            print('average damage = {:9.1f}'.format(self._arrays['global']['total_damage'].mean()))
+            print('std damage = {:7.1f}'.format(self._arrays['global']['total_damage'].std()))
+            print('ignite damage = {:9.1f}'.format(self._ignite.mean()))
 
-    return factor*(dp_hit - dm_hit)/(dp_sp - dm_sp)
+        return (self._arrays['global']['total_damage']/duration).mean()
+
+def get_damage(params):
+    array_generator = constants.ArrayGenerator(params)
+    encounter = Encounter(array_generator,
+                          params['rotation'],
+                          params['timing']['response'],
+                          params['configuration'])
+    return encounter.run()
 
