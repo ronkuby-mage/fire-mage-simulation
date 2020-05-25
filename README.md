@@ -32,9 +32,8 @@ The baseline rotation is:
 with a designated scorch mage (see below). *Cooldowns* are MQG (when available, five are allocated for all gear levels), and PI (when available, see Table 1 for allocation).  Many experiments were performed to explore possibilities such as expanding the buffer for non PI mages to guarentee a PI double-dip ignite stack and having a high crit chance mage spam scorch to keep the buffed ignite stack up.  None of these experments produced higher average damage than the baseline regardless of number of mages, crit chance, etc..
 
 There will always be a designated scorch mage who, after the initial rotation, casts scorch instead of fireball if:
-1. The scorch debuff has less than five seconds to expiration
-2. The scorch debuff stack is not at its full value of 5
-If the number of mages is less than 6, at least 2 scorches should be initially cast (see below).  Two mages should cast 3 scorches and one mage should cast 6 scorches.
+1. The scorch debuff has less than five seconds to expiration *or*
+2. The scorch stack count is less than 5
 
 The only variation in optimal rotation was including frostbolt as the *buffer* spell, which was better in world buffed cases -- see "Max Crit" column in Table 1.  For lower crit chance situations it was better to not include a buffer.  The cross-over point is around 30% crit chance as shown in Figures 1, 2, and 3.
 
@@ -58,8 +57,6 @@ For **world buffed**, the rotation is:
 With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  The equivalency value is dependent on current spell power, hit chance, crit chance, number of mages, encounter duration, and selected rotation.  Each plot below shows the values for a range of crit chance and spell power values.  To find the appropriate plot, select from the table based on your current hit chance and number of mages:
 
 #### Two minute no world buffs
-
-**Not world buffed**
 |             | 89% Hit | 91% Hit | 93% Hit | 95% Hit | 97% Hit | 99% Hit |
 |-------------|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | One Mage    |  [89_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_89_1.png) |  [91_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_91_1.png) |  [93_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_93_1.png) |  [95_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_95_1.png) |  [97_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_97_1.png) |  [99_1](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/crit_equiv/crit_equiv_99_1.png) |
