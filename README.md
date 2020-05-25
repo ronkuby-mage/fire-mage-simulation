@@ -6,7 +6,7 @@
 
 ## Fire Mage Simulations
 
-These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, talents, Curse of the Elements, spell travel time, power infusion (PI), Mind Quickening Gem (MQG), and Dark Moon Faire double dip (turned off by default).  The effects of nightfall, other active trinkets (including Arcanite Dragonling), spell batching, and unmitigable boss resistance are not included.
+These simulations play out scenarios in which multiple fire mages are casting against a single raid boss.  The mechanics considered include ignite, scorch, combustion, talents, Curse of the Elements, spell travel time, Power Infusion (PI), Mind Quickening Gem (MQG), and Dark Moon Faire double dip (turned off by default).  The effects of nightfall, other active trinkets (including Arcanite Dragonling), spell batching, and unmitigable boss resistance are not included.
 
 The primary purpose of these simulations is to determine the balance between spell power, +hit chance, and +crit chance for the purpose of gear selection.  In order to determine these equivalencies, the rotation must also be optimized at every possible stat point and raid configuration.  Doing so would require simulations at too many permutations.  Instead, for the purpose of rotation optimization, the problem is divided into three tiers of gear and raid configurations, encapulated by encounter duration.  Table 1 lists these three tiers along with the gear/stats used to evaluate rotations.
 
@@ -98,3 +98,4 @@ DPS per mage as a function of number of mages is plotted for a few values of spe
 Assuming the number of mages is fixed, these curves are only useful towards determining ones expected dps.
 
 *Thanks to elio for tracking down the error in ignite timing and providing parallel code sample!*
+*Thanks to alzy for the sim result comparison, which helped pin down a bug in the scorch refresg logic!*
