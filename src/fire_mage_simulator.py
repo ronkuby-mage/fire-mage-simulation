@@ -112,6 +112,7 @@ def do_plot(values, intra, inter, y_desc, plot_type, plot_name, sim_size, t0):
         elif k == 'num_mages':
             title += ' # mages = {:d}, {:d} w/MQG, {:d} w/PI'.format(v['num_mages'], v['num_mqg'], v['num_pi'])
             fn += '_n{:d}'.format(v['num_mages'])
+        
     fn += '_ss{:d}'.format(sim_size)
     plt.title(title)
     print('{:8.1f}: {:s}'.format(time.time() - t0, title))

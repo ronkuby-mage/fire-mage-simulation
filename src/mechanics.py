@@ -345,27 +345,3 @@ def get_damage(params):
                           params['configuration'])
     return encounter.run()
 
-def get_crit_damage_diff(sp, hit, crit, num_mages, response, sim_size):
-    dcrit = 0.025
-    dsp = 25.0
-    factor = dsp/dcrit/100.0
-
-    dm_sp = get_damage(sp - dsp, hit, crit, num_mages, response, sim_size)
-    dp_sp = get_damage(sp + dsp, hit, crit, num_mages, response, sim_size)
-    dm_crit = get_damage(sp, hit, crit - dcrit, num_mages, response, sim_size)
-    dp_crit = get_damage(sp, hit, crit + dcrit, num_mages, response, sim_size)
-
-    return factor*(dp_crit - dm_crit)/(dp_sp - dm_sp)
-
-def get_hit_damage_diff(sp, hit, crit, num_mages, rotation, response, sim_size):
-    dhit = 0.01
-    dsp = 25.0
-    factor = dsp/dhit/100.0
-
-    dm_sp = get_damage(sp - dsp, hit, crit, num_mages, rotation, response, sim_size)
-    dp_sp = get_damage(sp + dsp, hit, crit, num_mages, rotation, response, sim_size)
-    dm_hit = get_damage(sp, hit - dhit, crit, num_mages, rotation, response, sim_size)
-    dp_hit = get_damage(sp, hit + dhit, crit, num_mages, rotation, response, sim_size)
-
-    return factor*(dp_hit - dm_hit)/(dp_sp - dm_sp)
-
