@@ -173,7 +173,7 @@ A similar equivalency is calculated for hit.  Here are the plots:
 
 ### DPS by number of mages
 
-DPS per mage as a function of number of mages is plotted for a few values of spell power [here](https://github.com/ronkuby-mage/fire-mage-simulation/tree/master/dps_per_mage_plots).
+DPS per mage as a function of number of mages is plotted for a few values of spell power.
 ![dps per mage, 700 sp](https://github.com/ronkuby-mage/fire-mage-simulation/raw/master/plots/dps/dps_700_97.png)
 Assuming the number of mages is fixed, these curves are only useful towards determining ones expected dps.
 
