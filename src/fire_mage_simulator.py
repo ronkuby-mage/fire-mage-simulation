@@ -152,7 +152,7 @@ def main(config, name):
         'crit_equiv': 50000,
         'hit_equiv': 100000,
         'dps': 10000,
-        'test': 1000000}
+        'test': 10}
     variables = {'spell_power',
                  'hit_chance',
                  'crit_chance',
@@ -183,6 +183,7 @@ def main(config, name):
                 for arg in args]
 
         if plot_type == "test":
+            args[0]['sim_size'] = nom_ss
             value = get_damage(args[0])
             return
         elif plot_type == "rotation":

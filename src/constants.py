@@ -8,7 +8,7 @@ class Constant():
         self._FIREBALL_RANK = 12
         self._FROSTBOLT_TALENTED = False
         self._FROSTBOLT_RANK = 11
-        self._INCINERATE = False
+        self._INCINERATE = True
         self._DMF = False
         self._SIMPLE_SPELL = False
         
@@ -96,8 +96,13 @@ class Constant():
             self._SPELL_RANGE[self._CAST_FIREBALL] = 154.0
 
         if self._FROSTBOLT_RANK == 10:
-            self._SPELL_BASE[self._CAST_FIREBALL] = 440.0
-            self._SPELL_RANGE[self._CAST_FIREBALL] = 75.0
+            self._SPELL_BASE[self._CAST_FROSTBOLT] = 440.0
+            self._SPELL_RANGE[self._CAST_FROSTBOLT] = 75.0
+        elif self._FROSTBOLT_RANK == 1:
+            self._SPELL_BASE[self._CAST_FROSTBOLT] = 20.0
+            self._SPELL_RANGE[self._CAST_FROSTBOLT] = 2.0
+            self._CAST_TIME[self._CAST_FROSTBOLT] = 1.5
+            self._SP_MULTIPLIER[self._CAST_FROSTBOLT] = 0.407142857
 
         if self._FROSTBOLT_TALENTED:
             self._DAMAGE_MULTIPLIER[self._CAST_FROSTBOLT] = 1.06
@@ -143,6 +148,9 @@ class Constant():
             "combustion": self._CAST_COMBUSTION,
             "mqg": self._CAST_MQG,
             "pi": self._CAST_POWER_INFUSION}
+        self._AVAIL = {
+            "mqg": self._BUFF_MQG,
+            "pi": self._BUFF_POWER_INFUSION}
         
         ## debugging
         self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion', 'mqg       ', 'power inf ']

@@ -10,6 +10,27 @@ class Decider():
         self._config = [config for config in configuration \
                         if config['num_mages'] == num_mages][0]
 
+    def _regular(self, arrays, still_going, next_hit, action):
+        C = self._C
+
+        decisions = -np.ones(still_going.size).astype(np.int32)
+
+        one_cast = np.array([C._DECIDE[an] for an in action]) > C._CAST_COMBUSTION
+        one = np.where(one_cast)[0]
+        if one.size:
+            avail = np.array([C._AVAIL[ao] for ao in action[one]])
+            buff_avail = np.stack(arrays['player']['buff_avail'], axis=2)[still_going[one], next_hit[one], avail] > 0
+            buff = np.where(buff_avail)[0]
+            if buff.size:
+                decisions[one[buff]] = [C._DECIDE[an] for an in action[one][buff]]
+        many = np.where(np.logical_not(one_cast))[0]
+        if many.size:
+            # not currently using this -- "other" is all special actions
+            decisions[many] = [C._DECIDE[an] for an in action[many]]                
+        self._stage[still_going, next_hit] += 1
+
+        return decisions
+        
     def _common(self, arrays, still_going, next_hit):
         C = self._C
 
@@ -38,8 +59,11 @@ class Decider():
         # other actions
         regular = np.where(np.logical_not(scorch_stage))[0]
         if regular.size:
-            decisions[regular] = [C._DECIDE[ar] for ar in action[regular]]
-            self._stage[still_going[regular], next_hit[regular]] += 1
+            action = np.array(self._rotation['initial']['common'])[stage[regular]]
+            decisions[regular] = self._regular(arrays,
+                                               still_going[regular],
+                                               next_hit[regular],
+                                               action)
 
         return decisions
 
@@ -78,8 +102,11 @@ class Decider():
                 
                 not_cooldown = np.where(np.logical_not(cooldown_stage))[0]
                 if not_cooldown.size:
-                    decisions[pi[not_cooldown]] = [C._DECIDE[an] for an in action[not_cooldown]]
-                    self._stage[still_going[pi][not_cooldown], next_hit[pi][not_cooldown]] += 1
+                    action = np.array(self._rotation['initial']['have_pi'])[stage[pi][not_cooldown]]
+                    decisions[pi[not_cooldown]] = self._regular(arrays,
+                                                                still_going[pi][not_cooldown],
+                                                                next_hit[pi][not_cooldown],
+                                                                action)
         else:
             other = np.arange(decisions.size)
 
@@ -104,7 +131,7 @@ class Decider():
 
         regular = np.where(np.logical_not(frostbolt_stack))[0]
         if regular.size:
-            action = np.array(self._rotation['initial']['have_pi'])[stage[other][regular]]
+            action = np.array(self._rotation['initial']['other'])[stage[other][regular]]
             cooldown_stage = action == "cooldowns"
             cooldown = np.where(cooldown_stage)[0]
 
@@ -127,10 +154,11 @@ class Decider():
                 
             not_cooldown = np.where(np.logical_not(cooldown_stage))[0]
             if not_cooldown.size:
-                # not currently using this -- "other" is all special actions
-                decisions[other[regular[not_cooldown]]] = [C._DECIDE[an] for an in action[not_cooldown]]
-                self._stage[still_going[other][regular][not_cooldown],
-                            next_hit[other][regular][not_cooldown]] += 1
+                action = np.array(self._rotation['initial']['other'])[stage[other][regular][not_cooldown]]
+                decisions[other[regular[not_cooldown]]] = self._regular(arrays,
+                                                                        still_going[other][regular][not_cooldown],
+                                                                        next_hit[other][regular][not_cooldown],
+                                                                        action)
 
         return decisions
 
@@ -200,6 +228,7 @@ class Decider():
                 decisions[no_decision[init[spec]]] = self._special(arrays,
                                                                    mod_sg[spec],
                                                                    mod_nh[spec])
+
             if not (decisions < 0).any():
                 break
             
