@@ -2,8 +2,8 @@ import os
 import numpy as np
 import pickle
 import json
-from sklearn.preprocessing import PolynomialFeatures
-from itertools import permutations, product, combinations_with_replacement
+from sklearn.linear_model import LinearRegression
+from itertools import product, combinations_with_replacement
 
 def find_combinations_util(arr, index, num, reducedNum):
     if (reducedNum < 0):
@@ -25,7 +25,7 @@ def find_combs(n):
     return sorted(combs, reverse=True)
 
 def range_norm(vals, rang):
-    return 2.0 - 4.0*(vals - rang[0])/(rang[1] - rang[0])    
+    return 4.0*(vals - rang[0])/(rang[1] - rang[0]) - 2.0
 
 def poly(order, values):
     value_list = []
@@ -33,7 +33,7 @@ def poly(order, values):
         value_list.append([chr(ord('A') + jdx) + str(idx) for idx in range(val)])
     value_index = list(range(len(value_list)))
     tind = 0
-    outs = [[0, ()]]
+    outs = [[0]]
     prefs = set([-1])
     for torder in range(order):
         for comb in find_combs(torder + 1):
@@ -70,7 +70,6 @@ def poly(order, values):
 
 dfn = "../mc/"
 cfn = "../config/monte_carlo_test.json"
-order = 2
 with open(cfn, "rt") as fid:
     config = json.load(fid)
 sp_range = config['stats']['spell_power']['clip']
@@ -105,10 +104,64 @@ crits = np.stack(crits)
 durs = np.stack(durs)
 g2_size = args["num_mages"]["num_pi"]
 g1_size = args["num_mages"]["num_mages"] - g2_size
+num_mages = args["num_mages"]["num_mages"]
 
-order = 3
-values = (g1_size, g2_size, g1_size, g2_size, g1_size, g2_size, 1)
-outs = poly(order, values)
+order = 5
+arrays = [sps[:, :g1_size],
+          sps[:, g1_size:],
+          hits[:, :g1_size],
+          hits[:, g1_size:],
+          crits[:, :g1_size],
+          crits[:, g1_size:],
+          durs[:, None]]
+num_terms = [arr.shape[1] for arr in arrays]
+outs = poly(order, num_terms)
+num_coeff = outs[-1][0] + 1
+X = np.zeros((arrays[0].shape[0], num_coeff))
+y = np.stack(values) 
 for out in outs:
+    coeff_idx = out[0]
+    term = 1.0
+    for group, member, exponent in out[1:]:
+        term *= np.power(arrays[group][:, member], exponent)
+    X[:, coeff_idx] += term
     print(out)
+model = LinearRegression(fit_intercept=False)
+reg = model.fit(X, y)
+print(reg.coef_)
+print(reg.score(X, y))
+print(np.sqrt(np.power(reg.predict(X) - y, 2).mean()))
+
+big_terms = np.where(np.abs(reg.coef_) >= 0.3)[0]
+X = X[:, big_terms]
+model = LinearRegression(fit_intercept=False)
+reg = model.fit(X, y)
+print(reg.coef_)
+print(reg.score(X, y))
+print(np.sqrt(np.power(reg.predict(X) - y, 2).mean()))
+
+fid2 = open('coeff.txt', 'wt')
+with open('terms.txt', 'wt') as fid:
+    for idx, tidx in enumerate(big_terms):
+        tell = '= '
+        for out in outs:
+            if out[0] == tidx:
+                out_st = ''
+                for group, member, exponent in out[1:]:
+                    row = 3
+                    if group < 6:
+                        if group%2:
+                            row += 4*(num_mages - g2_size)
+                        row += group//2
+                    else:
+                        row = 1
+                    row += member*4
+                    out_st += 'G' + str(row) + '*'
+                if len(out) > 1:
+                    tell += out_st[:-1] + ' + '
+        fid.write(tell[:-3] + '\n')
+        fid2.write('{:.10e}'.format(reg.coef_[idx]) + '\n')
+fid2.close()
+
+
 

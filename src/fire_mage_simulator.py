@@ -249,7 +249,8 @@ def main_mc(config, name):
 
         with Pool() as p:
             out1 = np.array(p.map(get_damage, args))
-        savefile = '../mc/' + name + '_batch_{:04d}.pck'.format(bindex)
+        savefile = '../mc/{:s}/{:s}_{:04d}.pck'.format(name, name, bindex)
+        os.makedirs('../mc/{:s}'.format(name), exist_ok=True)
         with open(savefile, 'wb') as fid:
             for arg, out in zip(args, out1):
                 pickle.dump(out, fid)
@@ -261,7 +262,8 @@ if __name__ == '__main__':
     config_file = sys.argv[-1]
     with open(config_file, 'rt') as fid:
         config = json.load(fid)
-    name = config_file.split('/')[-1].split('.')[0]
+    name = os.path.split(config_file)[-1].split('.')[0]
+    print('starting', name)
     if "plot" in config:
         main_plot(config, name)
     elif "mc_params" in config:
