@@ -145,7 +145,7 @@ def do_plot(values, intra, inter, y_desc, plot_type, plot_name, sim_size, t0):
         pickle.dump(inter, fid)
         pickle.dump(sim_size, fid)
     
-def main(config, name):
+def main_plot(config, name):
     ss_nm = 5 # standard number of mages for sim_size purposes
     sim_size = {
         'rotation': 50000,
@@ -215,10 +215,54 @@ def main(config, name):
 
         value = value.reshape([len(idx) for idx in intra_idx])
         do_plot(value, intra, inter_param, y_desc, plot_type, name, nom_ss, t0)
-    
+
+def main_mc(config, name):
+    ss_nm = 5 # standard number of mages for sim_size purposes
+    sim_size = 10000
+    t0 = time.time()
+    var_range = {
+        'spell_power': config["stats"]["spell_power"]["clip"],
+        'hit_chance': config["stats"]["hit_chance"]["clip"],
+        'crit_chance': config["stats"]["crit_chance"]["clip"],
+        'duration': config["timing"]["duration"]["clip"]}
+    for bindex in range(config["mc_params"]["batches"]):
+        args = []
+        for iindex in range(config["mc_params"]["batch_size"]):
+            arg = {
+                "rotation": config["rotation"]["baseline"],
+                "configuration": config["configuration"],
+                "num_mages": config["configuration"][0],
+                "delay": config["timing"]["delay"],
+                "timing": config["timing"]}
+            arg["sim_size"] = sim_size*ss_nm//arg["num_mages"]["num_mages"]
+            for var, rng in var_range.items():
+                if var != "duration":
+                    arg[var] = {"fixed": rng[0]*np.ones(arg["num_mages"]["num_mages"])}
+                    arg[var]["fixed"] += (rng[1] - rng[0])*np.random.rand(arg["num_mages"]["num_mages"])
+                else:
+                    arg["timing"][var] = {"mean": rng[0] + (rng[1] - rng[0])*np.random.rand()}
+            args.append(deepcopy(arg))
+
+        #value = get_damage(args[0])
+        #print(value)
+        #fdsojsd()
+
+        with Pool() as p:
+            out1 = np.array(p.map(get_damage, args))
+        savefile = '../mc/' + name + '_batch_{:04d}.pck'.format(bindex)
+        with open(savefile, 'wb') as fid:
+            for arg, out in zip(args, out1):
+                pickle.dump(out, fid)
+                pickle.dump(arg, fid)
+        print(bindex, time.time() - t0, out1.mean())
+        sys.stdout.flush()
+        
 if __name__ == '__main__':
     config_file = sys.argv[-1]
     with open(config_file, 'rt') as fid:
         config = json.load(fid)
     name = config_file.split('/')[-1].split('.')[0]
-    main(config, name)
+    if "plot" in config:
+        main_plot(config, name)
+    elif "mc_params" in config:
+        main_mc(config, name)

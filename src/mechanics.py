@@ -275,14 +275,18 @@ class Encounter():
         player['cast_timer'][still_going, next_hit] = react_time
         player['cast_type'][still_going, next_hit] = decisions
 
+        # spell is a fixed wait time
+        wait = np.where(decisions == C._CAST_GCD)[0]
+        player['cast_timer'][still_going[wait], next_hit[wait]] = C._CAST_TIME[C._CAST_GCD]
+        
         # spell on global cooldown
-        gcd = np.where(decisions < C._CAST_GCD)[0]
-        player['cast_timer'][still_going[gcd], next_hit[gcd]] += C._CAST_TIME[decisions[gcd]]
+        on_gcd = np.where(decisions < C._CAST_GCD)[0]
+        player['cast_timer'][still_going[on_gcd], next_hit[on_gcd]] += C._CAST_TIME[decisions[on_gcd]]
         # mind quickening gem
-        mqg = (player['buff_timer'][C._BUFF_MQG][still_going[gcd], next_hit[gcd]] > 0.0).astype(np.float)
-        player['cast_timer'][still_going[gcd], next_hit[gcd]] /= (1.0 + C._MQG*mqg)
+        mqg = (player['buff_timer'][C._BUFF_MQG][still_going[on_gcd], next_hit[on_gcd]] > 0.0).astype(np.float)
+        player['cast_timer'][still_going[on_gcd], next_hit[on_gcd]] /= (1.0 + C._MQG*mqg)
     
-        player['gcd'][still_going[gcd], next_hit[gcd]] = np.maximum(0.0, C._GLOBAL_COOLDOWN + react_time[gcd] - player['cast_timer'][still_going[gcd], next_hit[gcd]])
+        player['gcd'][still_going[on_gcd], next_hit[on_gcd]] = np.maximum(0.0, C._GLOBAL_COOLDOWN + react_time[on_gcd] - player['cast_timer'][still_going[on_gcd], next_hit[on_gcd]])
 
         if C._LOG_SIM >= 0:
             if C._LOG_SIM in still_going:

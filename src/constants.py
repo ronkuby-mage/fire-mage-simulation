@@ -11,6 +11,7 @@ class Constant():
         self._INCINERATE = True
         self._DMF = False
         self._SIMPLE_SPELL = False
+        self._GCD = 1.0 # global cooldown "cast time"
         
         self._ROTATION_SIMSIZE = 3000
         self._CRIT_SIMSIZE = 50000
@@ -88,7 +89,7 @@ class Constant():
         self._IS_SCORCH = np.array([True, False, False, False, False])
         self._IS_FIRE = np.array([1.0, 1.0, 1.0, 1.0, 0.0])
         self._INCIN_BONUS = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
-        self._CAST_TIME = np.array([1.5, 6.0, 3.0, 0.0, 3.0, 3.0])
+        self._CAST_TIME = np.array([1.5, 6.0, 3.0, 0.0, 3.0, self._GCD])
         self._SPELL_TIME = np.array([0.0, 0.875, 0.875, 0.0, 0.75])
 
         if self._FIREBALL_RANK == 11:
@@ -145,6 +146,7 @@ class Constant():
             "fireball": self._CAST_FIREBALL,
             "fire_blast": self._CAST_FIRE_BLAST,
             "frostbolt": self._CAST_FROSTBOLT,
+            "gcd": self._CAST_GCD,
             "combustion": self._CAST_COMBUSTION,
             "mqg": self._CAST_MQG,
             "pi": self._CAST_POWER_INFUSION}
@@ -161,6 +163,21 @@ class ArrayGenerator():
     def __init__(self, params):
         self._params = params
 
+    @staticmethod
+    def _distribution(entry, size):
+        array = None
+        if 'mean' in entry:
+            array = entry['mean']*np.ones(size)
+            if 'var' in entry:
+                array += entry*np.random.randn(size)
+            if 'clip' in entry:
+                array = np.maximum(entry['clip'][0], array)
+                array = np.minimum(entry['clip'][1], array)
+        elif 'fixed' in entry:
+            array = np.tile(entry['fixed'][None, :], (size[0], 1))
+
+        return array
+        
     def run(self, C):
         sim_size = self._params['sim_size']
         num_mages = self._params['num_mages']['num_mages']
@@ -192,27 +209,22 @@ class ArrayGenerator():
                 'gcd': np.zeros((sim_size, num_mages))
             }
         }
-        duration = self._params['timing']['duration']['mean']*np.ones(sim_size)
-        if 'var' in self._params['timing']['duration']:
-            duration += self._params['timing']['duration']['var']*np.random.randn(sim_size)
-        if 'clip' in self._params['timing']['duration']:
-            duration = np.maximum(self._params['timing']['duration']['clip'][0], duration)
-            duration = np.minimum(self._params['timing']['duration']['clip'][1], duration)
-        arrays['global']['duration'] = duration
-        arrays['player']['cast_timer'] = np.abs(self._params['delay']*np.random.randn(sim_size, num_mages))
+        arrays['global']['duration'] = self._distribution(self._params['timing']['duration'],
+                                                          sim_size)
+        arrays['player']['cast_timer'] = np.abs(self._params['delay']*np.random.randn(sim_size,
+                                                                                      num_mages))
         for name in ['spell_power', 'hit_chance', 'crit_chance']:
-            value = self._params[name]*np.ones((sim_size, num_mages))
-            if 'var' in self._params['stats'][name]:
-                value += self._params['stats'][name]['var']*np.random.randn(sim_size)[:, None]
-            if 'clip' in self._params['stats'][name]:
-                value = np.maximum(self._params['stats'][name]['clip'][0], value)
-                value = np.minimum(self._params['stats'][name]['clip'][1], value)
-            arrays['player'][name] = value
+            arrays['player'][name] = self._distribution(self._params[name],
+                                                        (sim_size, num_mages))
+            if "chance" in name:
+                arrays['player'][name] = (100*arrays['player'][name]).astype(np.int32)
+                arrays['player'][name] = arrays['player'][name].astype(np.float)/100.0
+            
         arrays['player']['spell_power'].sort(axis=1)
         if 'single' in self._params:
             name = [k for k, v in self._params['stats'].items() if 'single' in v][0]
             arrays['player'][name][np.arange(sim_size),
-                                   self._params['stats'][name]['single']['slot']] = self._params['single']
+            self._params['stats'][name]['single']['slot']] = self._params['single']
         config = [config for config in self._params['configuration'] if config['num_mages'] == num_mages][0]
         arrays['player']['buff_avail'][C._BUFF_MQG][:, (num_mages - config['num_mqg']):] = 1
         arrays['player']['buff_avail'][C._BUFF_POWER_INFUSION][:, (num_mages - config['num_pi']):] = 1
