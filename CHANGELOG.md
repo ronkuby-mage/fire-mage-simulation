@@ -1,3 +1,8 @@
+### 25MAY20
+* Added PI, MQG
+* Added configuration files
+* Seperated rotation decisions from environment
+	
 ### 05APR20
 * code reorganization -- created mechanics.py, constants.py, and plots.py
 * added hit variation
