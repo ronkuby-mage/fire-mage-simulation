@@ -68,7 +68,8 @@ def poly(order, values):
                     outs.append(output)
     return outs
 
-run_name = "fireball_7n_7m_1p"
+run_name = "frostbolt_7n_7m_1p"
+#run_name = "fireball_7n_7m_1p"
 dfn = "../mc/" + run_name
 cfn = "../config/" + run_name + ".json"
 with open(cfn, "rt") as fid:
