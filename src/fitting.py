@@ -68,8 +68,9 @@ def poly(order, values):
                     outs.append(output)
     return outs
 
-dfn = "../mc/"
-cfn = "../config/monte_carlo_test.json"
+run_name = "fireball_7n_7m_1p"
+dfn = "../mc/" + run_name
+cfn = "../config/" + run_name + ".json"
 with open(cfn, "rt") as fid:
     config = json.load(fid)
 sp_range = config['stats']['spell_power']['clip']
@@ -148,15 +149,15 @@ with open('terms.txt', 'wt') as fid:
             if out[0] == tidx:
                 out_st = ''
                 for group, member, exponent in out[1:]:
-                    row = 3
                     if group < 6:
                         if group%2:
-                            row += 4*(num_mages - g2_size)
-                        row += group//2
+                            row = 3 + 4*member + group//2
+                        else:
+                            row = 3 + 4*(g2_size + member) + group//2
                     else:
-                        row = 1
-                    row += member*4
-                    out_st += 'G' + str(row) + '*'
+                        row = 2
+                    exp_str = '' if exponent <= 1 else '^' + str(int(exponent))
+                    out_st += 'Z' + str(row) + exp_str + '*'
                 if len(out) > 1:
                     tell += out_st[:-1] + ' + '
         fid.write(tell[:-3] + '\n')
