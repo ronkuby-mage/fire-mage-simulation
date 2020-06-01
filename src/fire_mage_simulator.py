@@ -212,6 +212,10 @@ def main_plot(config, name):
                     out = np.array(p.map(get_damage, args))
                 outs.append(out)
             value = factor*(outs[3] - outs[2])/(outs[1] - outs[0])
+        elif plot_type == "dps":
+            y_desc = "DPS"
+            with Pool() as p:
+                value = np.array(p.map(get_damage, args))
 
         value = value.reshape([len(idx) for idx in intra_idx])
         do_plot(value, intra, inter_param, y_desc, plot_type, name, nom_ss, t0)

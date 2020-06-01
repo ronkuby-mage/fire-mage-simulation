@@ -307,28 +307,24 @@ class Encounter():
                           self._rotation,
                           self._arrays['player']['cast_number'].shape,
                           self._config)
-        running_time = self._arrays['global']['running_time']
-        duration = self._arrays['global']['duration']
-        player = self._arrays['player']
         
-
         # prep for first player to "move"
-        first_act = np.min(player['cast_timer'], axis=1)
-        duration += first_act
-        player['cast_timer'] -= first_act[:, None]
-        next_hit = np.argmin(player['cast_timer'], axis=1)
-        player['cast_number'][np.arange(player['cast_timer'].shape[0]), next_hit] += 1
+        first_act = np.min(self._arrays['player']['cast_timer'], axis=1)
+        self._arrays['global']['duration'] += first_act
+        self._arrays['player']['cast_timer'] -= first_act[:, None]
+        next_hit = np.argmin(self._arrays['player']['cast_timer'], axis=1)
+        self._arrays['player']['cast_number'][np.arange(self._arrays['player']['cast_timer'].shape[0]), next_hit] += 1
 
         if C._LOG_SIM >= 0:
             self._ignite = np.zeros(self._arrays['global']['total_damage'].size)
             constants.log_message()
-        still_going = np.arange(running_time.size)
+        still_going = np.arange(self._arrays['global']['running_time'].size)
         while True:
             self._damage = np.zeros(self._arrays['global']['total_damage'].size)
             decisions, next_hit = decider.get_decisions(self._arrays, still_going)
             self._apply_decisions(still_going, decisions, next_hit)
             while self._advance():
-                still_going = np.where(running_time < duration)[0]
+                still_going = np.where(self._arrays['global']['running_time'] < self._arrays['global']['duration'])[0]
             self._arrays['global']['total_damage'][still_going] += self._damage[still_going]
             if not still_going.size:
                 break
@@ -339,7 +335,7 @@ class Encounter():
             print('std damage = {:7.1f}'.format(self._arrays['global']['total_damage'].std()))
             print('ignite damage = {:9.1f}'.format(self._ignite.mean()))
 
-        return (self._arrays['global']['total_damage']/duration).mean()
+        return (self._arrays['global']['total_damage']/self._arrays['global']['duration']).mean()
 
 def get_damage(params):
     array_generator = constants.ArrayGenerator(params)

@@ -166,7 +166,9 @@ class ArrayGenerator():
     @staticmethod
     def _distribution(entry, size):
         array = None
-        if 'mean' in entry:
+        if isinstance(entry, float):
+            array = entry*np.ones(size)
+        elif 'mean' in entry:
             array = entry['mean']*np.ones(size)
             if 'var' in entry:
                 array += entry*np.random.randn(size)
@@ -209,8 +211,11 @@ class ArrayGenerator():
                 'gcd': np.zeros((sim_size, num_mages))
             }
         }
-        arrays['global']['duration'] = self._distribution(self._params['timing']['duration'],
-                                                          sim_size)
+        if 'duration' in self._params:
+            arrays['global']['duration'] = self._params['duration']
+        else:
+            arrays['global']['duration'] = self._distribution(self._params['timing']['duration'],
+                                                              sim_size)
         arrays['player']['cast_timer'] = np.abs(self._params['delay']*np.random.randn(sim_size,
                                                                                       num_mages))
         for name in ['spell_power', 'hit_chance', 'crit_chance']:
