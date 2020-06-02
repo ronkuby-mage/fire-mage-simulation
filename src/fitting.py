@@ -68,8 +68,8 @@ def poly(order, values):
                     outs.append(output)
     return outs
 
-run_name = "frostbolt_7n_7m_1p"
-#run_name = "fireball_7n_7m_1p"
+run_name = "frostbolt_2n_2m_1p"
+#run_name = "fireball_1n_1m_1p"
 dfn = "../mc/" + run_name
 cfn = "../config/" + run_name + ".json"
 with open(cfn, "rt") as fid:
@@ -158,7 +158,7 @@ with open('terms.txt', 'wt') as fid:
                     else:
                         row = 2
                     exp_str = '' if exponent <= 1 else '^' + str(int(exponent))
-                    out_st += 'Z' + str(row) + exp_str + '*'
+                    out_st += 'Z$' + str(row) + exp_str + '*'
                 if len(out) > 1:
                     tell += out_st[:-1] + ' + '
         fid.write(tell[:-3] + '\n')
