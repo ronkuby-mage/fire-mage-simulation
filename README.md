@@ -1,3 +1,8 @@
+# Use [Sheet Calculator](https://docs.google.com/spreadsheets/d/1EnFoivjG3to-rKfL7s3en8JLYvSCJjaaudutArlZIWc/edit?usp=sharing)
+About 33000 iterations of 10k simulations with random stat weights were run for each rotation and number of mages (6 billion sims total).  For each rotation/ # mages a fitting function was applied to the damage outcomes.  This sheet uses the resulting fitting function to estimate crit and hit equivalency.
+
+Ideally the sheet would have a full interface that includes talent, buff, and gear selection.  If you are interested in developing one, contact Ronkuby#2054 on Discord.
+
 **Steps to determine stat weighting:**
 1) Use Table 1 to determine which configuration (row) best fits your raid in terms of boss kill time.
 2) Follow the link in the "duration" column according to the expected encounter duration.
