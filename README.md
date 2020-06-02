@@ -3,7 +3,9 @@ About 33000 iterations of 10k simulations with random stat weights were run for 
 
 Ideally the sheet would have a full interface that includes talent, buff, and gear selection.  If you are interested in developing one, contact Ronkuby#2054 on Discord.
 
-**Steps to determine stat weighting:**
+# Background
+
+**Old steps to determine stat weighting:**
 1) Use Table 1 to determine which configuration (row) best fits your raid in terms of boss kill time.
 2) Follow the link in the "duration" column according to the expected encounter duration.
 3) Choose the optimal rotation based on average raid crit % and number of mages.
