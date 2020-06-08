@@ -152,7 +152,7 @@ def main_plot(config, name):
         'crit_equiv': 50000,
         'hit_equiv': 100000,
         'dps': 10000,
-        'test': 10}
+        'test': 30000}
     variables = {'spell_power',
                  'hit_chance',
                  'crit_chance',
@@ -185,6 +185,7 @@ def main_plot(config, name):
         if plot_type == "test":
             args[0]['sim_size'] = nom_ss
             value = get_damage(args[0])
+            print("total dps =", value)
             return
         elif plot_type == "rotation":
             y_desc = 'Damage({:s})/Damage({:s})'.format(args[0]['rotation']['description'],
