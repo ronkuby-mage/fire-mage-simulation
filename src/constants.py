@@ -211,6 +211,8 @@ class ArrayGenerator():
                 'gcd': np.zeros((sim_size, num_mages))
             }
         }
+        if self._params["mc"]:
+            arrays['global']['ignite'] = np.zeros(sim_size)
         if 'duration' in self._params:
             arrays['global']['duration'] = self._params['duration']
         else:

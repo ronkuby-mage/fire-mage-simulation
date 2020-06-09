@@ -4,11 +4,12 @@ from decisions import Decider
 
 class Encounter():
 
-    def __init__(self, array_generator, rotation, response, config):
+    def __init__(self, array_generator, rotation, response, config, is_mc):
         self._array_generator = array_generator
         self._rotation = rotation
         self._response = response
         self._config = config
+        self._is_mc = is_mc
 
     def _subtime(self, sub, add_time):
         C = self._C
@@ -232,8 +233,9 @@ class Encounter():
             multiplier = C._COE_MULTIPLIER*boss['ignite_multiplier'][no_expire]
             multiplier *= 1.0 + scorch*(boss['scorch_timer'][no_expire] > 0.0).astype(np.float)
             self._damage[no_expire] += multiplier*boss['ignite_value'][no_expire]
-            if C._LOG_SIM >= 0:
+            if self._is_mc:
                 self._ignite[no_expire] += multiplier*boss['ignite_value'][no_expire]
+            if C._LOG_SIM >= 0:
                 if C._LOG_SIM in no_expire:
                     sub_index = no_expire.tolist().index(C._LOG_SIM)
                     message = ' {:7.0f} ({:6.2f}): ignite ticked   {:4.0f} damage done'
@@ -242,8 +244,6 @@ class Encounter():
                                          multiplier[sub_index]*boss['ignite_value'][C._LOG_SIM]))
 
     def _advance(self):
-        C = self._C
-
         going_array = (self._arrays['global']['running_time'] < self._arrays['global']['duration'])
         going_array &= np.logical_not(self._arrays['global']['decision'])
         still_going = np.where(going_array)[0]
@@ -316,16 +316,19 @@ class Encounter():
         self._arrays['player']['cast_number'][np.arange(self._arrays['player']['cast_timer'].shape[0]), next_hit] += 1
 
         if C._LOG_SIM >= 0:
-            self._ignite = np.zeros(self._arrays['global']['total_damage'].size)
             constants.log_message()
         still_going = np.arange(self._arrays['global']['running_time'].size)
         while True:
             self._damage = np.zeros(self._arrays['global']['total_damage'].size)
+            if self._is_mc:
+                self._ignite = np.zeros(self._arrays['global']['total_damage'].size)
             decisions, next_hit = decider.get_decisions(self._arrays, still_going)
             self._apply_decisions(still_going, decisions, next_hit)
             while self._advance():
                 still_going = np.where(self._arrays['global']['running_time'] < self._arrays['global']['duration'])[0]
             self._arrays['global']['total_damage'][still_going] += self._damage[still_going]
+            if self._is_mc:
+                self._arrays['global']['ignite'][still_going] += self._ignite[still_going]
             if not still_going.size:
                 break
         
@@ -333,15 +336,22 @@ class Encounter():
             print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]))
             print('average damage = {:9.1f}'.format(self._arrays['global']['total_damage'].mean()))
             print('std damage = {:7.1f}'.format(self._arrays['global']['total_damage'].std()))
-            print('ignite damage = {:9.1f}'.format(self._ignite.mean()))
+            if self._is_mc:
+                print('ignite damage = {:9.1f}'.format(self._arrays['global']['ignite'].mean()))
 
-        return (self._arrays['global']['total_damage']/self._arrays['global']['duration']).mean()
+        total_dps = (self._arrays['global']['total_damage']/self._arrays['global']['duration']).mean()
+        if self._is_mc:
+            return total_dps, (self._arrays['global']['ignite']/self._arrays['global']['duration']).mean()
+        else:
+            return total_dps
+                
 
 def get_damage(params):
     array_generator = constants.ArrayGenerator(params)
     encounter = Encounter(array_generator,
                           params['rotation'],
                           params['timing']['response'],
-                          params['configuration'])
+                          params['configuration'],
+                          params['mc'])
     return encounter.run()
 

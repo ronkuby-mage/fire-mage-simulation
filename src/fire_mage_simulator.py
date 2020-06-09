@@ -179,7 +179,7 @@ def main_plot(config, name):
                  **inter_param,
                  **get_values(intra, jdxs)}
                 for jdxs in [*itertools.product(*intra_idx)]]
-        args = [{**arg, **{'sim_size': int(nom_ss*ss_nm/arg['num_mages']['num_mages'])}}
+        args = [{**arg, **{'mc': False}, **{'sim_size': int(nom_ss*ss_nm/arg['num_mages']['num_mages'])}}
                 for arg in args]
 
         if plot_type == "test":
@@ -246,6 +246,7 @@ def main_mc(config, name):
                     arg[var]["fixed"] += (rng[1] - rng[0])*np.random.rand(arg["num_mages"]["num_mages"])
                 else:
                     arg["timing"][var] = {"mean": rng[0] + (rng[1] - rng[0])*np.random.rand()}
+                arg['mc'] = True
             args.append(deepcopy(arg))
 
         #value = get_damage(args[0])
