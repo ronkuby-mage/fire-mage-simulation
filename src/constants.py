@@ -171,7 +171,7 @@ class ArrayGenerator():
         elif 'mean' in entry:
             array = entry['mean']*np.ones(size)
             if 'var' in entry:
-                array += entry*np.random.randn(size)
+                array += entry['var']*np.random.randn(*size)
             if 'clip' in entry:
                 array = np.maximum(entry['clip'][0], array)
                 array = np.minimum(entry['clip'][1], array)
@@ -220,16 +220,16 @@ class ArrayGenerator():
                                                               sim_size)
         arrays['player']['cast_timer'] = np.abs(self._params['delay']*np.random.randn(sim_size,
                                                                                       num_mages))
-        if "mc_params" in self._params:
-            if "correlated_fraction" in self._params["mc_params"]:
-                if np.random.rand() < self._params["mc_params"]["correlated_fraction"]:
+        if self._params["mc"]:
+            if "correlated_fraction" in self._params["mc"]:
+                if np.random.rand() < self._params["mc"]["correlated_fraction"]:
                     for name in ['spell_power', 'hit_chance', 'crit_chance']:
                         value = np.random.rand()
-                        entry = {'mean': self._param[name]['fixed'][0]*(1 - value) +\
-                                         self._param[name]['fixed'][1]*value,
-                                 'var': self._params["mc_params"]["correlated_std"]*(self._param[name]['fixed'][1] - self._param[name]['fixed'][0]),
-                                 'clip': self._param[name]['fixed']}
-                        self._param[name] = entry
+                        entry = {'mean': self._params[name]['fixed'][0]*(1 - value) +\
+                                         self._params[name]['fixed'][1]*value,
+                                 'var': self._params["mc"]["correlated_std"]*(self._params[name]['fixed'][1] - self._params[name]['fixed'][0]),
+                                 'clip': self._params[name]['fixed']}
+                        self._params[name] = entry
                     
         for name in ['spell_power', 'hit_chance', 'crit_chance']:
             arrays['player'][name] = self._distribution(self._params[name],

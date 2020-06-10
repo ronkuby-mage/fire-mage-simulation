@@ -27,8 +27,8 @@
         }
     ],
     "mc_params": {
-        "correlated_fraction": 0.05,
-        "correlated_std": 0.05,
+        "correlated_fraction": 0.08,
+        "correlated_std": 0.04,
         "batches": 150,
         "batch_size": 64
     },
@@ -37,21 +37,21 @@
             "name": "Frostbolt 2",
             "description": "Scorch -> 2 x Frostbolt -> Fireball",
             "initial": {
-		"common": [
-		    "stack_scorch",
-		    "combustion"
-		],
-		"have_pi": [
-		    "mqg",
+                "common": [
+                    "stack_scorch",
+                    "combustion"
+                ],
+                "have_pi": [
+                    "mqg",
                     "frostbolt",
-		    "fireball",
-		    "pi"
-		],
-		"other": [
+                    "fireball",
+                    "pi"
+                ],
+                "other": [
                     "frostbolt",
                     "frostbolt",
-		    "mqg"
-		]
+                    "mqg"
+                ]
             },
             "continuing": {
                 "default": "fireball",

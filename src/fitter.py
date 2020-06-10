@@ -182,9 +182,9 @@ class Fitter():
         X = X[:, big_terms]
         model = LinearRegression(fit_intercept=False)
         reg = model.fit(X, y)
-        #print(reg.coef_.size)
-        #print(reg.score(X, y))
-        #print(np.sqrt(np.power(reg.predict(X) - y, 2).mean()))
+        print(reg.coef_.size)
+        print(reg.score(X, y))
+        print(np.sqrt(np.power(reg.predict(X) - y, 2).mean()))
         
         self._big_terms.append(big_terms)
         self._outs.append(outs)
@@ -215,11 +215,11 @@ def main():
             fitter.fit(5)
 
     config = {
-            'run_name': 'fireball_9n_9m_0p',
+            'run_name': 'frostbolt_4n_4m_0p',
             'mc_dir': '../mc/',
             'config_dir': '../config/mc/',
             'num_load': 999999999,
-            'test_fraction': 0.2}
+            'test_fraction': 0.0}
     fitter = Fitter(config)
     fitter.fit(5)
 

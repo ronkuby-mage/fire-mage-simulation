@@ -249,11 +249,12 @@ def main_mc(config, name):
                     arg[var]["fixed"] += (rng[1] - rng[0])*np.random.rand(arg["num_mages"]["num_mages"])
                 else:
                     arg["timing"][var] = {"mean": rng[0] + (rng[1] - rng[0])*np.random.rand()}
-                arg['mc'] = True
+                arg['mc'] = config['mc_params']
             args.append(deepcopy(arg))
 
-        #value = get_damage(args[0])
-        #print(value)
+        #for arg in args:
+        #    value = get_damage(arg)
+        #    print(value)
         #fdsojsd()
 
         with Pool() as p:
