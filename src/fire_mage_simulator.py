@@ -230,7 +230,10 @@ def main_mc(config, name):
         'hit_chance': config["stats"]["hit_chance"]["clip"],
         'crit_chance': config["stats"]["crit_chance"]["clip"],
         'duration': config["timing"]["duration"]["clip"]}
-    for bindex in range(config["mc_params"]["batches"]):
+    dfn = '../mc/{:s}'.format(name)
+    os.makedirs(dfn, exist_ok=True)
+    have = len(os.listdir(dfn))
+    for bindex in range(have, config["mc_params"]["batches"]):
         args = []
         for iindex in range(config["mc_params"]["batch_size"]):
             arg = {
@@ -255,8 +258,7 @@ def main_mc(config, name):
 
         with Pool() as p:
             out1 = np.array(p.map(get_damage, args))
-        savefile = '../mc/{:s}/{:s}_{:04d}.pck'.format(name, name, bindex)
-        os.makedirs('../mc/{:s}'.format(name), exist_ok=True)
+        savefile = '{:s}/{:s}_{:04d}.pck'.format(dfn, name, bindex)
         with open(savefile, 'wb') as fid:
             for arg, out in zip(args, out1):
                 pickle.dump(out, fid)

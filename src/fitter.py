@@ -86,6 +86,7 @@ class Fitter():
         dur_range = config['timing']['duration']['clip']
 
         values = []
+        ignites = []
         sps = []
         hits = []
         crits = []
@@ -96,7 +97,9 @@ class Fitter():
             with open(filename, "rb") as fid:
                 while fid.tell() < os.fstat(fid.fileno()).st_size and\
                     len(durs) < self._params['num_load']:
-                    values.append(pickle.load(fid))
+                    value = pickle.load(fid)
+                    values.append(value[0])
+                    ignites.append(value[1])
                     args = pickle.load(fid)
                     sp = range_norm(np.array(args['spell_power']['fixed']), sp_range)
                     hit = range_norm(np.array(args['hit_chance']['fixed']), hit_range)
@@ -125,6 +128,7 @@ class Fitter():
                   crits[:, g1_size:],
                   durs[:, None]]
         self._values = values
+        self._ignites = ignites
         self._num_mages = num_mages
         self._g_size = [g1_size, g2_size]
         
@@ -134,9 +138,12 @@ class Fitter():
                 config['stats']['hit_chance']['clip'],
                 config['stats']['crit_chance']['clip']]
         
-    def fit(self, order):
+    def _fit(self, order, ignites=False):
         arrays = self._arrays
-        values = self._values
+        if ignites:
+            values = self._ignites
+        else:
+            values = self._values
         
         num_terms = [arr.shape[1] for arr in arrays]
         outs = poly(order, num_terms)
@@ -151,9 +158,10 @@ class Fitter():
                 term *= np.power(arrays[group][:t_size, member], exponent)
             X[:, coeff_idx] += term
         model = LinearRegression(fit_intercept=False)
+
         reg = model.fit(X, y)
 
-        if self._params['test_fraction'] >= 1.0:
+        if self._params['test_fraction'] > 0.0:
             v_size = arrays[0].shape[0] - t_size
             X_v = np.zeros((v_size, num_coeff))
             y_v = np.stack(values)[t_size:]
@@ -167,17 +175,27 @@ class Fitter():
             print(reg.score(X_v, y_v))
             print(self._params['num_load'], np.sqrt(np.power(reg.predict(X_v) - y_v, 2).mean()))
 
-        big_terms = np.where(np.abs(reg.coef_) >= 0.3)[0]
+        if ignites:
+            big_terms = np.where(np.abs(reg.coef_) >= 0.1)[0]
+        else:
+            big_terms = np.where(np.abs(reg.coef_) >= 0.3)[0]
         X = X[:, big_terms]
         model = LinearRegression(fit_intercept=False)
         reg = model.fit(X, y)
-        #print(reg.coef_)
+        #print(reg.coef_.size)
         #print(reg.score(X, y))
         #print(np.sqrt(np.power(reg.predict(X) - y, 2).mean()))
         
-        self._big_terms = big_terms
-        self._outs = outs
-        self._coef = reg.coef_
+        self._big_terms.append(big_terms)
+        self._outs.append(outs)
+        self._coef.append(reg.coef_)
+        
+    def fit(self, order):
+        self._big_terms = []
+        self._outs = []
+        self._coef = []
+        self._fit(order)
+        self._fit(order, ignites=True)
 
     @property
     def clip(self):
@@ -197,9 +215,9 @@ def main():
             fitter.fit(5)
 
     config = {
-            'run_name': 'frostbolt_7n_7m_0p',
+            'run_name': 'fireball_9n_9m_0p',
             'mc_dir': '../mc/',
-            'config_dir': '../config/',
+            'config_dir': '../config/mc/',
             'num_load': 999999999,
             'test_fraction': 0.2}
     fitter = Fitter(config)
