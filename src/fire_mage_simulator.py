@@ -243,17 +243,31 @@ def main_mc(config, name):
                 "delay": config["timing"]["delay"],
                 "timing": config["timing"]}
             arg["sim_size"] = sim_size*ss_nm//arg["num_mages"]["num_mages"]
-            for var, rng in var_range.items():
-                if var != "duration":
-                    arg[var] = {"fixed": rng[0]*np.ones(arg["num_mages"]["num_mages"])}
-                    arg[var]["fixed"] += (rng[1] - rng[0])*np.random.rand(arg["num_mages"]["num_mages"])
-                else:
-                    arg["timing"][var] = {"mean": rng[0] + (rng[1] - rng[0])*np.random.rand()}
-                arg['mc'] = config['mc_params']
+            if np.random.rand() < config["mc_params"]["correlated_fraction"]:
+                for var, rng in var_range.items():
+                    if var != "duration":
+                        arg[var] = {"fixed": rng[0] + np.random.rand()*(rng[1] - rng[0])*np.ones(arg["num_mages"]["num_mages"])}
+                        arg[var]["fixed"] += (rng[1] - rng[0])*config["mc_params"]["correlated_std"]*np.random.randn(arg["num_mages"]["num_mages"])
+                        arg[var]["fixed"] = np.maximum(arg[var]["fixed"], rng[0])
+                        arg[var]["fixed"] = np.minimum(arg[var]["fixed"], rng[1])
+                    else:
+                        arg["timing"][var] = {"mean": rng[0] + (rng[1] - rng[0])*np.random.rand()}
+                    arg['mc'] = True
+            else:
+                for var, rng in var_range.items():
+                    if var != "duration":
+                        arg[var] = {"fixed": rng[0]*np.ones(arg["num_mages"]["num_mages"])}
+                        arg[var]["fixed"] += (rng[1] - rng[0])*np.random.rand(arg["num_mages"]["num_mages"])
+                    else:
+                        arg["timing"][var] = {"mean": rng[0] + (rng[1] - rng[0])*np.random.rand()}
+                    arg['mc'] = True
             args.append(deepcopy(arg))
 
         #for arg in args:
         #    value = get_damage(arg)
+        #    print(arg['spell_power'])
+        #    print(arg['hit_chance'])
+        #    print(arg['crit_chance'])
         #    print(value)
         #fdsojsd()
 
