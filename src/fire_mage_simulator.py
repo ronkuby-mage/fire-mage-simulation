@@ -223,7 +223,7 @@ def main_plot(config, name):
 
 def main_mc(config, name):
     ss_nm = 5 # standard number of mages for sim_size purposes
-    sim_size = 10000
+    sim_size = 50000
     t0 = time.time()
     var_range = {
         'spell_power': config["stats"]["spell_power"]["clip"],
@@ -242,28 +242,34 @@ def main_mc(config, name):
                 "num_mages": config["configuration"][0],
                 "delay": config["timing"]["delay"],
                 "timing": config["timing"]}
-            arg["sim_size"] = sim_size*ss_nm//arg["num_mages"]["num_mages"]
+            arg["sim_size"] = sim_size*ss_nm/arg["num_mages"]["num_mages"]
             if np.random.rand() < config["mc_params"]["correlated_fraction"]:
                 for var, rng in var_range.items():
                     if var != "duration":
-                        arg[var] = {"fixed": rng[0] + np.random.rand()*(rng[1] - rng[0])*np.ones(arg["num_mages"]["num_mages"])}
+                        if np.random.rand() < config["mc_params"]["correlated_edge"]:
+                            value = rng[1] if np.random.rand() < 0.5 else rng[0]
+                            arg[var] = {"fixed": value*np.ones(arg["num_mages"]["num_mages"])}
+                        else:
+                            arg[var] = {"fixed": rng[0] + np.random.rand()*(rng[1] - rng[0])*np.ones(arg["num_mages"]["num_mages"])}
                         arg[var]["fixed"] += (rng[1] - rng[0])*config["mc_params"]["correlated_std"]*np.random.randn(arg["num_mages"]["num_mages"])
                         arg[var]["fixed"] = np.maximum(arg[var]["fixed"], rng[0])
                         arg[var]["fixed"] = np.minimum(arg[var]["fixed"], rng[1])
-                    else:
-                        arg["timing"][var] = {"mean": rng[0] + (rng[1] - rng[0])*np.random.rand()}
-                    arg['mc'] = True
             else:
                 for var, rng in var_range.items():
                     if var != "duration":
                         arg[var] = {"fixed": rng[0]*np.ones(arg["num_mages"]["num_mages"])}
                         arg[var]["fixed"] += (rng[1] - rng[0])*np.random.rand(arg["num_mages"]["num_mages"])
-                    else:
-                        arg["timing"][var] = {"mean": rng[0] + (rng[1] - rng[0])*np.random.rand()}
-                    arg['mc'] = True
+            rng = var_range['duration']
+            arg["timing"]["duration"] = {
+                    "mean": rng[0] + config["mc_params"]["duration_var"] + (rng[1] - rng[0] - 2.0*config["mc_params"]["duration_var"])*np.random.rand(),
+                    "var": config["mc_params"]["duration_var"],
+                    "clip": [rng[0], rng[1]]}
+            arg['sim_size'] = int((0.5*arg['sim_size']*(rng[1] + rng[0]))/arg["timing"]["duration"]["mean"])
+            arg['mc'] = True
             args.append(deepcopy(arg))
 
         #for arg in args:
+        #    print(arg)
         #    value = get_damage(arg)
         #    print(arg['spell_power'])
         #    print(arg['hit_chance'])

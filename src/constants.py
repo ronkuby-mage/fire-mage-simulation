@@ -171,7 +171,7 @@ class ArrayGenerator():
         elif 'mean' in entry:
             array = entry['mean']*np.ones(size)
             if 'var' in entry:
-                array += entry*np.random.randn(size)
+                array += entry['var']*np.random.randn(size)
             if 'clip' in entry:
                 array = np.maximum(entry['clip'][0], array)
                 array = np.minimum(entry['clip'][1], array)
