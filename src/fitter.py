@@ -175,16 +175,19 @@ class Fitter():
             print(reg.score(X_v, y_v))
             print(self._params['num_load'], np.sqrt(np.power(reg.predict(X_v) - y_v, 2).mean()))
 
-        if ignites:
-            big_terms = np.where(np.abs(reg.coef_) >= 0.1)[0]
+        if False:
+            if ignites:
+                big_terms = np.where(np.abs(reg.coef_) >= 0.1)[0]
+            else:
+                big_terms = np.where(np.abs(reg.coef_) >= 0.3)[0]
+            X = X[:, big_terms]
+            model = LinearRegression(fit_intercept=False)
+            reg = model.fit(X, y)
+            print(reg.coef_.size)
+            print(reg.score(X, y))
+            print(np.sqrt(np.power(reg.predict(X) - y, 2).mean()))
         else:
-            big_terms = np.where(np.abs(reg.coef_) >= 0.3)[0]
-        X = X[:, big_terms]
-        model = LinearRegression(fit_intercept=False)
-        reg = model.fit(X, y)
-        print(reg.coef_.size)
-        print(reg.score(X, y))
-        print(np.sqrt(np.power(reg.predict(X) - y, 2).mean()))
+            big_terms = np.arange(reg.coef_.size, dtype=np.int32)
         
         self._big_terms.append(big_terms)
         self._outs.append(outs)
