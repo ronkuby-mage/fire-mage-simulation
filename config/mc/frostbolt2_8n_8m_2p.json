@@ -27,9 +27,11 @@
         }
     ],
     "mc_params": {
-        "correlated_fraction": 0.08,
+        "correlated_fraction": 0.25,
+        "correlated_edge": 0.5,
         "correlated_std": 0.04,
-        "batches": 150,
+        "duration_var": 5.0,
+        "batches": 16,
         "batch_size": 64
     },
     "rotation": {
@@ -50,7 +52,8 @@
                 "other": [
                     "frostbolt",
                     "frostbolt",
-                    "mqg"
+                    "mqg",
+                    "fireball"
                 ]
             },
             "continuing": {
@@ -65,8 +68,8 @@
     "timing": {
         "duration": {
             "clip": [
-                25.0,
-                180.0
+                20.0,
+                185.0
             ]
         },
         "delay": 1.0,

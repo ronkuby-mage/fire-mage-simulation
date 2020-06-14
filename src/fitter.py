@@ -175,7 +175,7 @@ class Fitter():
             print(reg.score(X_v, y_v))
             print(self._params['num_load'], np.sqrt(np.power(reg.predict(X_v) - y_v, 2).mean()))
 
-        if False:
+        if True:
             if ignites:
                 big_terms = np.where(np.abs(reg.coef_) >= 0.1)[0]
             else:
