@@ -27,8 +27,8 @@
     },
     "configuration": [
 	{
-	    "num_mages": 1,
-	    "num_mqg": 1,
+	    "num_mages": 4,
+	    "num_mqg": 4,
 	    "num_pi": 0
 	}
     ],
