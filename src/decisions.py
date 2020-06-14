@@ -172,10 +172,15 @@ class Decider():
 
             special = np.where(is_special)[0]
             if special.size:
-                if self._rotation['continuing']['special']['value'] == 'maintain_scorch':
-                    need_scorch = (arrays['boss']['scorch_timer'][still_going[special]] < C._MAX_SCORCH_REMAIN) |\
-                                  (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK)
-                    need_scorch &= arrays['player']['spell_type'][still_going[special], next_hit[special]] != C._CAST_SCORCH
+                need_scorch = (arrays['boss']['scorch_timer'][still_going[special]] < C._MAX_SCORCH_REMAIN) |\
+                              (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK)
+                need_scorch &= arrays['player']['spell_type'][still_going[special], next_hit[special]] != C._CAST_SCORCH
+                if self._rotation['continuing']['special']['value'] == 'scorch':
+                    more_scorch = (arrays['boss']['ignite_timer'][still_going[special]] > 0.0) &\
+                                  (arrays['boss']['ignite_count'][still_going[special]] == C._IGNITE_STACK)
+                    more_scorch &= arrays['player']['buff_timer'][C._BUFF_MQG][still_going[special], next_hit[special]] <= 0.0
+                    need_scorch |= more_scorch                    
+                if self._rotation['continuing']['special']['value'] in ['maintain_scorch', 'scorch']:
                     no_scorch = np.where(np.logical_not(need_scorch))[0]
                     scorch = np.where(need_scorch)[0]
                     if scorch.size:

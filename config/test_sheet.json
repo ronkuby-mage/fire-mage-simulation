@@ -1,0 +1,75 @@
+{
+    "stats": {
+	"spell_power": {
+	    "mean": 750.0,
+	    "var": 0.0,
+	    "clip": [
+		0.0,
+		2000.0
+	    ]
+	},
+	"hit_chance": {
+	    "mean": 0.95,
+	    "var": 0.0,
+	    "clip": [
+		0.89,
+		0.99
+	    ]
+	},
+	"crit_chance": {
+	    "mean": 0.12,
+	    "var": 0.0,
+	    "clip": [
+		0.0,
+		1.0
+	    ]
+	}
+    },
+    "configuration": [
+	{
+	    "num_mages": 4,
+	    "num_mqg": 4,
+	    "num_pi": 0
+	}
+    ],
+    "plot": {
+	"lines": "spell_power",
+	"x_axis": "crit_chance",
+	"y_axis": "test"
+    },
+    "rotation": {
+        "baseline": {
+            "name": "Frostbolt",
+            "description": "Scorch -> Frostbolt -> Fireball",
+            "initial": {
+                "common": [
+                    "stack_scorch",
+                    "combustion",
+                    "mqg",
+                    "frostbolt",
+                    "fireball",
+                    "pi"
+                ],
+                "other": []
+            },
+            "continuing": {
+                "default": "fireball",
+                "special": {
+                    "slot": 0,
+                    "value": "maintain_scorch"
+                }
+            }
+        }
+    },    "timing": {
+	"duration": {
+	    "mean": 95.0,
+	    "var": 5.0,
+	    "clip": [
+		15.0,
+		125.0
+	    ]
+	},
+	"delay": 1.0,
+	"response": 0.001
+    }
+}

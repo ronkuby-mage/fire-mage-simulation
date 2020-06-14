@@ -171,15 +171,15 @@ class Fitter():
                 for group, member, exponent in out[1:]:
                     term *= np.power(arrays[group][t_size:, member], exponent)
                 X_v[:, coeff_idx] += term
-            print(t_size, X_v.shape, y_v.shape)
-            print(reg.score(X_v, y_v))
-            print(self._params['num_load'], np.sqrt(np.power(reg.predict(X_v) - y_v, 2).mean()))
+                print(t_size, X_v.shape, y_v.shape)
+                print(reg.score(X_v, y_v))
+                print(self._params['num_load'], np.sqrt(np.power(reg.predict(X_v) - y_v, 2).mean()))
 
         if True:
             if ignites:
-                big_terms = np.where(np.abs(reg.coef_) >= 0.1)[0]
+                big_terms = np.where(np.abs(reg.coef_) >= 0.01)[0]
             else:
-                big_terms = np.where(np.abs(reg.coef_) >= 0.3)[0]
+                big_terms = np.where(np.abs(reg.coef_) >= 0.05)[0]
             X = X[:, big_terms]
             model = LinearRegression(fit_intercept=False)
             reg = model.fit(X, y)
