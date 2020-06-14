@@ -27,7 +27,7 @@
         }
     ],
     "mc_params": {
-        "correlated_fraction": 0.25,
+        "correlated_fraction": 1.0,
         "correlated_edge": 0.5,
         "correlated_std": 0.04,
         "duration_var": 5.0,

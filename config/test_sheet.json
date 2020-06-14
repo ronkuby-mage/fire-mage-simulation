@@ -1,7 +1,7 @@
 {
     "stats": {
 	"spell_power": {
-	    "mean": 750.0,
+	    "mean": 760.0,
 	    "var": 0.0,
 	    "clip": [
 		0.0,
@@ -17,7 +17,7 @@
 	    ]
 	},
 	"crit_chance": {
-	    "mean": 0.12,
+	    "mean": 0.11,
 	    "var": 0.0,
 	    "clip": [
 		0.0,
@@ -27,8 +27,8 @@
     },
     "configuration": [
 	{
-	    "num_mages": 4,
-	    "num_mqg": 4,
+	    "num_mages": 1,
+	    "num_mqg": 1,
 	    "num_pi": 0
 	}
     ],
