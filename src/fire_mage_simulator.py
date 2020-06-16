@@ -14,6 +14,26 @@ import pickle
 import time
 from mechanics import get_damage
 
+def str_encode(n):
+    enc_table_64 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
+    
+    if n == 0:
+        return enc_table_64[0]
+    base = len(enc_table_64)
+    digits = ""    
+    while n:
+        digits += enc_table_64[int(n % base)]
+        n //= base
+
+    return digits[::-1]
+
+def get_str():
+    digits = ""
+    for rr in range(3):
+        digits += str_encode(np.random.randint(64**5))
+        
+    return digits
+
 def get_values(objs, idxs):
     ret = {}
     for idx, (name, obj) in zip(idxs, objs.items()):
@@ -279,7 +299,7 @@ def main_mc(config, name):
 
         with Pool() as p:
             out1 = np.array(p.map(get_damage, args))
-        savefile = '{:s}/{:s}_{:04d}.pck'.format(dfn, name, bindex)
+        savefile = '{:s}/{:s}_{:s}.pck'.format(dfn, name, get_str())
         with open(savefile, 'wb') as fid:
             for arg, out in zip(args, out1):
                 pickle.dump(out, fid)
