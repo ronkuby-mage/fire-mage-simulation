@@ -311,7 +311,7 @@ if __name__ == '__main__':
     config_file = sys.argv[1]
     with open(config_file, 'rt') as fid:
         config = json.load(fid)
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         need = int(sys.argv[2])
         if 'mc_params' in config:
             config['mc_params']['batches'] = need
