@@ -308,9 +308,13 @@ def main_mc(config, name):
         sys.stdout.flush()
         
 if __name__ == '__main__':
-    config_file = sys.argv[-1]
+    config_file = sys.argv[1]
     with open(config_file, 'rt') as fid:
         config = json.load(fid)
+    if len(sys.argv) > 1:
+        need = int(sys.argv[2])
+        if 'mc_params' in config:
+            config['mc_params']['batches'] = need
     name = os.path.split(config_file)[-1].split('.')[0]
     print('starting', name)
     if "plot" in config:
