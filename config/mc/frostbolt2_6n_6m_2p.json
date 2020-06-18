@@ -31,7 +31,7 @@
         "correlated_edge": 0.5,
         "correlated_std": 0.04,
         "duration_var": 5.0,
-        "batches": 9999,
+        "batches": 100,
         "batch_size": 64
     },
     "rotation": {
