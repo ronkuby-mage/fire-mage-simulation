@@ -14,6 +14,8 @@ import pickle
 import time
 from mechanics import get_damage
 
+VERSION = 2
+
 def str_encode(n):
     enc_table_64 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
     
@@ -286,6 +288,7 @@ def main_mc(config, name):
                     "clip": [rng[0], rng[1]]}
             arg['sim_size'] = int((0.5*arg['sim_size']*(rng[1] + rng[0]))/arg["timing"]["duration"]["mean"])
             arg['mc'] = True
+            arg['version'] = VERSION
             args.append(deepcopy(arg))
 
         #for arg in args:
