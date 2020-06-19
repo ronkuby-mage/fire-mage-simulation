@@ -182,10 +182,13 @@ class Encounter():
                 scorch_out = sph[np.where(boss['scorch_timer'][sph] <= 0.0)[0]]
                 boss['scorch_count'][scorch_out] = 0
             
-                scorch = sph[np.where(C._IS_SCORCH[spell_type])[0]]
-                shit = np.where(np.random.rand(scorch.size) < player['hit_chance'][sph[scorch], next_hit[scorch]])[0]
-                boss['scorch_timer'][scorch[shit]] = C._SCORCH_TIME
-                boss['scorch_count'][scorch[shit]] = np.minimum(boss['scorch_count'][scorch[shit]] + 1, C._SCORCH_STACK)
+                scorch_list = np.where(C._IS_SCORCH[spell_type])[0]
+                if scorch_list.size:
+                    is_scorch = sph[scorch_list]
+                    snext_hit = next_hit[scorch_list]
+                    shit = np.where(np.random.rand(is_scorch.size) < player['hit_chance'][is_scorch, snext_hit])[0]
+                    boss['scorch_timer'][is_scorch[shit]] = C._SCORCH_TIME
+                    boss['scorch_count'][is_scorch[shit]] = np.minimum(boss['scorch_count'][is_scorch[shit]] + 1, C._SCORCH_STACK)
                     
                 fire = np.where(C._IS_FIRE[spell_type])[0]
                 player['comb_stack'][sph[fire], next_hit[fire]] += 1

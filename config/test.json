@@ -9,7 +9,7 @@
 	    ]
 	},
 	"hit_chance": {
-	    "mean": 0.99,
+	    "mean": 0.95,
 	    "var": 0.0,
 	    "clip": [
 		0.89,
