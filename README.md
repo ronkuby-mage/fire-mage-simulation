@@ -24,7 +24,7 @@ The primary purpose of these simulations is to determine the balance between spe
 | [P5 Max](https://sixtyupgrades.com/set/gmkocjtgEjHeEe5B5z43jv)          |   680   |   940   |   20%   |   39%   |  4  |  [**30 seconds**](#thirty-second-encounter)  |
 | [P6 Max](https://sixtyupgrades.com/set/aVR9Bwt1jsfieUzTPc9Xpf)          |   714   |   974   |   26%   |   45%   |     |              |
 
-**Table 1: Stats and buffs for encounter scenarios and rotation selection.  Use fight duration to select stat weighting.  _THESE_ARE_NOT_BiS_LISTS.**
+**Table 1: Stats and buffs for encounter scenarios and rotation selection.  Use fight duration to select stat weighting.  _THESE_ARE_NOT_BiS_LISTS_.**
 
 Here, min and max reflect the range of stats from raid buffed to raid + world + consumable buffed (within reason).  The world buffs are: Dire Maul Tribute Crit, Ony, Zandalar (effectively +1% crit), and Songflower.  The consumables are Brilliant Wizard Oil, Elixir of Greater Firepower, Greater Arcane Elixir, and Flask of Supreme Power.  These are the stat ranges used to determine the rotations for the respective gear levels.  At each gear level the equivalencies will be calculated over a much larger range of stats, still with the fixed rotations.  
 
