@@ -201,7 +201,6 @@ def main_plot(config, name):
                  **inter_param,
                  **get_values(intra, jdxs)}
                 for jdxs in [*itertools.product(*intra_idx)]]
-        print(args[0]['duration'])
         args = [{**arg, **{'mc': False}, **{'sim_size': int(nom_ss*ss_nm/arg['num_mages']['num_mages'])}}
                 for arg in args]
 

@@ -126,9 +126,10 @@ class Encounter():
                 # ADD ADDITIONAL OVERALL MULTIPLIERS TO _DAMAGE_MULTIPLIER
 
                 # handle critical hit/ignite ** READ HERE FOR MOST OF THE IGNITE MECHANICS **
-                comb_crit = C._PER_COMBUSTION*player['comb_stack'][sph, next_hit]
+                comb_crit = C._PER_COMBUSTION*player['comb_stack'][sph, next_hit] - C._IS_SCORCH[spell_type] # scorch and batching
                 comb_crit *= (player['comb_left'][sph, next_hit] > 0).astype(np.float)
                 comb_crit *= C._IS_FIRE[spell_type]
+                
                 crit_chance = player['crit_chance'][sph, next_hit] + comb_crit + C._INCIN_BONUS[spell_type]
                 crit_array = np.random.rand(sph.size) < crit_chance
                 

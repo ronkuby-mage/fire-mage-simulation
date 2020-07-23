@@ -21,8 +21,8 @@
     },
     "configuration": [
         {
-            "num_mages": 4,
-            "num_mqg": 4,
+            "num_mages": 3,
+            "num_mqg": 3,
             "num_pi": 1
         }
     ],
@@ -36,17 +36,26 @@
     },
     "rotation": {
         "baseline": {
-            "name": "Fireball",
-            "description": "Scorch -> Fireball",
+            "name": "Scenario 3",
+            "description": "Scenario 3",
             "initial": {
-                "common": [
-                    "stack_scorch",
+                "common": [],
+                "have_pi": [
                     "combustion",
-                    "fireball",
+                    "scorch",
+                    "frostbolt",
                     "mqg",
+                    "fireball",
                     "pi"
                 ],
-                "other": []
+                "other": [
+                    "scorch",
+                    "frostbolt",
+                    "frostbolt",
+                    "combustion",
+                    "fireball",
+                    "mqg"
+                ]
             },
             "continuing": {
                 "default": "fireball",
