@@ -1,11 +1,13 @@
-# Use [Sheet Calculator](https://docs.google.com/spreadsheets/d/1EnFoivjG3to-rKfL7s3en8JLYvSCJjaaudutArlZIWc/edit?usp=sharing)
+*23JUL20: Ignite mechanics have changed such that the below information is not accurate for PI > 0.  The plan is to update the sheet, correcting the PI=1 tab by phase 5 release.  Higher PI value tabs will then be populated.  There are no plans to update the charts.*
+
+# Use [Sheet Calculator](https://docs.google.com/spreadsheets/d/1fOXRbWAfbT0FiIu8gytV0Fj4Dnu2ZiLxSBc4tptczu4/edit?usp=sharing)
 About 33000 iterations of 10k simulations with random stat weights were run for each rotation and number of mages (6 billion sims total).  For each rotation/ # mages a fitting function was applied to the damage outcomes.  This sheet uses the resulting fitting function to estimate crit and hit equivalency.
 
 Ideally the sheet would have a full interface that includes talent, buff, and gear selection.  If you are interested in developing one, contact Wrdlbrmpft#3718 or Ronkuby#2054 on Discord.
 
 # Background
 
-**Old steps to determine stat weighting:**
+**Steps to determine stat weighting with charts:**
 1) Use Table 1 to determine which configuration (row) best fits your raid in terms of boss kill time.
 2) Follow the link in the "duration" column according to the expected encounter duration.
 3) Choose the optimal rotation based on average raid crit % and number of mages.
@@ -24,7 +26,7 @@ The primary purpose of these simulations is to determine the balance between spe
 | [P5 Max](https://sixtyupgrades.com/set/gmkocjtgEjHeEe5B5z43jv)          |   680   |   940   |   20%   |   39%   |  4  |  [**30 seconds**](#thirty-second-encounter)  |
 | [P6 Max](https://sixtyupgrades.com/set/aVR9Bwt1jsfieUzTPc9Xpf)          |   714   |   974   |   26%   |   45%   |     |              |
 
-**Table 1: Stats and buffs for encounter scenarios.  The most relevant factor for determining stat weighting is fight duration.**
+**Table 1: Stats and buffs for encounter scenarios and rotation selection.  Use fight duration to select stat weighting.  _THESE_ARE_NOT_BiS_LISTS_.**
 
 Here, min and max reflect the range of stats from raid buffed to raid + world + consumable buffed (within reason).  The world buffs are: Dire Maul Tribute Crit, Ony, Zandalar (effectively +1% crit), and Songflower.  The consumables are Brilliant Wizard Oil, Elixir of Greater Firepower, Greater Arcane Elixir, and Flask of Supreme Power.  These are the stat ranges used to determine the rotations for the respective gear levels.  At each gear level the equivalencies will be calculated over a much larger range of stats, still with the fixed rotations.  
 
@@ -32,7 +34,7 @@ The simulation starts when the first scorch starts casting.  Each of the mages 
 
 ## Rotations
 
-In the previous iteration of this simulation, fire blast was found to be the best buffer spell between scorch stacking and ignite stacking from a pure dps perceptive.  Here, fire blast is excluded from the rotations considered for a few reasons: 1) the fire blast buffer is too thin to be effective given real world coordination, 2) its range is a problem -- 26 yards would waste time moving to the boss (although untalented frostbolt's 30 yards isn't much better), and 3) fire blast should generally be kept out of rotations due to mana inefficiency.
+In the previous iteration of this simulation, fire blast was found to be the best buffer spell between scorch stacking and ignite stacking from a pure dps perceptive.  Here, fire blast is excluded from the rotations considered for a few reasons: 1) the fire blast buffer is too thin to be effective given real world coordination, 2) its range is a problem -- moving to 26 yards would waste time moving to the boss (although untalented frostbolt's 30 yards isn't much better), and 3) fire blast should generally be kept out of rotations due to mana inefficiency.
 
 The baseline rotation is:
 **```scorch to stack -> combustion -> *some cooldowns* --> *buffer*/fireball -> *other cooldowns* -> fireball (repeated)```**
