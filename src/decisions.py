@@ -174,7 +174,8 @@ class Decider():
             if special.size:
                 need_scorch = (arrays['boss']['scorch_timer'][still_going[special]] < C._MAX_SCORCH_REMAIN) |\
                               (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK)
-                need_scorch &= arrays['player']['spell_type'][still_going[special], next_hit[special]] != C._CAST_SCORCH
+                need_scorch &= (arrays['player']['spell_type'][still_going[special], next_hit[special]] != C._CAST_SCORCH)|\
+                               (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK - 1)
                 if self._rotation['continuing']['special']['value'] == 'scorch':
                     more_scorch = (arrays['boss']['ignite_timer'][still_going[special]] > 0.0) &\
                                   (arrays['boss']['ignite_count'][still_going[special]] == C._IGNITE_STACK)
@@ -198,7 +199,6 @@ class Decider():
         return decisions
         
     def get_decisions(self, arrays, still_going):
-        C = self._C
         rotation = self._rotation
         decisions = -np.ones(still_going.size).astype(np.int32)
 

@@ -57,7 +57,7 @@ class Encounter():
             # apply instant spells
             combustion = np.where(player['cast_type'][cst, next_hit] == C._CAST_COMBUSTION)[0]
             player['comb_left'][cst[combustion], next_hit[combustion]] = C._COMBUSTIONS
-            player['comb_stack'][cst[combustion], next_hit[combustion]] = 0
+            player['comb_stack'][cst[combustion], next_hit[combustion]] = 1
             player['comb_avail'][cst[combustion], next_hit[combustion]] -= 1
 
             for buff in range(C._BUFFS):
@@ -149,11 +149,11 @@ class Encounter():
                 mod_val = np.where(boss['ignite_count'][gbl_icrits] < C._IGNITE_STACK)[0]
                 # add to the ignite tick damage -- 1.5 x  0.2 x spell hit damage
                 boss['ignite_value'][gbl_icrits[mod_val]] += (1.0 + C._ICRIT_DAMAGE)*C._IGNITE_DAMAGE*spell_damage[lcl_icrits[mod_val]]
-                boss['ignite_multiplier'][gbl_icrits[mod_val]] = C._DMF_BUFF*(1.0 + C._POWER_INFUSION*pi[lcl_icrits[mod_val]])
 
                 # first in stack, set the tick
                 mod_val2 = np.where(boss['ignite_count'][gbl_icrits] == 0)[0]
                 boss['tick_timer'][gbl_icrits[mod_val2]] = C._IGNITE_TICK
+                boss['ignite_multiplier'][gbl_icrits[mod_val2]] = C._DMF_BUFF*(1.0 + C._POWER_INFUSION*pi[lcl_icrits[mod_val2]])
 
                 # increment to max of five (will do nothing if already at 5)
                 boss['ignite_count'][gbl_icrits] = np.minimum(boss['ignite_count'][gbl_icrits] + 1, C._IGNITE_STACK)
@@ -343,9 +343,16 @@ class Encounter():
             if self._is_mc:
                 print('ignite damage = {:9.1f}'.format(self._arrays['global']['ignite'].mean()))
 
-        total_dps = (self._arrays['global']['total_damage']/self._arrays['global']['duration']).mean()
+        dp_mage = self._arrays['global']['total_damage']/self._arrays['global']['duration']
+
+        total_dps = dp_mage.mean()
         if self._is_mc:
-            return total_dps, (self._arrays['global']['ignite']/self._arrays['global']['duration']).mean()
+        #if True:
+            ip_mage = self._arrays['global']['ignite']/self._arrays['global']['duration']
+            #pmage = np.concatenate([total_dps, ip_mage], axis=1)
+            #spage = np.sort(pmage, axis=0)
+            #print(spage[8990:9010, :])
+            return total_dps, ip_mage.mean()
         else:
             return total_dps
                 

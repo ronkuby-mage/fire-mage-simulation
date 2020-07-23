@@ -174,7 +174,7 @@ def main_plot(config, name):
         'crit_equiv': 50000,
         'hit_equiv': 100000,
         'dps': 10000,
-        'test': 30000}
+        'test': 100000}
     variables = {'spell_power',
                  'hit_chance',
                  'crit_chance',
@@ -201,6 +201,7 @@ def main_plot(config, name):
                  **inter_param,
                  **get_values(intra, jdxs)}
                 for jdxs in [*itertools.product(*intra_idx)]]
+        print(args[0]['duration'])
         args = [{**arg, **{'mc': False}, **{'sim_size': int(nom_ss*ss_nm/arg['num_mages']['num_mages'])}}
                 for arg in args]
 
@@ -309,6 +310,11 @@ def main_mc(config, name):
                 pickle.dump(arg, fid)
         print(bindex, time.time() - t0, out1.mean())
         sys.stdout.flush()
+
+def test():
+    config_file = os.path.join(*['..', 'config', 'test.json'])
+    name = os.path.split(config_file)[-1].split('.')[0]
+    main_plot(config, name)
         
 if __name__ == '__main__':
     if len(sys.argv) > 1:

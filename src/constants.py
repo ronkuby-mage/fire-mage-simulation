@@ -1,6 +1,6 @@
 import numpy as np
 
-_LOG_SIM = -1 # set to -1 for no log
+_LOG_SIM = 9 # set to -1 for no log
 
 class Constant():
     
@@ -218,6 +218,7 @@ class ArrayGenerator():
         else:
             arrays['global']['duration'] = self._distribution(self._params['timing']['duration'],
                                                               sim_size)
+            
         arrays['player']['cast_timer'] = np.abs(self._params['delay']*np.random.randn(sim_size,
                                                                                       num_mages))
         #if self._params["mc"]:
