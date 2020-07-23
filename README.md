@@ -1,4 +1,4 @@
-*23JUN20: Ignite mechanics have changed such that any of the below information for PI > 0 is not accurate.  The plan is to update the sheet first, correcting the PI=1 tab by  phase 5 relelease.  Higher PI value tabs will then be populated.  There are no plans to update the charts.*
+*23JUN20: Ignite mechanics have changed such that the below information is not accurate for PI > 0.  The plan is to update the sheet, correcting the PI=1 tab by phase 5 relelease.  Higher PI value tabs will then be populated.  There are no plans to update the charts.*
 
 # Use [Sheet Calculator](https://docs.google.com/spreadsheets/d/1fOXRbWAfbT0FiIu8gytV0Fj4Dnu2ZiLxSBc4tptczu4/edit?usp=sharing)
 About 33000 iterations of 10k simulations with random stat weights were run for each rotation and number of mages (6 billion sims total).  For each rotation/ # mages a fitting function was applied to the damage outcomes.  This sheet uses the resulting fitting function to estimate crit and hit equivalency.
