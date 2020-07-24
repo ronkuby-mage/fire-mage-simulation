@@ -348,12 +348,12 @@ class Encounter():
 
         total_dps = dp_mage.mean()
         if self._is_mc:
-        #if True:
             ip_mage = self._arrays['global']['ignite']/self._arrays['global']['duration']
-            #pmage = np.concatenate([total_dps, ip_mage], axis=1)
-            #spage = np.sort(pmage, axis=0)
-            #print(spage[8990:9010, :])
-            return total_dps, ip_mage.mean()
+            ssize = dp_mage.size
+            pmage = np.stack([dp_mage, ip_mage], axis=1)
+            spage = np.sort(pmage, axis=0)
+            npm = 9*ssize//10
+            return total_dps, ip_mage.mean(), spage[(npm - 100):(npm + 100), 0].mean(), spage[(npm - 100):(npm + 100), 1].mean() 
         else:
             return total_dps
                 
