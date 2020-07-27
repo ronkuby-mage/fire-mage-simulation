@@ -1,3 +1,5 @@
+*26JUL20: Sheet updated for PI=1 with new ignite stacking mechanics and rotation.  Also added 90% level output and weights.*
+
 *23JUL20: Ignite mechanics have changed such that the below information is not accurate for PI > 0.  The plan is to update the sheet, correcting the PI=1 tab by phase 5 release.  Higher PI value tabs will then be populated.  There are no plans to update the charts.*
 
 # Use [Sheet Calculator](https://docs.google.com/spreadsheets/d/1fOXRbWAfbT0FiIu8gytV0Fj4Dnu2ZiLxSBc4tptczu4/edit?usp=sharing)
