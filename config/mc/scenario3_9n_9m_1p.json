@@ -39,7 +39,9 @@
             "name": "Scenario 3",
             "description": "Scenario 3",
             "initial": {
-                "common": [],
+                "common": [
+                    "stack_scorch"
+                ],
                 "have_pi": [
                     "combustion",
                     "scorch",

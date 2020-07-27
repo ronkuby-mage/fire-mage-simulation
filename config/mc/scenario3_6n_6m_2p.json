@@ -21,9 +21,9 @@
     },
     "configuration": [
         {
-            "num_mages": 8,
-            "num_mqg": 8,
-            "num_pi": 1
+            "num_mages": 6,
+            "num_mqg": 6,
+            "num_pi": 2
         }
     ],
     "mc_params": {

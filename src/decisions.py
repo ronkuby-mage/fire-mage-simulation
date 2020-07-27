@@ -44,7 +44,7 @@ class Decider():
         #    cast since the exception would be cooldowns and who would cast their
         #    cooldowns before scorch stack?
         ss_actions = arrays['player']['cast_number'][still_going, next_hit] - stage
-        ss_needed = C._SCORCHES[self._config['num_mages']]
+        ss_needed = C._SCORCHES[self._config['num_mages']] - 1 # new rotations include scorch
         scorch_stage = action == "stack_scorch"
         do_stack = scorch_stage & (ss_actions < ss_needed)
         stack = np.where(do_stack)[0]
