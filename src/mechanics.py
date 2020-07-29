@@ -142,10 +142,11 @@ class Encounter():
                 rem_val = np.where(boss['ignite_timer'][gbl_icrits] <= 0.0)[0]
                 boss['ignite_count'][gbl_icrits[rem_val]] = 0
                 boss['ignite_value'][gbl_icrits[rem_val]] = 0.0
-            
-                # refresh ignite to full 4 seconds
-                boss['ignite_timer'][gbl_icrits] = C._IGNITE_TIME + epsilon
-            
+
+                # add tick if 1 tick remaining
+                new_tick = np.where(boss['ignite_timer'][gbl_icrits] <= C._IGNITE_TICK)[0]
+                boss['ignite_timer'][gbl_icrits[new_tick]] += C._IGNITE_TICK
+
                 # if we dont have a full stack
                 mod_val = np.where(boss['ignite_count'][gbl_icrits] < C._IGNITE_STACK)[0]
                 # add to the ignite tick damage -- 1.5 x  0.2 x spell hit damage
@@ -154,6 +155,7 @@ class Encounter():
                 # first in stack, set the tick
                 mod_val2 = np.where(boss['ignite_count'][gbl_icrits] == 0)[0]
                 boss['tick_timer'][gbl_icrits[mod_val2]] = C._IGNITE_TICK
+                boss['ignite_timer'][gbl_icrits[mod_val2]] = C._IGNITE_TIME + epsilon
                 boss['ignite_multiplier'][gbl_icrits[mod_val2]] = C._DMF_BUFF*(1.0 + C._POWER_INFUSION*pi[lcl_icrits[mod_val2]])
 
                 # increment to max of five (will do nothing if already at 5)
