@@ -32,7 +32,7 @@ The buffered rotation is:
 **```scorch to stack -> MQG --> frostbolt -> combustion -> fireball (repeated)```**
 again with a designated scorch mage (see below).
 
-Note that after MQG has expired, the scorch mage can spam scorch with no DPS loss and perhaps a DPS gain.
+Note that after MQG has expired, the scorch mage can sometimes spam scorch on full ignite stakcs with no DPS loss and perhaps a DPS gain.
 
 ## Spell power equivalency of critical strike rating
 
