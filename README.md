@@ -32,11 +32,51 @@ The buffered rotation is:
 **```scorch to stack -> MQG --> frostbolt -> combustion -> fireball (repeated)```**
 again with a designated scorch mage (see below).
 
-Note that after MQG has expired, the scorch mage can spam scorch with no DPS loss and perhaps a DPS gain.
+Note that after MQG has expired, the scorch mage can sometimes spam scorch on full ignite stakcs with no DPS loss and perhaps a DPS gain.
 
 ## Spell power equivalency of critical strike rating
 
 With finite-differences the simulations are used to determine the equivalency between a single spell power increase and 1% critical strike chance increase.  The equivalency value is dependent on current spell power, hit chance, crit chance, number of mages, encounter duration, and selected rotation.  Each plot below shows the values for a range of crit chance and spell power values.  To find the appropriate plot, select from the table based on your current hit chance and number of mages:
+
+### No Buffer
+
+![One mage no buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_fireball_crit_e1_u100_h99_n1_ss50000.png)
+
+![Two mages no buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_fireball_crit_e1_u100_h99_n2_ss50000.png)
+
+![Three mages no buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_fireball_crit_e1_u100_h99_n3_ss50000.png)
+
+![Four mages no buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_fireball_crit_e1_u100_h99_n4_ss50000.png)
+
+![Five mages no buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_fireball_crit_e1_u100_h99_n5_ss50000.png)
+
+![Six mages no buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_fireball_crit_e1_u100_h99_n6_ss50000.png)
+
+![Seven mages no buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_fireball_crit_e1_u100_h99_n7_ss50000.png)
+
+![Eight mages no buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_fireball_crit_e1_u100_h99_n8_ss50000.png)
+
+![Nine mages no buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_fireball_crit_e1_u100_h99_n9_ss50000.png)
+
+### Buffer
+
+![One mage buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_frostbolt_crit_e1_u100_h99_n1_ss50000.png)
+
+![Two mages buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_frostbolt_crit_e1_u100_h99_n2_ss50000.png)
+
+![Three mages buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_frostbolt_crit_e1_u100_h99_n3_ss50000.png)
+
+![Four mages buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_frostbolt_crit_e1_u100_h99_n4_ss50000.png)
+
+![Five mages buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_frostbolt_crit_e1_u100_h99_n5_ss50000.png)
+
+![Six mages buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_frostbolt_crit_e1_u100_h99_n6_ss50000.png)
+
+![Seven mages buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_frostbolt_crit_e1_u100_h99_n7_ss50000.png)
+
+![Eight mages buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_frostbolt_crit_e1_u100_h99_n8_ss50000.png)
+
+![Nine mages buffer](https://raw.githubusercontent.com/ronkuby-mage/fire-mage-simulation/master/plots/crit_equiv/PS_PI0_frostbolt_crit_e1_u100_h99_n9_ss50000.png)
 
 ## Crit equivalency comparisons
 
