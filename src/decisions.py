@@ -167,7 +167,9 @@ class Decider():
         decisions = -np.ones(still_going.size).astype(np.int32)
 
         if "special" in self._rotation['continuing']:
-            is_special = next_hit == self._rotation['continuing']['special']['slot']
+            is_special = np.zeros(next_hit.size, dtype=np.bool)
+            for slot in self._rotation['continuing']['special']['slot']:
+                is_special |= next_hit == slot
             not_special = np.where(np.logical_not(is_special))[0]
 
             special = np.where(is_special)[0]

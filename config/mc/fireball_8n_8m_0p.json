@@ -51,7 +51,9 @@
             "continuing": {
                 "default": "fireball",
                 "special": {
-                    "slot": 0,
+                    "slot": [
+                        0
+                    ],
                     "value": "maintain_scorch"
                 }
             }
