@@ -1,3 +1,5 @@
+*02AUG20* The sheets are now updated to current ignite mechanics.  Use the charts when applicable as there will be some error (est. +/- 1.5 EP) in the sheet values.
+
 *29JUL20* Adding charts for PI=0 with the new ignite mechanics as they come in.  The sheet will be updated for PI=0 later this week and for PI>0 once new rotations have been worked out.
 
 *26JUL20: Sheet updated for PI=1 with new ignite stacking mechanics and rotation.  Also added 90% level output and weights.*
