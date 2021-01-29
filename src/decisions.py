@@ -7,8 +7,7 @@ class Decider():
         self._rotation = rotation
         self._stage = np.zeros(array_shape, dtype=np.int32)
         num_mages = array_shape[1]
-        self._config = [config for config in configuration \
-                        if config['num_mages'] == num_mages][0]
+        self._config = configuration
 
     def _regular(self, arrays, still_going, next_hit, action):
         C = self._C
