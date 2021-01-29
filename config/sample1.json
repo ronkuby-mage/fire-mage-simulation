@@ -1,0 +1,111 @@
+{
+    "stats": {
+    	"spell_power": [
+            663,
+            650,
+            649,
+            713,
+            733
+	    ],
+    	"hit_chance": [
+            0.1,
+            0.1,
+            0.1,
+            0.09,
+            0.09
+	    ],
+    	"crit_chance": [
+            0.10,
+            0.04,
+            0.10,
+            0.06,
+            0.06
+        ],
+        "intellect": [
+            318,
+            318,
+            333,
+            333,
+            304
+        ]
+    },
+    "buffs": {
+        "raid": [
+            "arcane_intellect",
+            "improved_mark",
+            "blessing_of_kings"
+        ],
+        "consumes": [
+            "greater_arcane_elixir",
+            "elixir_of_greater_firepower",
+            "flask_of_supreme_power",
+            "blessed_wizard_oil"
+        ],
+        "world": [
+            "rallying_cry_of_the_dragonslayer",
+            "spirit_of_zandalar",
+            "dire_maul_tribute",
+            "songflower_serenade",
+            "sayges_dark_fortune_of_damage"
+        ],
+        "racial": [
+            "gnome",
+            "gnome",
+            "gnome",
+            "human",
+            "human"
+        ],
+        "boss": []
+    },
+    "configuration": {
+        "num_mages": 5,
+        "target": [
+            4
+        ],
+        "mqg": [
+            0,
+            1,
+            2,
+            3,
+            4
+        ],
+        "sapp": [],
+        "pi": [],
+        "udc": [
+            1,
+            4
+        ]
+    },
+    "rotation": {
+        "initial": {
+            "common": [
+                "scorch",
+                "fireball",
+                "combustion",
+                "mqg"
+            ],
+            "other": []
+        },
+        "continuing": {
+            "default": "fireball",
+            "special": {
+                "slot": [
+                    0
+                ],
+                "value": "maintain_scorch"
+            }
+        }
+    },
+    "timing": {
+	    "duration": {
+	        "mean": 80.0,
+            "var": 5.0,
+	        "clip": [
+    	    	20.0,
+	    	    200.0
+            ]
+        },   
+    	"delay": 1.0,
+        "response": 0.05
+    }
+}
