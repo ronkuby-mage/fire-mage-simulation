@@ -1,32 +1,32 @@
 {
     "stats": {
     	"spell_power": [
-            671,
-            650,
-            649,
-            713,
+            733,
+            733,
+            733,
+            733,
             733
 	    ],
     	"hit_chance": [
-            0.1,
-            0.1,
-            0.1,
+            0.09,
+            0.09,
+            0.09,
             0.09,
             0.09
 	    ],
     	"crit_chance": [
-            0.10,
-            0.04,
-            0.10,
-            0.07,
+            0.06,
+            0.06,
+            0.06,
+            0.06,
             0.06
         ],
         "intellect": [
             318,
             318,
-            333,
-            333,
-            304
+            318,
+            318,
+            318
         ]
     },
     "buffs": {
@@ -52,14 +52,18 @@
             "gnome",
             "gnome",
             "gnome",
-            "human",
-            "human"
+            "gnome",
+            "gnome"
         ],
         "boss": []
     },
     "configuration": {
         "num_mages": 5,
         "target": [
+            0,
+            1,
+            2,
+            3,
             4
         ],
         "mqg": [
@@ -70,9 +74,18 @@
             4
         ],
         "sapp": [],
-        "pi": [],
-        "udc": [
+        "pi": [
+            0,
             1,
+            2,
+            3,
+            4
+        ],
+        "udc": [
+            0,
+            1,
+            2,
+            3,
             4
         ]
     },
@@ -80,9 +93,12 @@
         "initial": {
             "common": [
                 "scorch",
-                "fireball",
+                "frostbolt",
+                "mqg",
                 "combustion",
-                "mqg"
+                "fireball",
+                "pi",
+                "fireball"
             ],
             "other": []
         },
@@ -90,9 +106,13 @@
             "default": "fireball",
             "special": {
                 "slot": [
-                    0
+                    0,
+                    1,
+                    2,
+                    3,
+                    4
                 ],
-                "value": "maintain_scorch"
+                "value": "scorch"
             }
         }
     },
