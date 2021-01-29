@@ -31,7 +31,7 @@ def trinket(config):
     for tt, d1, d2 in zip(trange, mqg_mark, tear_mark):
         print(tt, d1, d2)
 
-def loatheb(config):
+def loatheb_stat_weights(config):
     configo = deepcopy(config)
     configo["timing"]["duration"]["mean"] = float(80)
     configo["buffs"]["boss"].append("loatheb")
@@ -48,7 +48,7 @@ def loatheb(config):
     print(10*(dc - base)/(ds - base))
     #configo["configuration"]["mqg"].remove(4)
 
-def thaddius(config):
+def thaddius_stat_weights(config):
     configo = deepcopy(config)
     #configo["timing"]["duration"]["mean"] = float(80)
     configo['buffs']['world'] = []
@@ -75,7 +75,7 @@ def switch_trinket(config):
 
     return configo
         
-def naxx(config):
+def naxx_upgrade_comparison(config):
     # missing gothic, 4H, 2x spider, sapp
     weighting = [('wb', 0.75), ('no_wb', 0.25)]
     encounters = [
@@ -154,6 +154,6 @@ if __name__ == '__main__':
         config = json.load(fid)
     name = os.path.split(config_file)[-1].split('.')[0]
     print('starting', name)
-    naxx(config)
-    #loatheb(config)
-    #thaddius(config)
+    naxx_upgrade_comparison(config)
+    #loatheb_stat_weights(config)
+    #thaddius_stat_weights(config)
