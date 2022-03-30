@@ -16,8 +16,8 @@ class Decider():
         one_cast = np.array([C._DECIDE[an] for an in action]) > C._CAST_COMBUSTION
         one = np.where(one_cast)[0]
         if one.size:
-            avail = np.array([C._AVAIL[ao] for ao in action[one]])
-            buff_avail = np.stack(arrays['player']['buff_avail'], axis=2)[still_going[one], next_hit[one], avail] > 0
+            avail = np.array([C._BUFF_LOOKUP[ao] for ao in action[one]])
+            buff_avail = np.stack(arrays['player']['buff_cooldown'], axis=2)[still_going[one], next_hit[one], avail] <= 0.0
             buff = np.where(buff_avail)[0]
             if buff.size:
                 decisions[one[buff]] = [C._DECIDE[an] for an in action[one][buff]]
@@ -72,7 +72,8 @@ class Decider():
         stage = self._stage[still_going, next_hit] - len(self._rotation['initial']['common'])
 
         if "have_pi" in self._rotation['initial']:
-            has_pi = next_hit >= self._config['num_mages'] - self._config['num_pi']
+            #has_pi = next_hit >= self._config['num_mages'] - self._config['num_pi']
+            has_pi = np.any(np.equal(next_hit.reshape(next_hit.size, 1), arrays['player']['pi']), axis=1)
             other = np.where(np.logical_not(has_pi))[0]
 
             pi = np.where(has_pi)[0]
@@ -84,8 +85,8 @@ class Decider():
                 if cooldown.size:
                     mod_sg = still_going[pi][cooldown]
                     mod_nh = next_hit[pi][cooldown]
-                    buff_avail = np.stack(arrays['player']['buff_avail'], axis=2)[mod_sg, mod_nh, :]
-                    is_buff = np.max(buff_avail, axis=1) > 0
+                    buff_avail = np.stack(arrays['player']['buff_cooldown'], axis=2)[mod_sg, mod_nh, :] <= 0.0
+                    is_buff = np.max(buff_avail, axis=1)
                     buff = np.where(is_buff)[0]
                     if buff.size:
                         cast = C._BUFF_CAST_TYPE[np.argmax(buff_avail[buff, :], axis=1)]
@@ -136,8 +137,9 @@ class Decider():
             if cooldown.size:
                 mod_sg = still_going[other][regular][cooldown]
                 mod_nh = next_hit[other][regular][cooldown]
-                buff_avail = np.stack(arrays['player']['buff_avail'], axis=2)[mod_sg, mod_nh, :]
-                is_buff = np.max(buff_avail, axis=1) > 0
+                #buff_avail = np.stack(arrays['player']['buff_avail'], axis=2)[mod_sg, mod_nh, :]
+                buff_avail = np.stack(arrays['player']['buff_cooldown'], axis=2)[mod_sg, mod_nh, :] <= 0.0
+                is_buff = np.max(buff_avail, axis=1)
                 buff = np.where(is_buff)[0]
                 if buff.size:
                     cast = C._BUFF_CAST_TYPE[np.argmax(buff_avail[buff, :], axis=1)]
@@ -194,7 +196,22 @@ class Decider():
             not_special = np.arange(decisions.size)
 
         if not_special.size:
-            decisions[not_special] = C._DECIDE[self._rotation['continuing']['default']]
+            comb_array = arrays['player']['comb_cooldown'][still_going[not_special], next_hit[not_special]] <= 0.0
+            combustion = np.where(comb_array)[0]
+            if combustion.size:
+                decisions[not_special[combustion]] = C._DECIDE["combustion"]
+            used_buff = comb_array
+            
+            for buff in range(C._BUFFS):
+                buff_ready = arrays['player']['buff_cooldown'][buff][still_going[not_special], next_hit[not_special]] <= 0.0
+                buff_it = np.where(buff_ready&np.logical_not(used_buff))[0]
+                if buff_it.size:
+                    decisions[not_special[buff_it]] = C._BUFF_CAST_TYPE[buff]
+                used_buff |= buff_ready
+
+            avail = np.where(np.logical_not(used_buff))[0]
+            if avail.size:
+                decisions[not_special[avail]] = C._DECIDE[self._rotation['continuing']['default']]
 
         return decisions
         

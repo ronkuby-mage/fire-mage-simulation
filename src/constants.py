@@ -75,10 +75,12 @@ class Constant():
         self._CAST_GCD = 5 # placeholder for extra time due to GCD
         # below this line are instant/external source casts
         self._CAST_COMBUSTION = 6
-        self._CAST_MQG = 7
-        self._CAST_SAPP = 8
-        self._CAST_POWER_INFUSION = 9
-        self._CASTS = 10
+        self._CAST_SAPP = 7
+        self._CAST_TOEP = 8
+        self._CAST_ZHC = 9
+        self._CAST_MQG = 10
+        self._CAST_POWER_INFUSION = 11
+        self._CASTS = 12
 
         self._SP_MULTIPLIER = np.array([0.428571429, 1.0, 1.0, 0.428571429, 0.814285714])
         self._DAMAGE_MULTIPLIER = np.array([1.1, 1.1, 1.1, 1.1, 1.0]) # fire power
@@ -118,16 +120,21 @@ class Constant():
 
         # BUFFs have simple mechanics: limited use and a timer
         self._POWER_INFUSION = 0.2
-        self._SAPP = 130.0
         self._MQG = 0.33
 
-        self._BUFF_MQG = 0
-        self._BUFF_SAPP = 1
-        self._BUFF_POWER_INFUSION = 2
-        self._BUFFS = 3
+        self._BUFF_SAPP = 0
+        self._BUFF_TOEP = 1
+        self._BUFF_ZHC = 2
+        self._BUFF_MQG = 3
+        self._BUFF_POWER_INFUSION = 4
+        self._BUFFS = 5
+        self._DAMAGE_BUFFS = 3
 
-        self._BUFF_DURATION = np.array([20.0, 20.0, 15.0])
-        self._BUFF_CAST_TYPE = np.array([self._CAST_MQG, self._CAST_SAPP, self._CAST_POWER_INFUSION])
+        self._BUFF_DURATION = np.array([20.0, 15.0, 20.0, 20.0, 15.0])
+        self._BUFF_CAST_TYPE = np.array([self._CAST_SAPP, self._CAST_TOEP, self._CAST_ZHC, self._CAST_MQG, self._CAST_POWER_INFUSION])
+        self._BUFF_COOLDOWN = np.array([120.0, 90.0, 120.0, 300.0, 180.0])
+        self._BUFF_DAMAGE = np.array([130.0, 175.0, 204.0])
+        self._BUFF_PER_TICK = np.array([0.0, 0.0, -17.0])
 
         self._DEBUFFS = 0
 
@@ -146,11 +153,12 @@ class Constant():
 
         self._COMBUSTIONS = 3
         self._PER_COMBUSTION = 0.1
+        self._COMBUSTION_COOLDOWN = 180.0
         
         self._LONG_TIME = 999*self._DURATION_AVERAGE
 
         ## decision making
-        self._SCORCHES = np.array([9000, 6, 3, 2, 2, 2, 1, 1, 1, 1])
+        self._SCORCHES = np.array([9000, 6, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1])
         self._DECIDE = {
             "scorch": self._CAST_SCORCH,
             "pyroblast": self._CAST_PYROBLAST,
@@ -159,16 +167,20 @@ class Constant():
             "frostbolt": self._CAST_FROSTBOLT,
             "gcd": self._CAST_GCD,
             "combustion": self._CAST_COMBUSTION,
-            "mqg": self._CAST_MQG,
             "sapp": self._CAST_SAPP,
+            "toep": self._CAST_TOEP,
+            "zhc": self._CAST_ZHC,
+            "mqg": self._CAST_MQG,
             "pi": self._CAST_POWER_INFUSION}
-        self._AVAIL = {
-            "mqg": self._BUFF_MQG,
+        self._BUFF_LOOKUP = {
             "sapp": self._BUFF_SAPP,
+            "toep": self._BUFF_TOEP,
+            "zhc": self._BUFF_ZHC,
+            "mqg": self._BUFF_MQG,
             "pi": self._BUFF_POWER_INFUSION}
         
         ## debugging
-        self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion', 'mqg       ', 'sapp      ', 'power inf ']
+        self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion',  'sapp      ', 'toep      ', 'zhc       ', 'mqg       ', 'power inf ']
         self._LOG_SIM = _LOG_SIM
 
 class ArrayGenerator():
@@ -221,9 +233,11 @@ class ArrayGenerator():
                 'comb_stack': np.zeros((sim_size, num_mages)).astype(np.int32),
                 'comb_left': np.zeros((sim_size, num_mages)).astype(np.int32),
                 'comb_avail': np.ones((sim_size, num_mages)).astype(np.int32),
+                'comb_cooldown': np.inf*np.ones((sim_size, num_mages)).astype(np.int32),
                 'cast_number': -np.ones((sim_size, num_mages)).astype(np.int32),
                 'buff_timer': [np.zeros((sim_size, num_mages)) for aa in range(C._BUFFS)],
-                'buff_avail': [np.zeros((sim_size, num_mages)).astype(np.int32) for aa in range(C._BUFFS)],
+                'buff_cooldown': [np.inf*np.ones((sim_size, num_mages)) for aa in range(C._BUFFS)],
+                'buff_ticks': [np.zeros((sim_size, num_mages)).astype(np.int32) for aa in range(C._DAMAGE_BUFFS)],
                 'gcd': np.zeros((sim_size, num_mages))
             }
         }
@@ -244,6 +258,7 @@ class ArrayGenerator():
         racial = np.array([1.05 if rac == "gnome" else 1.0 for rac in self._params["buffs"]["racial"]])
         intellect *= racial
 
+        # 0.062 = 6% talents + 0.2% base
         arrays["player"]["crit_chance"] = 0.062 + np.tile(np.array(self._params["stats"]["crit_chance"])[None, :], (sim_size, 1))
         arrays["player"]["crit_chance"] += 0.01*float("brilliant_wizard_oil" in self._params["buffs"]["consumes"])
         arrays["player"]["crit_chance"] += 0.1*float("rallying_cry_of_the_dragonslayer" in self._params["buffs"]["world"])
@@ -257,16 +272,14 @@ class ArrayGenerator():
         arrays["player"]["hit_chance"] = 0.89 + np.tile(np.array(self._params["stats"]["hit_chance"])[None, :], (sim_size, 1))
         arrays["player"]["hit_chance"] = np.minimum(0.99, arrays["player"]["hit_chance"])
         
-        for index in self._params["configuration"]["mqg"]:
-            arrays["player"]["buff_avail"][C._BUFF_MQG][:, index] = 1
-        for index in self._params["configuration"]["sapp"]:
-            arrays["player"]["buff_avail"][C._BUFF_SAPP][:, index] = 1
-        for index in self._params["configuration"]["pi"]:
-            arrays["player"]["buff_avail"][C._BUFF_POWER_INFUSION][:, index] = 1
+        for key, val in C._BUFF_LOOKUP.items():
+            for index in self._params["configuration"][key]:
+                arrays["player"]["buff_cooldown"][val][:, index] = 0.0
         
         arrays["player"]["cleaner"] = np.array(self._params["configuration"]["udc"]).reshape(1, len(self._params["configuration"]["udc"]))
+        arrays["player"]["pi"] = np.array(self._params["configuration"]["pi"]).reshape(1, len(self._params["configuration"]["pi"]))
         arrays["player"]["target"] = np.array(self._params["configuration"]["target"]).reshape(1, len(self._params["configuration"]["target"]))
-        
+      
         return arrays
             
 def log_message():
