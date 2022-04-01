@@ -6,9 +6,7 @@ class Decider():
         self._C = C
         self._rotation = rotation
         self._stage = np.zeros(array_shape, dtype=np.int32)
-        num_mages = array_shape[1]
-        self._config = [config for config in configuration \
-                        if config['num_mages'] == num_mages][0]
+        self._config = configuration
 
     def _regular(self, arrays, still_going, next_hit, action):
         C = self._C
@@ -18,8 +16,8 @@ class Decider():
         one_cast = np.array([C._DECIDE[an] for an in action]) > C._CAST_COMBUSTION
         one = np.where(one_cast)[0]
         if one.size:
-            avail = np.array([C._AVAIL[ao] for ao in action[one]])
-            buff_avail = np.stack(arrays['player']['buff_avail'], axis=2)[still_going[one], next_hit[one], avail] > 0
+            avail = np.array([C._BUFF_LOOKUP[ao] for ao in action[one]])
+            buff_avail = np.stack(arrays['player']['buff_cooldown'], axis=2)[still_going[one], next_hit[one], avail] <= 0.0
             buff = np.where(buff_avail)[0]
             if buff.size:
                 decisions[one[buff]] = [C._DECIDE[an] for an in action[one][buff]]
@@ -74,7 +72,8 @@ class Decider():
         stage = self._stage[still_going, next_hit] - len(self._rotation['initial']['common'])
 
         if "have_pi" in self._rotation['initial']:
-            has_pi = next_hit >= self._config['num_mages'] - self._config['num_pi']
+            #has_pi = next_hit >= self._config['num_mages'] - self._config['num_pi']
+            has_pi = np.any(np.equal(next_hit.reshape(next_hit.size, 1), arrays['player']['pi']), axis=1)
             other = np.where(np.logical_not(has_pi))[0]
 
             pi = np.where(has_pi)[0]
@@ -86,8 +85,8 @@ class Decider():
                 if cooldown.size:
                     mod_sg = still_going[pi][cooldown]
                     mod_nh = next_hit[pi][cooldown]
-                    buff_avail = np.stack(arrays['player']['buff_avail'], axis=2)[mod_sg, mod_nh, :]
-                    is_buff = np.max(buff_avail, axis=1) > 0
+                    buff_avail = np.stack(arrays['player']['buff_cooldown'], axis=2)[mod_sg, mod_nh, :] <= 0.0
+                    is_buff = np.max(buff_avail, axis=1)
                     buff = np.where(is_buff)[0]
                     if buff.size:
                         cast = C._BUFF_CAST_TYPE[np.argmax(buff_avail[buff, :], axis=1)]
@@ -138,8 +137,9 @@ class Decider():
             if cooldown.size:
                 mod_sg = still_going[other][regular][cooldown]
                 mod_nh = next_hit[other][regular][cooldown]
-                buff_avail = np.stack(arrays['player']['buff_avail'], axis=2)[mod_sg, mod_nh, :]
-                is_buff = np.max(buff_avail, axis=1) > 0
+                #buff_avail = np.stack(arrays['player']['buff_avail'], axis=2)[mod_sg, mod_nh, :]
+                buff_avail = np.stack(arrays['player']['buff_cooldown'], axis=2)[mod_sg, mod_nh, :] <= 0.0
+                is_buff = np.max(buff_avail, axis=1)
                 buff = np.where(is_buff)[0]
                 if buff.size:
                     cast = C._BUFF_CAST_TYPE[np.argmax(buff_avail[buff, :], axis=1)]
@@ -167,6 +167,9 @@ class Decider():
         decisions = -np.ones(still_going.size).astype(np.int32)
 
         if "special" in self._rotation['continuing']:
+            # if need scorch then always scorch
+            # if want scorch, if no cooldown available, cast scorch
+
             is_special = np.zeros(next_hit.size, dtype=np.bool)
             for slot in self._rotation['continuing']['special']['slot']:
                 is_special |= next_hit == slot
@@ -178,25 +181,69 @@ class Decider():
                               (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK)
                 need_scorch &= (arrays['player']['spell_type'][still_going[special], next_hit[special]] != C._CAST_SCORCH)|\
                                (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK - 1)
-                if self._rotation['continuing']['special']['value'] == 'scorch':
-                    more_scorch = (arrays['boss']['ignite_timer'][still_going[special]] > 0.0) &\
-                                  (arrays['boss']['ignite_count'][still_going[special]] == C._IGNITE_STACK)
-                    more_scorch &= arrays['player']['buff_timer'][C._BUFF_MQG][still_going[special], next_hit[special]] <= 0.0
-                    need_scorch |= more_scorch                    
                 if self._rotation['continuing']['special']['value'] in ['maintain_scorch', 'scorch']:
-                    no_scorch = np.where(np.logical_not(need_scorch))[0]
+
+                    # first check if scorch is about to expire
                     scorch = np.where(need_scorch)[0]
                     if scorch.size:
                         decisions[special[scorch]] = C._CAST_SCORCH
-                    if no_scorch.size:
-                        decisions[special[no_scorch]] = C._DECIDE[self._rotation['continuing']['default']]
-                else:
+
+                    # then check if we have a cooldown
+                    no_scorch_yet = np.where(np.logical_not(need_scorch))[0]
+                    comb_array = arrays['player']['comb_cooldown'][still_going[special[no_scorch_yet]], next_hit[special[no_scorch_yet]]] <= 0.0
+                    combustion = np.where(comb_array)[0]
+                    if combustion.size:
+                        decisions[special[no_scorch_yet[combustion]]] = C._DECIDE["combustion"]
+                    used_buff = comb_array
+                    for buff in range(C._BUFFS):
+                        buff_ready = arrays['player']['buff_cooldown'][buff][still_going[special[no_scorch_yet]], next_hit[special[no_scorch_yet]]] <= 0.0
+                        buff_it = np.where(buff_ready&np.logical_not(used_buff))[0]
+                        if buff_it.size:
+                            decisions[special[no_scorch_yet[buff_it]]] = C._BUFF_CAST_TYPE[buff]
+                        used_buff |= buff_ready
+
+                    # then check want scorch
+                    avail = np.where(np.logical_not(used_buff))[0]
+                    if self._rotation['continuing']['special']['value'] == 'scorch':
+                        # scorch if ignite is active, and full stack
+                        want_scorch = (arrays['boss']['ignite_timer'][still_going[special[no_scorch_yet[avail]]]] > 0.0) &\
+                                      (arrays['boss']['ignite_count'][still_going[special[no_scorch_yet[avail]]]] == C._IGNITE_STACK)
+                        # and no trinkets active
+                        for buff in range(C._BUFFS):
+                            want_scorch &= arrays['player']['buff_timer'][buff][still_going[special[no_scorch_yet[avail]]], next_hit[special[no_scorch_yet[avail]]]] <= 0.0
+                        want_scorch &= arrays['player']['comb_left'][still_going[special[no_scorch_yet[avail]]], next_hit[special[no_scorch_yet[avail]]]] <= 0
+                    else:
+                        want_scorch = np.zeros(avail.shape, dtype=avail.dtype)
+
+                    to_scorch = np.where(want_scorch)[0]
+                    if to_scorch.size:
+                        decisions[special[no_scorch_yet[avail[to_scorch]]]] = C._CAST_SCORCH
+                    
+                    on_default = np.where(np.logical_not(want_scorch))[0]
+                    if on_default.size:
+                        decisions[special[no_scorch_yet[avail[on_default]]]] = C._DECIDE[self._rotation['continuing']['default']]
+
+                else: # not sure what this is for
                     decisions[special] = C._DECIDE[self._rotation['continuing']['special']['value']]
         else:
             not_special = np.arange(decisions.size)
 
         if not_special.size:
-            decisions[not_special] = C._DECIDE[self._rotation['continuing']['default']]
+            comb_array = arrays['player']['comb_cooldown'][still_going[not_special], next_hit[not_special]] <= 0.0
+            combustion = np.where(comb_array)[0]
+            if combustion.size:
+                decisions[not_special[combustion]] = C._DECIDE["combustion"]
+            used_buff = comb_array
+            for buff in range(C._BUFFS):
+                buff_ready = arrays['player']['buff_cooldown'][buff][still_going[not_special], next_hit[not_special]] <= 0.0
+                buff_it = np.where(buff_ready&np.logical_not(used_buff))[0]
+                if buff_it.size:
+                    decisions[not_special[buff_it]] = C._BUFF_CAST_TYPE[buff]
+                used_buff |= buff_ready
+
+            avail = np.where(np.logical_not(used_buff))[0]
+            if avail.size:
+                decisions[not_special[avail]] = C._DECIDE[self._rotation['continuing']['default']]
 
         return decisions
         

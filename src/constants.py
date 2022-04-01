@@ -4,12 +4,13 @@ _LOG_SIM = -1 # set to -1 for no log
 
 class Constant():
     
-    def __init__(self, sim_size=1000):
+    def __init__(self, double_dip, sim_size=1000):
+       
         self._FIREBALL_RANK = 12
         self._FROSTBOLT_TALENTED = False
         self._FROSTBOLT_RANK = 11
         self._INCINERATE = True
-        self._DMF = False
+        self._CLEANSING = True
         self._SIMPLE_SPELL = False
         self._GCD = 1.0 # global cooldown "cast time"
         
@@ -74,9 +75,12 @@ class Constant():
         self._CAST_GCD = 5 # placeholder for extra time due to GCD
         # below this line are instant/external source casts
         self._CAST_COMBUSTION = 6
-        self._CAST_MQG = 7
-        self._CAST_POWER_INFUSION = 8
-        self._CASTS = 9
+        self._CAST_SAPP = 7
+        self._CAST_TOEP = 8
+        self._CAST_ZHC = 9
+        self._CAST_MQG = 10
+        self._CAST_POWER_INFUSION = 11
+        self._CASTS = 12
 
         self._SP_MULTIPLIER = np.array([0.428571429, 1.0, 1.0, 0.428571429, 0.814285714])
         self._DAMAGE_MULTIPLIER = np.array([1.1, 1.1, 1.1, 1.1, 1.0]) # fire power
@@ -118,16 +122,30 @@ class Constant():
         self._POWER_INFUSION = 0.2
         self._MQG = 0.33
 
-        self._BUFF_MQG = 0
-        self._BUFF_POWER_INFUSION = 1
-        self._BUFFS = 2
+        self._BUFF_SAPP = 0
+        self._BUFF_TOEP = 1
+        self._BUFF_ZHC = 2
+        self._BUFF_MQG = 3
+        self._BUFF_POWER_INFUSION = 4
+        self._BUFFS = 5
+        self._DAMAGE_BUFFS = 3
 
-        self._BUFF_DURATION = np.array([20.0, 15.0])
-        self._BUFF_CAST_TYPE = np.array([self._CAST_MQG, self._CAST_POWER_INFUSION])
+        self._BUFF_DURATION = np.array([20.0, 15.0, 20.0, 20.0, 15.0])
+        self._BUFF_CAST_TYPE = np.array([self._CAST_SAPP, self._CAST_TOEP, self._CAST_ZHC, self._CAST_MQG, self._CAST_POWER_INFUSION])
+        self._BUFF_COOLDOWN = np.array([120.0, 90.0, 120.0, 300.0, 180.0])
+        self._BUFF_DAMAGE = np.array([130.0, 175.0, 204.0])
+        self._BUFF_PER_TICK = np.array([0.0, 0.0, -17.0])
 
         self._DEBUFFS = 0
 
-        self._DMF_BUFF = 1.0 if not self._DMF else 1.1
+        self._NORMAL_BUFF = double_dip
+        self._CRIT_BUFF = 1.0
+        self._IGNITE_BUFF = double_dip
+
+        self._NORMAL_BUFF_C = double_dip*(1.0 if not self._CLEANSING else 1.02)
+        self._CRIT_BUFF_C = (1.0 if not self._CLEANSING else 1.02)
+        self._IGNITE_BUFF_C = double_dip*(1.0 if not self._CLEANSING else 1.02)
+
 
         self._IGNITE_DAMAGE = 0.2
         self._ICRIT_DAMAGE = 0.5
@@ -135,11 +153,12 @@ class Constant():
 
         self._COMBUSTIONS = 3
         self._PER_COMBUSTION = 0.1
+        self._COMBUSTION_COOLDOWN = 180.0
         
         self._LONG_TIME = 999*self._DURATION_AVERAGE
 
         ## decision making
-        self._SCORCHES = np.array([9000, 6, 3, 2, 2, 2, 1, 1, 1, 1])
+        self._SCORCHES = np.array([9000, 6, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1])
         self._DECIDE = {
             "scorch": self._CAST_SCORCH,
             "pyroblast": self._CAST_PYROBLAST,
@@ -148,15 +167,25 @@ class Constant():
             "frostbolt": self._CAST_FROSTBOLT,
             "gcd": self._CAST_GCD,
             "combustion": self._CAST_COMBUSTION,
+            "sapp": self._CAST_SAPP,
+            "toep": self._CAST_TOEP,
+            "zhc": self._CAST_ZHC,
             "mqg": self._CAST_MQG,
             "pi": self._CAST_POWER_INFUSION}
-        self._AVAIL = {
+        self._BUFF_LOOKUP = {
+            "sapp": self._BUFF_SAPP,
+            "toep": self._BUFF_TOEP,
+            "zhc": self._BUFF_ZHC,
             "mqg": self._BUFF_MQG,
             "pi": self._BUFF_POWER_INFUSION}
         
         ## debugging
-        self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion', 'mqg       ', 'power inf ']
+        self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion',  'sapp      ', 'toep      ', 'zhc       ', 'mqg       ', 'power inf ']
         self._LOG_SIM = _LOG_SIM
+        
+        self._RES_AMOUNT = [0.75, 0.5, 0.25]
+        self._RES_THRESH = [0.9066, 96.78, 99.45]
+        self._RESISTANCE_MODIFIER = 0.966975
 
 class ArrayGenerator():
 
@@ -175,19 +204,22 @@ class ArrayGenerator():
             if 'clip' in entry:
                 array = np.maximum(entry['clip'][0], array)
                 array = np.minimum(entry['clip'][1], array)
-        elif 'fixed' in entry:
+        elif 'value' in entry:
             array = np.tile(entry['fixed'][None, :], (size[0], 1))
 
         return array
         
     def run(self, C):
         sim_size = self._params['sim_size']
-        num_mages = self._params['num_mages']['num_mages']
+        num_mages = self._params['configuration']['num_mages']
         arrays = {
             'global': {
                 'total_damage': np.zeros(sim_size),
                 'running_time': np.zeros(sim_size),
-                'decision': np.zeros(sim_size).astype(np.bool)},
+                'decision': np.zeros(sim_size).astype(np.bool),
+                'ignite': np.zeros(sim_size),
+                'crit': np.zeros(sim_size),
+                'player': np.zeros(sim_size)},
             'boss': {
                 'ignite_timer': np.zeros(sim_size),
                 'ignite_count': np.zeros(sim_size).astype(np.int32),
@@ -205,49 +237,53 @@ class ArrayGenerator():
                 'comb_stack': np.zeros((sim_size, num_mages)).astype(np.int32),
                 'comb_left': np.zeros((sim_size, num_mages)).astype(np.int32),
                 'comb_avail': np.ones((sim_size, num_mages)).astype(np.int32),
+                'comb_cooldown': np.inf*np.ones((sim_size, num_mages)).astype(np.int32),
                 'cast_number': -np.ones((sim_size, num_mages)).astype(np.int32),
                 'buff_timer': [np.zeros((sim_size, num_mages)) for aa in range(C._BUFFS)],
-                'buff_avail': [np.zeros((sim_size, num_mages)).astype(np.int32) for aa in range(C._BUFFS)],
+                'buff_cooldown': [np.inf*np.ones((sim_size, num_mages)) for aa in range(C._BUFFS)],
+                'buff_ticks': [np.zeros((sim_size, num_mages)).astype(np.int32) for aa in range(C._DAMAGE_BUFFS)],
                 'gcd': np.zeros((sim_size, num_mages))
             }
         }
-        if self._params["mc"]:
-            arrays['global']['ignite'] = np.zeros(sim_size)
-        if 'duration' in self._params:
-            arrays['global']['duration'] = self._params['duration']
-        else:
-            arrays['global']['duration'] = self._distribution(self._params['timing']['duration'],
-                                                              sim_size)
             
-        arrays['player']['cast_timer'] = np.abs(self._params['delay']*np.random.randn(sim_size,
-                                                                                      num_mages))
-        #if self._params["mc"]:
-        #    if "correlated_fraction" in self._params["mc"]:
-        #        if np.random.rand() < self._params["mc"]["correlated_fraction"]:
-        #            for name in ['spell_power', 'hit_chance', 'crit_chance']:
-        #                value = np.random.rand()
-        #                entry = {'fixed': self._param[name]['fixed'][0]*(1 - value) +\
-        #                                 self._param[name]['fixed'][1]*value,
-        #                         'var': self._params["mc"]["correlated_std"]*(self._param[name]['fixed'][1] - self._param[name]['fixed'][0]),
-        #                         'clip': self._param[name]['fixed']}
-        #                self._param[name] = entry
-                    
-        for name in ['spell_power', 'hit_chance', 'crit_chance']:
-            arrays['player'][name] = self._distribution(self._params[name],
-                                                        (sim_size, num_mages))
-            if "chance" in name:
-                arrays['player'][name] = (100*arrays['player'][name]).astype(np.int32)
-                arrays['player'][name] = arrays['player'][name].astype(np.float)/100.0
-            
-        arrays['player']['spell_power'].sort(axis=1)
-        if 'single' in self._params:
-            name = [k for k, v in self._params['stats'].items() if 'single' in v][0]
-            arrays['player'][name][np.arange(sim_size),
-            self._params['stats'][name]['single']['slot']] = self._params['single']
-        config = [config for config in self._params['configuration'] if config['num_mages'] == num_mages][0]
-        arrays['player']['buff_avail'][C._BUFF_MQG][:, (num_mages - config['num_mqg']):] = 1
-        arrays['player']['buff_avail'][C._BUFF_POWER_INFUSION][:, (num_mages - config['num_pi']):] = 1
+        arrays['global']['duration'] = self._distribution(self._params['timing']['duration'], sim_size)
+        arrays['player']['cast_timer'] = np.abs(self._params['timing']['delay']*np.random.randn(sim_size, num_mages))
         
+        arrays["player"]["spell_power"] = np.tile(np.array(self._params["stats"]["spell_power"])[None, :], (sim_size, 1))
+        arrays["player"]["spell_power"] += 35*("greater_arcane_elixir" in self._params["buffs"]["consumes"])
+        arrays["player"]["spell_power"] += 40*("elixir_of_greater_firepower" in self._params["buffs"]["consumes"])
+        arrays["player"]["spell_power"] += 150*("flask_of_supreme_power" in self._params["buffs"]["consumes"])
+        arrays["player"]["spell_power"] += 60*("blessed_wizard_oil" in self._params["buffs"]["consumes"])
+        arrays["player"]["spell_power"] += 36*("brilliant_wizard_oil" in self._params["buffs"]["consumes"])
+        
+        intellect = np.tile(np.array(self._params["stats"]["intellect"], dtype=np.float)[None, :], (sim_size, 1))
+        intellect += 31.0*float("arcane_intellect" in self._params["buffs"]["raid"]) + 1.35*12.0*float("improved_mark" in self._params["buffs"]["raid"])
+        intellect *= (1 + 0.1*float("blessing_of_kings" in self._params["buffs"]["raid"]))*(1 + 0.15*float("spirit_of_zandalar" in self._params["buffs"]["world"]))
+        racial = np.array([1.05 if rac == "gnome" else 1.0 for rac in self._params["buffs"]["racial"]])
+        intellect *= racial
+
+        # 0.062 = 6% talents + 0.2% base
+        arrays["player"]["crit_chance"] = 0.062 + np.tile(np.array(self._params["stats"]["crit_chance"])[None, :], (sim_size, 1))
+        arrays["player"]["crit_chance"] += 0.01*float("brilliant_wizard_oil" in self._params["buffs"]["consumes"])
+        arrays["player"]["crit_chance"] += 0.1*float("rallying_cry_of_the_dragonslayer" in self._params["buffs"]["world"])
+        arrays["player"]["crit_chance"] += 0.03*float("moonkin_aura" in self._params["buffs"]["raid"])
+        arrays["player"]["crit_chance"] += 0.05*float("songflower_serenade" in self._params["buffs"]["world"])
+        arrays["player"]["crit_chance"] += 0.03*float("dire_maul_tribute" in self._params["buffs"]["world"])
+        arrays["player"]["crit_chance"] += intellect/5950
+        arrays["player"]["crit_chance"] += 0.60*float("loatheb" in self._params["buffs"]["boss"])
+        arrays["player"]["crit_chance"] = np.minimum(1.00, arrays["player"]["crit_chance"])
+        
+        arrays["player"]["hit_chance"] = 0.89 + np.tile(np.array(self._params["stats"]["hit_chance"])[None, :], (sim_size, 1))
+        arrays["player"]["hit_chance"] = np.minimum(0.99, arrays["player"]["hit_chance"])
+        
+        for key, val in C._BUFF_LOOKUP.items():
+            for index in self._params["configuration"][key]:
+                arrays["player"]["buff_cooldown"][val][:, index] = 0.0
+        
+        arrays["player"]["cleaner"] = np.array(self._params["configuration"]["udc"]).reshape(1, len(self._params["configuration"]["udc"]))
+        arrays["player"]["pi"] = np.array(self._params["configuration"]["pi"]).reshape(1, len(self._params["configuration"]["pi"]))
+        arrays["player"]["target"] = np.array(self._params["configuration"]["target"]).reshape(1, len(self._params["configuration"]["target"]))
+      
         return arrays
             
 def log_message():

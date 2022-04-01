@@ -1,0 +1,108 @@
+{
+    "stats": {
+    	"spell_power": [
+            781,
+            781,
+            781,
+            781,
+            781
+	    ],
+    	"hit_chance": [
+            0.10,
+            0.10,
+            0.10,
+            0.10,
+            0.10
+	    ],
+    	"crit_chance": [
+            0.11,
+            0.11,
+            0.11,
+            0.11,
+            0.11
+        ],
+        "intellect": [
+            284,
+            284,
+            284,
+            284,
+            284
+        ]
+    },
+    "buffs": {
+        "raid": [
+            "arcane_intellect",
+            "improved_mark"
+        ],
+        "consumes": [
+            "greater_arcane_elixir",
+            "elixir_of_greater_firepower",
+            "flask_of_supreme_power",
+            "brilliant_wizard_oil"
+        ],
+        "world": [],
+        "racial": [
+            "human",
+            "human",
+            "human",
+            "human",
+            "human"
+        ],
+        "boss": []
+    },
+    "configuration": {
+        "num_mages": 5,
+        "target": [
+            4
+        ],
+        "sapp": [
+            0,
+            1,
+            2,
+            3,
+            4
+        ],
+        "toep": [],
+        "zhc": [],
+        "mqg": [],
+        "pi": [],
+        "udc": [
+            0,
+            1,
+            2,
+            3,
+            4
+        ]
+    },
+    "rotation": {
+        "initial": {
+            "common": [
+                "fireball",
+                "combustion",
+                "fireball"
+            ],
+            "other": []
+        },
+        "continuing": {
+            "default": "fireball",
+            "special": {
+                "slot": [
+                    0
+                ],
+                "value": "maintain_scorch"
+            }
+        }
+    },
+    "timing": {
+	    "duration": {
+	        "mean": 80.0,
+            "var": 5.0,
+	        "clip": [
+    	    	20.0,
+	    	    200.0
+            ]
+        },   
+    	"delay": 1.0,
+        "response": 0.05
+    }
+}

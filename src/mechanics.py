@@ -4,12 +4,13 @@ from decisions import Decider
 
 class Encounter():
 
-    def __init__(self, array_generator, rotation, response, config, is_mc):
+    def __init__(self, array_generator, rotation, response, config, world_buffs, boss_buffs):
         self._array_generator = array_generator
         self._rotation = rotation
         self._response = response
         self._config = config
-        self._is_mc = is_mc
+        self._world_buffs = world_buffs
+        self._boss_buffs = boss_buffs
 
     def _subtime(self, sub, add_time):
         C = self._C
@@ -20,11 +21,13 @@ class Encounter():
         running_time[sub] += add_time
         player['cast_timer'][sub, :] -= add_time[:, None]
         player['spell_timer'][sub, :] -= add_time[:, None]
+        player['comb_cooldown'][sub, :] -= add_time[:, None]
         boss['ignite_timer'][sub] -= add_time
         boss['tick_timer'][sub] -= add_time
         boss['scorch_timer'][sub] -= add_time
         for buff in range(C._BUFFS):
             player['buff_timer'][buff][sub, :] -= add_time[:, None]
+            player['buff_cooldown'][buff][sub, :] -= add_time[:, None]
         for debuff in range(C._DEBUFFS):
             boss['debuff_timer'][debuff][sub] -= add_time
 
@@ -59,11 +62,22 @@ class Encounter():
             player['comb_left'][cst[combustion], next_hit[combustion]] = C._COMBUSTIONS
             player['comb_stack'][cst[combustion], next_hit[combustion]] = 1
             player['comb_avail'][cst[combustion], next_hit[combustion]] -= 1
+            player['comb_cooldown'][cst[combustion], next_hit[combustion]] = np.inf # temporary
 
             for buff in range(C._BUFFS):
                 tbuff = np.where(player['cast_type'][cst, next_hit] == C._BUFF_CAST_TYPE[buff])[0]
                 player['buff_timer'][buff][cst[tbuff], next_hit[tbuff]] = C._BUFF_DURATION[buff]
-                player['buff_avail'][buff][cst[tbuff], next_hit[tbuff]] -= 1
+                #player['buff_avail'][buff][cst[tbuff], next_hit[tbuff]] -= 1
+                player['buff_cooldown'][buff][cst[tbuff], next_hit[tbuff]] = C._BUFF_COOLDOWN[buff]
+                if buff < C._DAMAGE_BUFFS:
+                    player['buff_ticks'][buff][cst[tbuff], next_hit[tbuff]] = 0
+                # internal cooldown (MQG too)
+                if buff < C._DAMAGE_BUFFS + 1:
+                    for buff2 in range(C._DAMAGE_BUFFS + 1):
+                        if buff2 == buff:
+                            continue
+                        player['buff_cooldown'][buff2][cst[tbuff], next_hit[tbuff]] =\
+                            np.maximum(player['buff_cooldown'][buff2][cst[tbuff], next_hit[tbuff]], C._BUFF_DURATION[buff])
 
             # determine gcd        
             gcd_array = player['gcd'][cst, next_hit] > 0.0
@@ -113,16 +127,33 @@ class Encounter():
                 next_hit = lnext_hit[spell_hits]
                 spell_type = player['spell_type'][sph, next_hit]
 
+                #print(self._arrays['player']['cleaner'], self._arrays['player']['cleaner'].shape)
+                the_cleaner = np.any(np.equal(next_hit.reshape(next_hit.size, 1), self._arrays['player']['cleaner']), axis=1)
+                #the_cleaner = (next_hit == self._arrays['player']['cast_number'].shape[1] - 1) | (next_hit == 1)
+                the_player = np.any(np.equal(next_hit.reshape(next_hit.size, 1), self._arrays['player']['target']), axis=1)
+                is_play = np.where(the_player)[0]
+                is_clean = np.where(the_cleaner)[0]
+                not_clean = np.where(np.logical_not(the_cleaner))[0]
+                
+                buff_damage = np.zeros(sph.size)
+                for buff in range(C._DAMAGE_BUFFS):
+                    active = (player['buff_timer'][buff][sph, next_hit] > 0.0).astype(np.float)
+                    ticks = player['buff_ticks'][buff][sph, next_hit]
+                    buff_damage += active*(C._BUFF_DAMAGE[buff] + ticks*C._BUFF_PER_TICK[buff])
+                    player['buff_ticks'][buff][sph, next_hit] += 1
+                    
                 spell_damage = C._SPELL_BASE[spell_type] + \
                                C._SPELL_RANGE[spell_type]*np.random.rand(sph.size) +\
-                               C._SP_MULTIPLIER[spell_type]*player['spell_power'][sph, next_hit]
+                               C._SP_MULTIPLIER[spell_type]*(player['spell_power'][sph, next_hit] + buff_damage)
                 spell_damage *= C._COE_MULTIPLIER*C._DAMAGE_MULTIPLIER[spell_type] # CoE + talents
                 scorch = C._IS_FIRE[spell_type]*C._SCORCH_MULTIPLIER*boss['scorch_count'][sph]
                 spell_damage *= 1.0 + scorch*(boss['scorch_timer'][sph] > 0.0).astype(np.float)
                 pi = (player['buff_timer'][C._BUFF_POWER_INFUSION][sph, next_hit] > 0.0).astype(np.float)
                 spell_damage *= 1.0 + C._POWER_INFUSION*pi
-                spell_damage *= C._DMF_BUFF
+                spell_damage[not_clean] *= C._NORMAL_BUFF
+                spell_damage[is_clean] *= C._NORMAL_BUFF_C
                 self._damage[sph] += spell_damage
+                self._arrays['global']['player'][sph[is_play]] += spell_damage[is_play] 
                 # ADD ADDITIONAL OVERALL MULTIPLIERS TO _DAMAGE_MULTIPLIER
 
                 # handle critical hit/ignite ** READ HERE FOR MOST OF THE IGNITE MECHANICS **
@@ -134,6 +165,16 @@ class Encounter():
                 crit_array = np.random.rand(sph.size) < crit_chance
                 
                 ignite_array = crit_array & C._IS_FIRE[spell_type].astype(np.bool)
+
+                lcrit_clean = np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & the_cleaner)[0]
+                lnot_crit_clean = np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & np.logical_not(the_cleaner))[0]
+
+                gcrit_clean = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & the_cleaner)[0]]
+                gnot_crit_clean = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & np.logical_not(the_cleaner))[0]]
+
+                lcrit_play = np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & the_player)[0]
+                gcrit_play = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & the_player)[0]]
+
                 lcl_icrits = np.where(ignite_array)[0]
                 gbl_icrits = sph[lcl_icrits]
                 inext_hit = next_hit[lcl_icrits]
@@ -143,32 +184,55 @@ class Encounter():
                 boss['ignite_count'][gbl_icrits[rem_val]] = 0
                 boss['ignite_value'][gbl_icrits[rem_val]] = 0.0
 
+                # extend by 4 secs, reset timer if no more ticks (31MAR22)
+                # comment this section and uncomment next section to return to classic mechanics
+                new_tick = np.where((boss['tick_timer'][gbl_icrits] > C._IGNITE_TICK) & (boss['ignite_count'][gbl_icrits] > 0))[0]
+                boss['tick_timer'][gbl_icrits[new_tick]] = C._IGNITE_TICK
+                boss['ignite_timer'][gbl_icrits] = C._IGNITE_TIME + epsilon
+
                 # add tick if 1 tick remaining
                 # comment this section and uncomment next section to return to TBC mechanics
-                new_tick = np.where(boss['ignite_timer'][gbl_icrits] <= C._IGNITE_TICK)[0]
-                boss['ignite_timer'][gbl_icrits[new_tick]] += C._IGNITE_TICK
+                #new_tick = np.where(boss['ignite_timer'][gbl_icrits] <= C._IGNITE_TICK)[0]
+                #boss['ignite_timer'][gbl_icrits[new_tick]] += C._IGNITE_TICK
 
                 ## refresh ignite to full 4 seconds
                 #boss['ignite_timer'][gbl_icrits] = C._IGNITE_TIME + epsilon
 
                 # if we dont have a full stack
-                mod_val = np.where(boss['ignite_count'][gbl_icrits] < C._IGNITE_STACK)[0]
+                mod_val = np.where(boss['ignite_count'][gnot_crit_clean] < C._IGNITE_STACK)[0]
                 # add to the ignite tick damage -- 1.5 x  0.2 x spell hit damage
-                boss['ignite_value'][gbl_icrits[mod_val]] += (1.0 + C._ICRIT_DAMAGE)*C._IGNITE_DAMAGE*spell_damage[lcl_icrits[mod_val]]
+                boss['ignite_value'][gnot_crit_clean[mod_val]] += (1.0 + C._ICRIT_DAMAGE)*C._CRIT_BUFF*C._IGNITE_DAMAGE*spell_damage[lnot_crit_clean[mod_val]]
+                mod_val = np.where(boss['ignite_count'][gcrit_clean] < C._IGNITE_STACK)[0]
+                # add to the ignite tick damage -- 1.5 x  0.2 x spell hit damage
+                boss['ignite_value'][gcrit_clean[mod_val]] += (1.0 + C._ICRIT_DAMAGE)*C._CRIT_BUFF_C*C._IGNITE_DAMAGE*spell_damage[lcrit_clean[mod_val]]
 
                 # first in stack, set the tick
-                mod_val2 = np.where(boss['ignite_count'][gbl_icrits] == 0)[0]
-                boss['tick_timer'][gbl_icrits[mod_val2]] = C._IGNITE_TICK
+                mod_val2 = np.where(boss['ignite_count'][gnot_crit_clean] == 0)[0]
+                boss['tick_timer'][gnot_crit_clean[mod_val2]] = C._IGNITE_TICK
                 # comment the next line to return to TBC ignite mechanics
-                boss['ignite_timer'][gbl_icrits[mod_val2]] = C._IGNITE_TIME + epsilon
-                boss['ignite_multiplier'][gbl_icrits[mod_val2]] = C._DMF_BUFF*(1.0 + C._POWER_INFUSION*pi[lcl_icrits[mod_val2]])
+                boss['ignite_timer'][gnot_crit_clean[mod_val2]] = C._IGNITE_TIME + epsilon
+                boss['ignite_multiplier'][gnot_crit_clean[mod_val2]] = C._IGNITE_BUFF*(1.0 + C._POWER_INFUSION*pi[lnot_crit_clean[mod_val2]])
+                mod_val2 = np.where(boss['ignite_count'][gcrit_clean] == 0)[0]
+                boss['tick_timer'][gcrit_clean[mod_val2]] = C._IGNITE_TICK
+                # comment the next line to return to TBC ignite mechanics
+                boss['ignite_timer'][gcrit_clean[mod_val2]] = C._IGNITE_TIME + epsilon
+                boss['ignite_multiplier'][gcrit_clean[mod_val2]] = C._IGNITE_BUFF_C*(1.0 + C._POWER_INFUSION*pi[lcrit_clean[mod_val2]])
+
 
                 # increment to max of five (will do nothing if already at 5)
                 boss['ignite_count'][gbl_icrits] = np.minimum(boss['ignite_count'][gbl_icrits] + 1, C._IGNITE_STACK)
 
                 # add crit to damage
                 self._damage[gbl_icrits] += C._ICRIT_DAMAGE*spell_damage[lcl_icrits]
-            
+                self._arrays['global']['player'][gcrit_play] -= spell_damage[lcrit_play] 
+                self._arrays['global']['player'][gcrit_play] += spell_damage[lcrit_play]*(1.0 + C._ICRIT_DAMAGE)*C._CRIT_BUFF_C
+                
+                self._crit[gbl_icrits] += (1.0 + C._ICRIT_DAMAGE)*spell_damage[lcl_icrits]
+
+                # check last combustion
+                comb_off = np.where(player['comb_left'][gbl_icrits, inext_hit] == 1)[0]
+                player['comb_cooldown'][gbl_icrits[comb_off], inext_hit[comb_off]] = C._COMBUSTION_COOLDOWN
+
                 # remove from combustion
                 player['comb_left'][gbl_icrits, inext_hit] = np.maximum(player['comb_left'][gbl_icrits, inext_hit] - 1, 0)
 
@@ -207,9 +271,12 @@ class Encounter():
                     dam_done = ' {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM] + self._damage[C._LOG_SIM])
                     message = message + message2
                     buffs = player['buff_timer']
-                    is_mqg = 'msg' if buffs[C._BUFF_MQG][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
+                    is_sapp = 'sap' if buffs[C._BUFF_SAPP][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
+                    is_toep = 'toep' if buffs[C._BUFF_TOEP][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
+                    is_zhc = 'zhc' if buffs[C._BUFF_ZHC][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
+                    is_mqg = 'mqg' if buffs[C._BUFF_MQG][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
                     is_pi =  'pi' if buffs[C._BUFF_POWER_INFUSION][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '  '
-                    status = ' ic {:d} it {:4.2f} in {:s} id {:4.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d} {:s} {:s}'
+                    status = ' ic {:d} it {:4.2f} in {:s} id {:4.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d} {:s} {:s} {:s} {:s} {:s}'
                     ival = boss['tick_timer'][C._LOG_SIM]
                     istat = '{:4.2f}'.format(ival) if ival > 0.0 and ival <= 2.0 else ' off'
                     status = status.format(boss['ignite_count'][C._LOG_SIM],
@@ -220,6 +287,9 @@ class Encounter():
                                            max([boss['scorch_timer'][C._LOG_SIM], 0.0]),
                                            player['comb_stack'][C._LOG_SIM, lnext_hit[sub_index]],
                                            player['comb_left'][C._LOG_SIM, lnext_hit[sub_index]],
+                                           is_sapp,
+                                           is_toep,
+                                           is_zhc,
                                            is_mqg,
                                            is_pi)
                     print(dam_done + message + status)
@@ -235,18 +305,26 @@ class Encounter():
             self._subtime(tic, add_time)
         
             ignite_expire = boss['ignite_timer'][tic] <= 0.0
-            yes_expire = tic[np.where(ignite_expire)[0]]
-            boss['tick_timer'][yes_expire] = C._LONG_TIME
-            
             no_expire = tic[np.where(np.logical_not(ignite_expire))[0]]
-            boss['tick_timer'][no_expire] = C._IGNITE_TICK
 
+            # new ignite mechanics (31MAR22) comment this section and uncomment block below to revert
+            refresh_array = boss['ignite_timer'][tic] >= 2.0
+            new_ignite = tic[np.where(refresh_array)[0]]
+            no_ignite = tic[np.where(np.logical_not(refresh_array))[0]]
+            boss['tick_timer'][new_ignite] = C._IGNITE_TICK
+            boss['tick_timer'][no_ignite] = C._LONG_TIME
+
+            ## uncomment to revert
+            #yes_expire = tic[np.where(ignite_expire)[0]]
+            #boss['tick_timer'][yes_expire] = C._LONG_TIME
+            #boss['tick_timer'][no_expire] = C._IGNITE_TICK
+            #multiplier = np.ones(no_expire.shape)
+            
             scorch = C._SCORCH_MULTIPLIER*boss['scorch_count'][no_expire]
             multiplier = C._COE_MULTIPLIER*boss['ignite_multiplier'][no_expire]
             multiplier *= 1.0 + scorch*(boss['scorch_timer'][no_expire] > 0.0).astype(np.float)
             self._damage[no_expire] += multiplier*boss['ignite_value'][no_expire]
-            if self._is_mc:
-                self._ignite[no_expire] += multiplier*boss['ignite_value'][no_expire]
+            self._ignite[no_expire] += multiplier*boss['ignite_value'][no_expire]
             if C._LOG_SIM >= 0:
                 if C._LOG_SIM in no_expire:
                     sub_index = no_expire.tolist().index(C._LOG_SIM)
@@ -310,16 +388,19 @@ class Encounter():
                 print(message)
         self._arrays['global']['decision'] = np.zeros(self._arrays['global']['decision'].shape, dtype=np.bool)
     
-    def run(self):
-        C = constants.Constant()
+    def run(self, ret_dist):
+        double_dip = (1.0 + 0.1*float("sayges_dark_fortune_of_damage" in self._world_buffs))
+        double_dip *= (1.0 + 1.9*float("thaddius" in self._boss_buffs))
+        C = constants.Constant(double_dip)
         self._C = C
+
         self._arrays = self._array_generator.run(C)
 
         decider = Decider(C,
                           self._rotation,
                           self._arrays['player']['cast_number'].shape,
                           self._config)
-        
+
         # prep for first player to "move"
         first_act = np.min(self._arrays['player']['cast_timer'], axis=1)
         self._arrays['global']['duration'] += first_act
@@ -332,45 +413,47 @@ class Encounter():
         still_going = np.arange(self._arrays['global']['running_time'].size)
         while True:
             self._damage = np.zeros(self._arrays['global']['total_damage'].size)
-            if self._is_mc:
-                self._ignite = np.zeros(self._arrays['global']['total_damage'].size)
+            self._crit = np.zeros(self._arrays['global']['total_damage'].size)
+            self._ignite = np.zeros(self._arrays['global']['total_damage'].size)
             decisions, next_hit = decider.get_decisions(self._arrays, still_going)
             self._apply_decisions(still_going, decisions, next_hit)
             while self._advance():
                 still_going = np.where(self._arrays['global']['running_time'] < self._arrays['global']['duration'])[0]
             self._arrays['global']['total_damage'][still_going] += self._damage[still_going]
-            if self._is_mc:
-                self._arrays['global']['ignite'][still_going] += self._ignite[still_going]
+            self._arrays['global']['crit'][still_going] += self._crit[still_going]
+            self._arrays['global']['ignite'][still_going] += self._ignite[still_going]
             if not still_going.size:
                 break
+            
+        self._arrays['global']['total_damage'] -= (1 - C._RESISTANCE_MODIFIER)*self._arrays['global']['ignite']
+        self._arrays['global']['total_damage'] *= C._RESISTANCE_MODIFIER
+        self._arrays['global']['crit'] *= C._RESISTANCE_MODIFIER
+        self._arrays['global']['ignite'] *= C._RESISTANCE_MODIFIER*C._RESISTANCE_MODIFIER
         
         if C._LOG_SIM >= 0:
             print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]))
             print('average damage = {:9.1f}'.format(self._arrays['global']['total_damage'].mean()))
             print('std damage = {:7.1f}'.format(self._arrays['global']['total_damage'].std()))
-            if self._is_mc:
-                print('ignite damage = {:9.1f}'.format(self._arrays['global']['ignite'].mean()))
+            print('crit damage = {:9.1f}'.format(self._arrays['global']['crit'].mean()))
+            print('ignite damage = {:9.1f}'.format(self._arrays['global']['ignite'].mean()))
 
-        dp_mage = self._arrays['global']['total_damage']/self._arrays['global']['duration']
+        dp_mage = self._arrays['global']['player']/self._arrays['global']['duration']
+        solo_mage = dp_mage + self._arrays['global']['ignite']*len(self._config["target"])/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration']
+        if ret_dist:
+            return solo_mage
+        npm = 9*dp_mage.size//10
+        opc = dp_mage.size//100
+        smage = np.sort(solo_mage)
 
-        total_dps = dp_mage.mean()
-        if self._is_mc:
-            ip_mage = self._arrays['global']['ignite']/self._arrays['global']['duration']
-            ssize = dp_mage.size
-            pmage = np.stack([dp_mage, ip_mage], axis=1)
-            spage = np.sort(pmage, axis=0)
-            npm = 9*ssize//10
-            return total_dps, ip_mage.mean(), spage[(npm - 100):(npm + 100), 0].mean(), spage[(npm - 100):(npm + 100), 1].mean() 
-        else:
-            return total_dps
-                
+        return solo_mage.mean(), solo_mage.std(), smage[(npm - opc):(npm + opc)].mean()
 
-def get_damage(params):
+def get_damage(params, ret_dist=False):
     array_generator = constants.ArrayGenerator(params)
     encounter = Encounter(array_generator,
                           params['rotation'],
                           params['timing']['response'],
                           params['configuration'],
-                          params['mc'])
-    return encounter.run()
+                          params["buffs"]["world"],
+                          params["buffs"]["boss"])
+    return encounter.run(ret_dist)
 

@@ -1,334 +1,1046 @@
 import os
-import sys
-import numpy as np
 import json
-import itertools
-from collections import OrderedDict
-from sortedcontainers import SortedDict
-from pathos.multiprocessing import Pool
+from copy import deepcopy
+from mechanics import get_damage
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-from copy import deepcopy
-import pickle
-import time
-from mechanics import get_damage
+import numpy as np
+from scipy import optimize
 
-VERSION = 2
+VERSION = 3
 
-def str_encode(n):
-    enc_table_64 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
-    
-    if n == 0:
-        return enc_table_64[0]
-    base = len(enc_table_64)
-    digits = ""    
-    while n:
-        digits += enc_table_64[int(n % base)]
-        n //= base
-
-    return digits[::-1]
-
-def get_str():
-    digits = ""
-    for rr in range(3):
-        digits += str_encode(np.random.randint(64**5))
-        
-    return digits
-
-def get_values(objs, idxs):
-    ret = {}
-    for idx, (name, obj) in zip(idxs, objs.items()):
-        if isinstance(obj, dict):
-            if 'mean' in obj:
-                ret[name] = get_values({name: obj['mean']}, [idx])[name]
-            elif 'value' in obj:
-                ret[name] = get_values({name: obj['value']}, [idx])[name]
-        elif isinstance(obj, list):
-            ret[name] = obj[idx]
-        else:
-            ret[name] = obj
-
-    return ret
-
-def all_values(obj):
-    if isinstance(obj, dict):
-        if 'mean' in obj:
-            return all_values(obj['mean'])
-        elif 'value' in obj:
-            return all_values(obj['value'])
-    elif isinstance(obj, list):
-        return obj
-    else:
-        return [obj]
-
-def num_elements(obj):
-    return len(all_values(obj))
-
-def get_element(config, var):
-    if var == 'spell_power':
-        return config['stats']['spell_power']
-    elif var == 'hit_chance':
-        return config['stats']['hit_chance']
-    elif var == 'crit_chance':
-        return config['stats']['crit_chance']
-    elif var == 'num_mages':
-        return config['configuration']
-    elif var == 'rotation':
-        if 'compare' in config['rotation']:
-            return config['rotation']['compare']
-        else:
-            return [config['rotation']['baseline']]
-    elif var == 'duration':
-        return config['timing']['duration']
-    elif var == 'delay':
-        return config['timing']['delay']
-    elif var == 'single':
-        cs = config['stats']
-        stats = [cs['spell_power'], cs['hit_chance'], cs['crit_chance']]
-        for stat in stats:
-            if 'single' in stat:
-                return stat['single']
-    else:
-        raise ValueError("Unknown variable.")
-
-def do_plot(values, intra, inter, y_desc, plot_type, plot_name, sim_size, t0):
-    sinter = SortedDict(inter)
-    colors = ['purple', 'indigo', 'darkblue', 'royalblue', 'skyblue', 'green', 'lime', 'gold', 'orange', 'darkorange', 'red', 'firebrick', 'black']
-    keys = []
-    vals = []
-    for k, vv in intra.items():
-        v = all_values(vv)
-        if k in ['crit_chance', 'hit_chance']:
-            keys.append(k.split('_')[0])
-            vals.append((100.0*np.array(v)).astype(np.int32))
-        elif k == 'spell_power':
-            keys.append('SP')
-            vals.append(np.array(v))
-        elif k == 'num_mages':
-            keys.append('mages')
-            vals.append(np.array([nv['num_mages'] for nv in v]))
-        else:
-            keys.append(k)
-            vals.append(np.array(v))
-
-    plt.close('all')
-    plt.figure(figsize=(10.0, 7.0), dpi=200)
-    title = ''
-    fn = ''
-    for k, v in sinter.items():
-        if k == 'rotation':
-            pass
-        elif k in ['duration', 'delay']:
-            title += ' {:s} = {:.1f}s'.format(k, v)
-            fn += '_{:s}{:d}'.format(k[1], int(v))
-        elif k in ['crit_chance', 'hit_chance']:
-            title += ' {:s} = {:d}%'.format(k.split('_')[0], int(v*100))
-            fn += '_{:s}{:d}'.format(k[0], int(v*100))
-        elif k == 'spell_power':
-            title += ' SP = {:d}'.format(int(v))
-            fn += '_s{:d}'.format(int(v))
-        elif k == 'single':
-            title += ' single mage crit = {:d}%'.format(int(v*100))
-            fn += '_m{:d}'.format(int(v*100))
-        elif k == 'num_mages':
-            title += ' # mages = {:d}, {:d} w/MQG, {:d} w/PI'.format(v['num_mages'], v['num_mqg'], v['num_pi'])
-            fn += '_n{:d}'.format(v['num_mages'])
-        
-    fn += '_ss{:d}'.format(sim_size)
-    plt.title(title)
-    print('{:8.1f}: {:s}'.format(time.time() - t0, title))
-    sys.stdout.flush()
-    relabel = {
-        'SP': 'Spell Power',
-        'hit': 'Hit Chance (percent)',
-        'crit': 'Crit Chance (percent)',
-        'single': 'Single Mage Crit Chance (percent)',
-        'duration': 'Duration (seconds)',
-        'delay': 'Delay (seconds)',
-        'mages': 'Number of Mages'}
-    plt.xlabel(relabel[keys[1]])
-    plt.ylabel(y_desc)
-            
-    for index, (lval, yval) in enumerate(zip(vals[0], values)):
-        color = colors[index*len(colors)//values.shape[0]]
-        plt.plot(vals[1], yval, label='{:} {:s}'.format(lval, keys[0]), color=color, marker='.')
-                
-    plt.legend()
-    plt.grid()
-    savefile = '../plots/{:s}/{:s}{:s}.png'.format(plot_type, plot_name, fn)
-    os.makedirs('../plots/{:s}'.format(plot_type), exist_ok=True)
-    plt.savefig(savefile)
-    savefile = '../savestates/{:s}/{:s}{:s}.pck'.format(plot_type, plot_name, fn)
-    os.makedirs('../savestates/{:s}'.format(plot_type), exist_ok=True)
-    with open(savefile, 'wb') as fid:
-        pickle.dump(values, fid)
-        pickle.dump(intra, fid)
-        pickle.dump(inter, fid)
-        pickle.dump(sim_size, fid)
-    
-def main_plot(config, name):
-    ss_nm = 5 # standard number of mages for sim_size purposes
-    sim_size = {
-        'rotation': 50000,
-        'crit_equiv': 50000,
-        'hit_equiv': 100000,
-        'dps': 10000,
-        'test': 100000}
-    variables = {'spell_power',
-                 'hit_chance',
-                 'crit_chance',
-                 'num_mages',
-                 'duration',
-                 'delay',
-                 'rotation'}
-    cs = config['stats']
-    stats = [cs['spell_power'], cs['hit_chance'], cs['crit_chance']]
-    if any(['single' in stat for stat in stats]):
-        variables.add('single')
-    intra_names = [config['plot']['lines'], config['plot']['x_axis']]
-    inter_names = variables - set(intra_names)
-    inter = OrderedDict([(iname, get_element(config, iname)) for iname in inter_names])
-    intra = OrderedDict([(iname, get_element(config, iname)) for iname in intra_names])
-    inter_idx = [np.arange(num_elements(element)) for element in inter.values()]
-    t0 = time.time()
-    for idxs in [*itertools.product(*inter_idx)]:
-        inter_param = get_values(inter, idxs)
-        intra_idx = [np.arange(num_elements(element)) for element in intra.values()]
-        plot_type = config['plot']['y_axis']
-        nom_ss = sim_size[plot_type]
-        args = [{**config,
-                 **inter_param,
-                 **get_values(intra, jdxs)}
-                for jdxs in [*itertools.product(*intra_idx)]]
-        args = [{**arg, **{'mc': False}, **{'sim_size': int(nom_ss*ss_nm/arg['num_mages']['num_mages'])}}
-                for arg in args]
-
-        if plot_type == "test":
-            args[0]['sim_size'] = nom_ss
-            value = get_damage(args[0])
-            print("total dps =", value)
-            return
-        elif plot_type == "rotation":
-            y_desc = 'Damage({:s})/Damage({:s})'.format(args[0]['rotation']['description'],
-                                                        config['rotation']['baseline']['description'])
-            with Pool() as p:
-                out1 = np.array(p.map(get_damage, args))
-            for index in range(len(args)):
-                args[index]['rotation'] = config['rotation']['baseline']
-            with Pool() as p:
-                out2 = np.array(p.map(get_damage, args))
-            value = out1/out2
-        elif plot_type == "crit_equiv":
-            y_desc = 'SP ratio'
-            dcrit = 0.025
-            dsp = 25.0
-            factor = dsp/dcrit/100.0
-            
-            orig_args = deepcopy(args)
-            outs = []
-            for dc, ds in zip([0.0, 0.0, -dcrit, +dcrit], [-dsp, +dsp, 0.0, 0.0]):
-                for index in range(len(args)):
-                    args[index]['crit_chance'] = orig_args[index]['crit_chance'] + dc
-                    args[index]['spell_power'] = orig_args[index]['spell_power'] + ds
-                with Pool() as p:
-                    out = np.array(p.map(get_damage, args))
-                outs.append(out)
-            value = factor*(outs[3] - outs[2])/(outs[1] - outs[0])
-        elif plot_type == "dps":
-            y_desc = "DPS"
-            with Pool() as p:
-                value = np.array(p.map(get_damage, args))
-
-        value = value.reshape([len(idx) for idx in intra_idx])
-        do_plot(value, intra, inter_param, y_desc, plot_type, name, nom_ss, t0)
-
-def main_mc(config, name):
-    ss_nm = 5 # standard number of mages for sim_size purposes
+def main(config, name, ret_dist=False):
     sim_size = 50000
-    t0 = time.time()
-    var_range = {
-        'spell_power': config["stats"]["spell_power"]["clip"],
-        'hit_chance': config["stats"]["hit_chance"]["clip"],
-        'crit_chance': config["stats"]["crit_chance"]["clip"],
-        'duration': config["timing"]["duration"]["clip"]}
-    dfn = '../mc/{:s}'.format(name)
-    os.makedirs(dfn, exist_ok=True)
-    have = len(os.listdir(dfn))
-    for bindex in range(have, config["mc_params"]["batches"]):
-        args = []
-        for iindex in range(config["mc_params"]["batch_size"]):
-            arg = {
-                "rotation": config["rotation"]["baseline"],
-                "configuration": config["configuration"],
-                "num_mages": config["configuration"][0],
-                "delay": config["timing"]["delay"],
-                "timing": config["timing"]}
-            arg["sim_size"] = sim_size*ss_nm/arg["num_mages"]["num_mages"]
-            if np.random.rand() < config["mc_params"]["correlated_fraction"]:
-                for var, rng in var_range.items():
-                    if var != "duration":
-                        if np.random.rand() < config["mc_params"]["correlated_edge"]:
-                            value = rng[1] if np.random.rand() < 0.5 else rng[0]
-                            arg[var] = {"fixed": value*np.ones(arg["num_mages"]["num_mages"])}
-                        else:
-                            arg[var] = {"fixed": rng[0] + np.random.rand()*(rng[1] - rng[0])*np.ones(arg["num_mages"]["num_mages"])}
-                        arg[var]["fixed"] += (rng[1] - rng[0])*config["mc_params"]["correlated_std"]*np.random.randn(arg["num_mages"]["num_mages"])
-                        arg[var]["fixed"] = np.maximum(arg[var]["fixed"], rng[0])
-                        arg[var]["fixed"] = np.minimum(arg[var]["fixed"], rng[1])
-            else:
-                for var, rng in var_range.items():
-                    if var != "duration":
-                        arg[var] = {"fixed": rng[0]*np.ones(arg["num_mages"]["num_mages"])}
-                        arg[var]["fixed"] += (rng[1] - rng[0])*np.random.rand(arg["num_mages"]["num_mages"])
-            rng = var_range['duration']
-            arg["timing"]["duration"] = {
-                    "mean": rng[0] + config["mc_params"]["duration_var"] + (rng[1] - rng[0] - 2.0*config["mc_params"]["duration_var"])*np.random.rand(),
-                    "var": config["mc_params"]["duration_var"],
-                    "clip": [rng[0], rng[1]]}
-            arg['sim_size'] = int((0.5*arg['sim_size']*(rng[1] + rng[0]))/arg["timing"]["duration"]["mean"])
-            arg['mc'] = True
-            arg['version'] = VERSION
-            args.append(deepcopy(arg))
+    config["sim_size"] = sim_size
+    values = get_damage(config, ret_dist=ret_dist)
+    print(f"  {name}={values[0]:6.1f}")
+    return values
 
-        #for arg in args:
-        #    print(arg)
-        #    value = get_damage(arg)
-        #    print(arg['spell_power'])
-        #    print(arg['hit_chance'])
-        #    print(arg['crit_chance'])
-        #    print(value)
-        #fdsojsd()
-
-        with Pool() as p:
-            out1 = np.array(p.map(get_damage, args))
-        savefile = '{:s}/{:s}_{:s}.pck'.format(dfn, name, get_str())
-        with open(savefile, 'wb') as fid:
-            for arg, out in zip(args, out1):
-                pickle.dump(out, fid)
-                pickle.dump(arg, fid)
-        print(bindex, time.time() - t0, out1.mean())
-        sys.stdout.flush()
-
-def test():
-    config_file = os.path.join(*['..', 'config', 'test.json'])
-    name = os.path.split(config_file)[-1].split('.')[0]
-    main_plot(config, name)
-        
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        config_file = sys.argv[1]
-    else:
-        config_file = os.path.join(*['..', 'config', 'test.json'])
+def load_config(cfn):
+    config_file = os.path.join("../config/", cfn)
     with open(config_file, 'rt') as fid:
         config = json.load(fid)
-    if len(sys.argv) > 2:
-        need = int(sys.argv[2])
-        if 'mc_params' in config:
-            config['mc_params']['batches'] = need
     name = os.path.split(config_file)[-1].split('.')[0]
-    print('starting', name)
-    if "plot" in config:
-        main_plot(config, name)
-    elif "mc_params" in config:
-        main_mc(config, name)
+    #print('starting', name)
+
+    return config
+
+def time_compare():
+    confs = ["non_udc_bis_5mages_4pi.json", "udc_bis_5mages_4pi.json"]
+    confs = ["non_udc_bis_4mages_4pi.json", "udc_bis_4mages_4pi.json"]
+    #confs = ["udc_bis_4mages_4pi_target.json", "udc_bis_4mages_4pi_target_non.json"]
+    #confs = ["udc_bis_5mages_4pi_sapp.json", "udc_bis_5mages_4pi.json"]
+#    confs = ["udc_bis_5mages_4pi.json", "udc_bis_5mages_4pi_T3pants.json"]
+        
+    trange = list(range(30, 185, 10))
+    #trange = [50]
+    vals = []
+    for tindex in trange:
+        val = [tindex]
+        for conf in confs:
+
+            config = load_config(conf)
+            #config["buffs"]["world"] = []
+            config["timing"]["duration"]["mean"] = float(tindex)
+            values = main(config, conf)
+            val.append(values[0])
+        vals.append(val)
+            
+    for t, a, b in vals:
+        print(f"{t:3d}: {b - a:5.1f}")
+
+def distribution():
+    #confs = ["non_udc_bis_5mages_4pi.json", "udc_bis_5mages_4pi_othersnon.json"]
+    confs = ["non_udc_bis_5mages_4pi.json", "udc_bis_5mages_4pi.json"]
+    plt.close('all')
+    plt.figure(figsize=(8.0, 5.5), dpi=200)
+    plt.title('60s encounter, n=1000000, others non-udc')
+    for conf in confs:
+        config = load_config(conf)
+        config["timing"]["duration"]["mean"] = 60.0
+        #config["configuration"]["target"] = [1]
+        config["buffs"]["world"] = []
+        values = main(config, conf, ret_dist=True)
+        print(f"  mean = {values.mean()}")
+        h, x = np.histogram(values, bins=500, range=[0, 3000])
+        x = (x[1:] + x[:-1])/2
+        plt.plot(x, h, label=conf.split('.')[0])
+    plt.xlabel('total mage dps')
+    plt.ylabel('')
+    plt.xlim(1300, 2000)
+    plt.legend()
+    plt.yticks([])
+    plt.savefig("dist.png")
+
+def simple_crit():
+    config = load_config("wrap_scenario.json")
+    configo = deepcopy(config)
+    configo["stats"]["spell_power"][0] += 25.0
+    dsp = main(configo, 'sp')[0]
+    configo["stats"]["spell_power"][0] -= 50.0
+    dsm = main(configo, 'sp')[0]
+    configo["stats"]["spell_power"][0] += 25.0
+    configo["stats"]["crit_chance"][0] += 0.01
+    dcp = main(configo, 'crit')[0]
+    configo["stats"]["crit_chance"][0] -= 0.02
+    dcm = main(configo, 'crit')[0]
+    ds = dsp - dsm
+    dc = dcp - dcm
+    print(f"crit(PI)={25*dc/ds:4.1f}")
+    
+
+def crit(config):
+    #config["buffs"]["world"] = []
+    trange = [20, 30, 40, 60, 90]
+    #trange = [50]
+    for tindex in trange:
+        configo = deepcopy(config)
+        configo["timing"]["duration"]["mean"] = float(tindex)
+        configo["stats"]["spell_power"][0] += 25.0
+        dsp = main(configo, 'sp')[0]
+        configo["stats"]["spell_power"][0] -= 50.0
+        dsm = main(configo, 'sp')[0]
+        configo["stats"]["spell_power"][0] += 25.0
+        configo["stats"]["crit_chance"][0] += 0.01
+        dcp = main(configo, 'crit')[0]
+        configo["stats"]["crit_chance"][0] -= 0.02
+        dcm = main(configo, 'crit')[0]
+        ds = dsp - dsm
+        dc = dcp - dcm
+        print(f"{tindex}s: crit(PI)={25*dc/ds:4.1f}")
+
+
+def fivepi_stat_weights(config):
+    #config["buffs"]["world"] = []
+    trange = [30, 50, 80, 110, 150]
+    #trange = [50]
+    for tindex in trange:
+        hit = []
+        crit = []
+        for pindex in [4, 5]:
+            configo = deepcopy(config)
+            configo["timing"]["duration"]["mean"] = float(tindex)
+            configo["stats"]["spell_power"][pindex] += 25.0
+            dsp = main(configo, 'sp')[0]
+            configo["stats"]["spell_power"][pindex] -= 50.0
+            dsm = main(configo, 'sp')[0]
+            configo["stats"]["spell_power"][pindex] += 25.0
+            configo["stats"]["hit_chance"][pindex] += 0.01
+            dhp = main(configo, 'hit')[0]
+            configo["stats"]["hit_chance"][pindex] -= 0.02
+            dhm = main(configo, 'hit')[0]
+            configo["stats"]["hit_chance"][pindex] += 0.01
+            configo["stats"]["crit_chance"][pindex] += 0.01
+            dcp = main(configo, 'crit')[0]
+            configo["stats"]["crit_chance"][pindex] -= 0.02
+            dcm = main(configo, 'crit')[0]
+            ds = dsp - dsm
+            dh = dhp - dhm
+            dc = dcp - dcm
+            hit.append(25*dh/ds)
+            crit.append(25*dc/ds)
+        print(f"{tindex}s: crit(PI)={crit[0]:4.1f} crit(no PI)={crit[1]:4.1f} hit(PI)={hit[0]:4.1f} hit(no PI)={hit[1]:4.1f}")
+
+def twopi_stat_weights(config):
+    config["buffs"]["world"] = []
+    trange = [50]
+    #trange = [50]
+    for tindex in trange:
+        hit = []
+        crit = []
+        for pindex in [0, 1]:
+            configo = deepcopy(config)
+            configo["timing"]["duration"]["mean"] = float(tindex)
+            configo["stats"]["spell_power"][pindex] += 25.0
+            dsp = main(configo, 'sp')[0]
+            configo["stats"]["spell_power"][pindex] -= 50.0
+            dsm = main(configo, 'sp')[0]
+            configo["stats"]["spell_power"][pindex] += 25.0
+            configo["stats"]["hit_chance"][pindex] += 0.01
+            dhp = main(configo, 'hit')[0]
+            configo["stats"]["hit_chance"][pindex] -= 0.02
+            dhm = main(configo, 'hit')[0]
+            configo["stats"]["hit_chance"][pindex] += 0.01
+            configo["stats"]["crit_chance"][pindex] += 0.01
+            dcp = main(configo, 'crit')[0]
+            configo["stats"]["crit_chance"][pindex] -= 0.02
+            dcm = main(configo, 'crit')[0]
+            ds = dsp - dsm
+            dh = dhp - dhm
+            dc = dcp - dcm
+            hit.append(25*dh/ds)
+            crit.append(25*dc/ds)
+        print(f"{tindex}s: crit(PI)={crit[0]:4.1f} crit(no PI)={crit[1]:4.1f} hit(PI)={hit[0]:4.1f} hit(no PI)={hit[1]:4.1f}")
+    
+
+def trinket(config):
+    mqg_mark = []
+    tear_mark = []
+    trange = list(range(30, 185, 10))
+    config["buffs"]["world"] = []
+    for tindex in trange:
+        configo = deepcopy(config)
+        configo["timing"]["duration"]["mean"] = float(tindex)
+        mqg_mark.append(main(configo, 'hi')[0])
+        configo["stats"]["spell_power"][4] += 44 + 4
+        configo["stats"]["hit_chance"][4] += 0.01
+        configo["stats"]["crit_chance"][4] += 0.01
+        configo["configuration"]["mqg"].remove(4)
+        tear_mark.append(main(configo, 'hi')[0])
+    for tt, d1, d2 in zip(trange, mqg_mark, tear_mark):
+        print(tt, d1, d2)
+
+def loatheb_stat_weights(config):
+    configo = deepcopy(config)
+    configo["timing"]["duration"]["mean"] = float(80)
+    configo["buffs"]["boss"].append("loatheb")
+    base = main(configo, 'base')[0]
+    configo["stats"]["spell_power"][4] += 10.0
+    ds = main(configo, 'base')[0]
+    configo["stats"]["spell_power"][4] -= 10.0
+    configo["stats"]["hit_chance"][4] += 0.01
+    dh = main(configo, 'base')[0]
+    configo["stats"]["hit_chance"][4] -= 0.01
+    configo["stats"]["crit_chance"][4] += 0.01
+    dc = main(configo, 'base')[0]
+    print(10*(dh - base)/(ds - base))
+    print(10*(dc - base)/(ds - base))
+    #configo["configuration"]["mqg"].remove(4)
+
+def thaddius_stat_weights(config):
+    configo = deepcopy(config)
+    configo['buffs']['boss'] = ["thaddius"]
+    configo['buffs']['world'] = []
+    base = main(configo, 'base')[0]
+    configo["stats"]["spell_power"][4] += 10.0
+    ds = main(configo, 'sp')[0]
+    configo["stats"]["spell_power"][4] -= 10.0
+    configo["stats"]["hit_chance"][4] += 0.01
+    dh = main(configo, 'hit')[0]
+    configo["stats"]["hit_chance"][4] -= 0.01
+    configo["stats"]["crit_chance"][4] += 0.01
+    dc = main(configo, 'crit')[0]
+    hit_eq = 10*(dh - base)/(ds - base)
+    crit_eq = 10*(dc - base)/(ds - base)
+    print(f"hit equiv  = {hit_eq:4.1f}")
+    print(f"crit equiv = {crit_eq:4.1f}")
+
+def switch_trinket(config, gear):
+    configo = deepcopy(config)
+    if configo["stats"]["hit_chance"][4] >= 0.09:
+        configo["stats"]["spell_power"][4] += 44 + 4
+        configo["stats"]["hit_chance"][4] += 0.01
+        configo["stats"]["crit_chance"][4] += 0.01
+    else:
+        configo["stats"]["spell_power"][4] += 44
+        configo["stats"]["hit_chance"][4] += 0.02
+    if gear['name'] == 'eternal':
+        configo["stats"]["spell_power"][4] += 9.0
+    configo["configuration"]["mqg"].remove(4)
+
+    return configo
+        
+def naxx_upgrade_comparison():
+    config = load_config("frenzy_mqg.json")
+    
+    # missing gothic, 4H, 2x spider, sapp
+    weighting = [('wb', 0.75), ('no_wb', 0.25)]
+    encounters = [
+            {'name': 'patchwork',
+             'duration': 160.0,
+             'undead': True},
+            {'name': 'grobbulus',
+             'duration': 93.0,
+             'undead': True},
+            {'name': 'gluth',
+             'duration': 80.0,
+             'undead': True},
+            {'name': 'thaddius',
+             'duration': 80.0,
+             'undead': True},
+            {'name': 'noth',
+             'duration': 72.0,
+             'undead': True},
+            {'name': 'heigan',
+             'duration': 81.0,
+             'undead': True},
+            {'name': 'loatheb',
+             'duration': 165.0,
+             'undead': True},
+            {'name': 'raz',
+             'duration': 109.0,
+             'undead': True},
+            {'name': 'fourH', # about 3min 30sec --> get 2 combustion
+             'duration': 90.0,
+             'undead': True},
+            {'name': 'anub',
+             'duration': 128.0,
+             'undead': True},
+            {'name': 'faerlina',
+             'duration': 80.0,
+             'undead': False},
+            {'name': 'maexxna',
+             'duration': 90.0,
+             'undead': False},
+            {'name': 'kt',
+             'duration': 180.0,
+             'undead': True}]
+    
+    gears = [
+            {'name': 'current',
+             'dsp': 0.0,
+             'dhit': 0.0,
+             'dcrit': 0.0,
+             'undead': True},
+            {'name': 't3_robe',
+             'dsp': 8.0,
+             'dhit': 0.01,
+             'dcrit': 0.0,
+             'undead': False},
+            {'name': 'eternal',
+             'dsp': 4.0,
+             'dhit': 0.0,
+             'dcrit': 0.0,
+             'undead': False},
+            {'name': 'polarity',
+             'dsp': -13.0,
+             'dhit': 0.0,
+             'dcrit': 0.02,
+             'undead': True},
+            {'name': 't3_helm',
+             'dsp': 2.0,
+             'dhit': 0.0,
+             'dcrit': 0.01,
+             'undead': True},
+            {'name': 'necro_cape',
+             'dsp': -4.0,
+             'dhit': 0.0,
+             'dcrit': 0.01,
+             'undead': True},
+            {'name': 'inevitable',
+             'dsp': 15.0,
+             'dhit': 0.0,
+             'dcrit': 0.0,
+             'undead': True},
+            {'name': 'wraith',
+             'dsp': 22.0,
+             'dhit': -0.01,
+             'dcrit': 0.0,
+             'undead': True}]
+    lose_songflower = [e['name'] for e in encounters].index('loatheb')
+    summary = []
+    for gear in gears:
+        sum_dps = 0.0
+        pconfig = deepcopy(config)
+        pconfig['buffs']['world'].remove('sayges_dark_fortune_of_damage')
+        pconfig['stats']['spell_power'][4] += gear['dsp']
+        pconfig['stats']['hit_chance'][4] += gear['dhit']
+        pconfig['stats']['crit_chance'][4] += gear['dcrit']
+
+        for eindex, encounter in enumerate(encounters):
+            if encounter['undead']:
+                tconfig = deepcopy(pconfig) if encounter['duration'] < 150.0 else switch_trinket(pconfig, gear)
+                if not gear['undead']:
+                    tconfig['stats']['spell_power'][4] -= gear['dsp']
+                    tconfig['stats']['hit_chance'][4] -= gear['dhit']
+                    tconfig['stats']['crit_chance'][4] -= gear['dcrit']
+            else:
+                tconfig = deepcopy(pconfig)
+                tconfig['configuration']['udc'] = []
+                tconfig['stats']['spell_power'][4] = 694 + gear['dsp']
+                tconfig['stats']['hit_chance'][4] = 0.10 + gear['dhit']
+                tconfig['stats']['crit_chance'][4] = 0.09 + gear['dcrit'] # robe + ring
+                if gear['name'] == 'inevitable':
+                    tconfig['stats']['spell_power'][4] -= gear['dsp']   # no ring change
+                if gear['name'] == 'wraith':
+                    # put hit ring back on
+                    tconfig['stats']['spell_power'][4] -= 9
+                    tconfig['stats']['hit_chance'][4] += 0.01
+                    tconfig['stats']['crit_chance'][4] -= 0.01
+                    
+                tconfig['stats']['spell_power'][1] = 700
+                tconfig['stats']['hit_chance'][1] = 0.10
+                tconfig['stats']['crit_chance'][1] = 0.08
+            
+            if encounter == "thaddius":
+                tconfig["rotation"]["initial"]["common"] = ["scorch", "frostbolt", "combustion", "fireball", "mqg"]
+                tconfig["rotation"]["continuing"]["special"]["value"] = "scorch"
+                tconfig["rotation"]["continuing"]["special"]["slot"] = [0, 1, 2, 3, 4]
+
+            
+            tconfig['timing']['duration'] = encounter['duration']
+            tconfig["buffs"]["boss"].append(encounter['name'])
+            if eindex >= lose_songflower:
+                tconfig['buffs']['world'].remove('songflower_serenade')
+            for name, weight in weighting:
+                dconfig = deepcopy(tconfig)
+                if name == 'no_wb':
+                    dconfig['buffs']['world'] = []
+                value = main(dconfig, encounter['name'])
+                sum_dps += weight*value[0]
+        summary.append((gear['name'], sum_dps/len(encounters)))
+    for gear, value in summary:
+        print(f"{gear:10s}: {value:6.1f}")
+
+def naxx_stat_comparison():
+    config = load_config("frenzy_ron_undead.json")
+    
+    
+    # missing gothic, 4H, 2x spider, sapp
+    encounters = [
+            {'name': 'patchwork',
+             'duration': 160.0,
+             'undead': True},
+            {'name': 'grobbulus',
+             'duration': 93.0,
+             'undead': True},
+            {'name': 'gluth',
+             'duration': 80.0,
+             'undead': True},
+            {'name': 'thaddius',
+             'duration': 80.0,
+             'undead': True},
+            {'name': 'noth',
+             'duration': 72.0,
+             'undead': True},
+            {'name': 'heigan',
+             'duration': 81.0,
+             'undead': True},
+            {'name': 'loatheb',
+             'duration': 165.0,
+             'undead': True},
+            {'name': 'raz',
+             'duration': 109.0,
+             'undead': True},
+            {'name': 'anub',
+             'duration': 128.0,
+             'undead': True},
+            {'name': 'faerlina',
+             'duration': 80.0,
+             'undead': False},
+            {'name': 'maexxna',
+             'duration': 90.0,
+             'undead': False},
+            {'name': 'kt',
+             'duration': 180.0,
+             'undead': True}]
+    stats = [{'dsp': 0.0,
+              'dhit': 0.0,
+              'dcrit': 0.0},
+             {'dsp': 25.0,
+              'dhit': 0.0,
+              'dcrit': 0.0},
+             {'dsp': 0.0,
+              'dhit': 0.0,
+              'dcrit': 0.025}]
+
+    
+    summary = []
+
+    for eindex, encounter in enumerate(encounters):
+        tconfig = deepcopy(config)
+        #tconfig['buffs']['world'] = []
+        if not encounter['undead']:
+            tconfig['configuration']['udc'] = []
+            tconfig['stats']['spell_power'][4] = 694
+            tconfig['stats']['hit_chance'][4] = 0.10
+            tconfig['stats']['crit_chance'][4] = 0.09
+            tconfig['stats']['spell_power'][1] = 694
+            tconfig['stats']['hit_chance'][1] = 0.10
+            tconfig['stats']['crit_chance'][1] = 0.09
+        
+        if encounter == "thaddius":
+            tconfig["rotation"]["initial"]["common"] = ["scorch", "frostbolt", "combustion", "fireball", "mqg"]
+            tconfig["rotation"]["continuing"]["special"]["value"] = "scorch"
+            tconfig["rotation"]["continuing"]["special"]["slot"] = [0, 1, 2, 3, 4]
+
+        
+        tconfig['timing']['duration'] = encounter['duration']
+        tconfig["buffs"]["boss"].append(encounter['name'])
+        
+        vals = []
+        for stat in stats:
+            pconfig = deepcopy(tconfig)
+            pconfig['buffs']['world'].remove('sayges_dark_fortune_of_damage')
+            pconfig['stats']['spell_power'][4] += stat['dsp']
+            pconfig['stats']['hit_chance'][4] += stat['dhit']
+            pconfig['stats']['crit_chance'][4] += stat['dcrit']
+            vals.append(main(pconfig, encounter['name'])[0])
+        
+        summary.append((encounter['name'], 10.0*(vals[2] - vals[0])/(vals[1] - vals[0])))
+    for boss, value in summary:
+        print(f"{boss:10s}: {value:4.1f}")
+
+
+def naxx_upgrade_comparison2():
+    
+    # missing gothic, 4H, 2x spider, sapp
+    #weighting = [('wb', 0.75), ('no_wb', 0.25)]
+    weighting = [('wb', 1.00)]
+    #weighting = [('no_wb', 1.00)]
+    encounters = [
+            {'name': 'patchwork',
+             'duration': 180.0,
+             'undead': True},
+            {'name': 'grobbulus',
+             'duration': 140.0,
+             'undead': True},
+            {'name': 'gluth',
+             'duration': 125.0,
+             'undead': True},
+            {'name': 'thaddius',
+             'duration': 180.0,
+             'undead': True},
+            {'name': 'noth',
+             'duration': 180.0,
+             'undead': True},
+            {'name': 'heigan',
+             'duration': 180.0,
+             'undead': True},
+            {'name': 'loatheb',
+             'duration': 180.0,
+             'undead': True},
+            {'name': 'raz',
+             'duration': 180.0,
+             'undead': True},
+            {'name': 'fourH', # about 3min 30sec --> get 2 combustion
+             'duration': 180.0,
+             'undead': True},
+            {'name': 'anub',
+             'duration': 160.0,
+             'undead': True},
+            {'name': 'kt',
+             'duration': 180.0,
+             'undead': True}]
+    
+    gears = [{'name': 'current', 'file': 'frenzy_ron_unundead.json'},
+             {'name': 'inev', 'file': 'frenzy_ron_inev.json'},
+             {'name': 'circ', 'file': 'frenzy_ron_circ.json'},
+             {'name': 'necro', 'file': 'frenzy_ron_necro.json'},
+             {'name': 'polarity', 'file': 'frenzy_ron_polarity.json'},
+             {'name': 'eternal', 'file': 'frenzy_ron_eternal.json'}]
+    gears = [{'name': 'soulseeker', 'file': 'frenzy_ron_soulseeker.json'},
+             {'name': 'brimstone', 'file': 'frenzy_ron_brimstone.json'}]
+    gears = [{'name': 'UDC', 'file': 'frenzy_ron_undead_t3pants.json'},
+             {'name': 'UDC2', 'file': 'frenzy_ron_undead_t3pants_necro.json'}]
+    #         {'name': 'no UDC', 'file': 'frenzy_ron_unundead_wraith.json'}]
+    #gears = [{'name': 'current', 'file': 'frenzy_ron_unundead.json'},
+    #         {'name': 'DSG', 'file': 'frenzy_ron_dsg.json'}]
+    #gears = [{'name': 'no UDC', 'file': 'frenzy_ron_tear_unundead.json'},
+    #         {'name': 'UDC', 'file': 'frenzy_ron_tear_undead.json'}]
+    gears = [{'name': 'UDC bis', 'file': 'undead_bis.json'},
+             {'name': 'no UDC bis', 'file': 'unundead_bis.json'}]
+    gears = [{'name': 'UDC bis', 'file': 'ron_undead_bis.json'},
+             {'name': 'no UDC bis', 'file': 'ron_unundead_bis.json'}]
+    #gears = [{'name': 'no UDC', 'file': 'frenzy_ron_unundead.json'},
+    #         {'name': 'undead wire', 'file': 'frenzy_ron_undead_wire.json'}]
+    lose_songflower = [e['name'] for e in encounters].index('loatheb')
+    summary = []
+    for gear in gears:
+        sum_dps = 0.0
+        pconfig = load_config(gear['file'])
+
+        for eindex, encounter in enumerate(encounters):
+            
+            #if encounter == "thaddius":
+            #    tconfig["rotation"]["initial"]["common"] = ["scorch", "frostbolt", "combustion", "fireball", "mqg"]
+            #    tconfig["rotation"]["continuing"]["special"]["value"] = "scorch"
+            #    tconfig["rotation"]["continuing"]["special"]["slot"] = [0, 1, 2, 3, 4]
+            tconfig = deepcopy(pconfig)
+            
+            tconfig['timing']['duration'] = encounter['duration']
+            tconfig["buffs"]["boss"].append(encounter['name'])
+            #if eindex >= lose_songflower:
+            #    tconfig['buffs']['world'].remove('songflower_serenade')
+            for name, weight in weighting:
+                dconfig = deepcopy(tconfig)
+                if name == 'no_wb':
+                    dconfig['buffs']['world'] = []
+                value = main(dconfig, encounter['name'])
+                sum_dps += weight*value[0]
+        summary.append((gear['name'], sum_dps/len(encounters)))
+    for gear, value in summary:
+        print(f"{gear:16s}: {value - summary[0][1]:6.1f}")
+        #print(f"{gear:16s}: {value:6.1f}")
+
+
+
+def naxx_player_comparison():
+    config = load_config("frenzy_mqg.json")
+    
+    # missing gothic, 4H, 2x spider, sapp
+    weighting = [('wb', 0.75), ('no_wb', 0.25)]
+    encounters = [
+            {'name': 'patchwork',
+             'duration': 160.0,
+             'undead': True},
+            {'name': 'grobbulus',
+             'duration': 93.0,
+             'undead': True},
+            {'name': 'gluth',
+             'duration': 80.0,
+             'undead': True},
+            {'name': 'thaddius',
+             'duration': 80.0,
+             'undead': True},
+            {'name': 'noth',
+             'duration': 72.0,
+             'undead': True},
+            {'name': 'heigan',
+             'duration': 81.0,
+             'undead': True},
+            {'name': 'loatheb',
+             'duration': 165.0,
+             'undead': True},
+            {'name': 'raz',
+             'duration': 109.0,
+             'undead': True},
+            {'name': 'fourH', # about 3min 30sec --> get 2 combustion
+             'duration': 90.0,
+             'undead': True},
+            {'name': 'anub',
+             'duration': 128.0,
+             'undead': True},
+            {'name': 'faerlina',
+             'duration': 80.0,
+             'undead': False},
+            {'name': 'maexxna',
+             'duration': 90.0,
+             'undead': False},
+            {'name': 'kt',
+             'duration': 180.0,
+             'undead': True}]
+    lose_songflower = [e['name'] for e in encounters].index('loatheb')
+    summary = [0.0 for index in range(config["configuration"]["num_mages"])]
+    pconfig = deepcopy(config)
+    pconfig['buffs']['world'].remove('sayges_dark_fortune_of_damage')
+
+    gear = {'name': 'current',
+             'dsp': 0.0,
+             'dhit': 0.0,
+             'dcrit': 0.0,
+             'undead': True}
+    for eindex, encounter in enumerate(encounters):
+        if encounter['undead']:
+            tconfig = deepcopy(pconfig) if encounter['duration'] < 150.0 else switch_trinket(pconfig, gear)
+        else:
+            tconfig = deepcopy(pconfig)
+            tconfig['configuration']['udc'] = []
+            tconfig['stats']['spell_power'][4] = 694
+            tconfig['stats']['hit_chance'][4] = 0.10
+            tconfig['stats']['crit_chance'][4] = 0.09
+                
+            tconfig['stats']['spell_power'][1] = 700
+            tconfig['stats']['hit_chance'][1] = 0.10
+            tconfig['stats']['crit_chance'][1] = 0.08
+
+        if encounter == "thaddius":
+            tconfig["rotation"]["initial"]["common"] = ["scorch", "frostbolt", "combustion", "fireball", "mqg"]
+            tconfig["rotation"]["continuing"]["special"]["value"] = "scorch"
+            tconfig["rotation"]["continuing"]["special"]["slot"] = [0, 1, 2, 3, 4]
+
+                
+        tconfig['timing']['duration'] = encounter['duration']
+        tconfig["buffs"]["boss"].append(encounter['name'])
+        if eindex >= lose_songflower:
+            tconfig['buffs']['world'].remove('songflower_serenade')
+
+        for index in range(config["configuration"]["num_mages"]):
+            for name, weight in weighting:
+                dconfig = deepcopy(tconfig)
+                dconfig['configuration']['target'] = [index]
+                if name == 'no_wb':
+                    dconfig['buffs']['world'] = []
+                value = main(dconfig, encounter['name'])
+                summary[index] += weight*value[1]/len(encounters)
+    for index, value in enumerate(summary):
+        print(f"{index:d}: {value:6.1f}")
+
+def naxx_player_comparison2():
+    config = load_config("frenzy_ron_unundead.json")
+    
+    # missing gothic, 4H, 2x spider, sapp
+    weighting = [('wb', 0.75), ('no_wb', 0.25)]
+    encounters = [
+            {'name': 'patchwork',
+             'duration': 160.0,
+             'undead': True},
+            {'name': 'grobbulus',
+             'duration': 93.0,
+             'undead': True},
+            {'name': 'gluth',
+             'duration': 80.0,
+             'undead': True},
+            {'name': 'noth',
+             'duration': 72.0,
+             'undead': True},
+            {'name': 'heigan',
+             'duration': 81.0,
+             'undead': True},
+            {'name': 'loatheb',
+             'duration': 165.0,
+             'undead': True},
+            {'name': 'raz',
+             'duration': 109.0,
+             'undead': True},
+            {'name': 'fourH', # about 3min 30sec --> get 2 combustion
+             'duration': 90.0,
+             'undead': True},
+            {'name': 'anub',
+             'duration': 128.0,
+             'undead': True},
+            {'name': 'kt',
+             'duration': 180.0,
+             'undead': True}]
+    lose_songflower = [e['name'] for e in encounters].index('loatheb')
+    summary = [0.0 for index in range(config["configuration"]["num_mages"])]
+    pconfig = deepcopy(config)
+    pconfig['buffs']['world'].remove('sayges_dark_fortune_of_damage')
+
+    for eindex, encounter in enumerate(encounters):
+        tconfig = deepcopy(pconfig)
+                
+        tconfig['timing']['duration'] = encounter['duration']
+        tconfig["buffs"]["boss"].append(encounter['name'])
+        if eindex >= lose_songflower:
+            tconfig['buffs']['world'].remove('songflower_serenade')
+
+        for index in range(config["configuration"]["num_mages"]):
+            for name, weight in weighting:
+                dconfig = deepcopy(tconfig)
+                dconfig['configuration']['target'] = [index]
+                if name == 'no_wb':
+                    dconfig['buffs']['world'] = []
+                value = main(dconfig, encounter['name'])
+                summary[index] += weight*value[1]/len(encounters)
+    for index, value in enumerate(summary):
+        print(f"{index:d}: {value:6.1f}")
+        
+def naxx_simple_comparison():
+    
+    # missing gothic, 4H, 2x spider, sapp
+    weighting = [('wb', 0.75), ('no_wb', 0.25)]
+    weighting = [('wb', 1.00)]
+    #weighting = [('no_wb', 1.00)]
+    encounters = [
+            {'name': 'patchwork',
+             'duration': 80.0,
+             'undead': True}]
+    
+    gears = [{'name': 'current', 'file': 'frenzy_ron_unundead.json'},
+             {'name': 'inev', 'file': 'frenzy_ron_inev.json'},
+             {'name': 'circ', 'file': 'frenzy_ron_circ.json'},
+             {'name': 'necro', 'file': 'frenzy_ron_necro.json'},
+             {'name': 'polarity', 'file': 'frenzy_ron_polarity.json'},
+             {'name': 'eternal', 'file': 'frenzy_ron_eternal.json'}]
+    gears = [{'name': 'soulseeker', 'file': 'frenzy_ron_soulseeker.json'},
+             {'name': 'brimstone', 'file': 'frenzy_ron_brimstone.json'}]
+    gears = [{'name': 'UDC', 'file': 'frenzy_ron_undead_t3pants.json'},
+             {'name': 'UDC2', 'file': 'frenzy_ron_undead_t3pants_necro.json'}]
+    #         {'name': 'no UDC', 'file': 'frenzy_ron_unundead_wraith.json'}]
+    #gears = [{'name': 'current', 'file': 'frenzy_ron_unundead.json'},
+    #         {'name': 'DSG', 'file': 'frenzy_ron_dsg.json'}]
+    #gears = [{'name': 'no UDC', 'file': 'frenzy_ron_tear_unundead.json'},
+    #         {'name': 'UDC', 'file': 'frenzy_ron_tear_undead.json'}]
+    #gears = [{'name': 'UDC bis', 'file': 'undead_bis.json'},
+    #         {'name': 'no UDC bis', 'file': 'unundead_bis.json'}]
+    #gears = [{'name': 'UDC bis', 'file': 'ron_undead_bis.json'},
+    #         {'name': 'no UDC bis', 'file': 'ron_unundead_bis.json'}]
+    #gears = [{'name': 'no UDC', 'file': 'frenzy_ron_unundead.json'},y
+    #         {'name': 'undead wire', 'file': 'frenzy_ron_undead_wire.json'}]
+    gears = [{'name': 'simple', 'file': 'scorchfireball_all.json'},
+             #{'name': 'simple2', 'file': 'scorchfireball_all2.json'},
+             #{'name': 'simple3', 'file': 'scorchfireball_all3.json'},
+             #{'name': 'simple4', 'file': 'scor chfireball_all4.json'},
+             #{'name': 'simple nopi', 'file': 'scorchfireball_all_nopi.json'},
+             #{'name': 'scorch duty', 'file': 'scorchduty_fireball.json'},
+             {'name': 'frostbolt duty', 'file': 'scorchduty_frostbolt.json'},
+             {'name': 'pyro', 'file': 'scorchduty_pyro.json'}]
+             #{'name': 'pyro fb', 'file': 'scorchduty_pyro_fireball.json'},
+             #{'name': 'pyro gcd', 'file': 'scorchduty_pyro_gcd.json'},
+             #{'name': 'ff', 'file': 'fireball_frostbolt.json'}]
+             #{'name': 'pyro nopi', 'file': 'scorchduty_pyro_nopi.json'},
+             #{'name': 'same simple', 'file': 'same_scorchfireball_all.json'},
+             #{'name': 'same simple2', 'file': 'same_scorchfireball_all2.json'},
+             #{'name': 'same pyro', 'file': 'same_scorchduty_pyro.json'}]
+    gears = [{'name': 'udc frostfire', 'file': 'encore_undead_fflegs.json'},
+             {'name': 'udc polarity + wraith', 'file': 'encore_undead_polarity_wraith.json'},
+             {'name': 'udc polarity + wraith + eye', 'file': 'encore_undead_polarity_wraith_eye.json'}]
+    #gears = [{'name': 'soulseeker', 'file': 'encore_normal_ss.json'},
+    #         {'name': 'wraith', 'file': 'encore_normal_wraith.json'},
+    #         {'name': 'wraith + polarity', 'file': 'encore_normal_wraith_polarity.json'},
+    #         {'name': 'wraith + polarity + dsg + sh', 'file': 'encore_normal_wraith_polarity_dsg_sh.json'},
+    #         {'name': 'wraith + polarity + dsg + sh + eye', 'file': 'encore_normal_wraith_polarity_dsg_sh_eye.json'}]
+    gears = [{'name': 'udc mqg', 'file': 'encore_undead_mqg.json'},
+             {'name': 'udc mqg + polarity + wraith + eye + fates', 'file': 'encore_undead_mqg_polarity_wraith_eye_fates.json'}]
+    gears = [{'name': 'nowb soulseeker', 'file': 'encore_undead_nowb_1.json'},
+             {'name': 'nowb brimstone', 'file': 'encore_undead_nowb_2.json'}]
+    gears = [{'name': 'no T3', 'file': 'encore_no_T3.json'},
+             {'name': '8/8 T3', 'file': 'encore_8_T3.json'}]
+    gears = [{'name': 'no buffer', 'file': 'encore_buffer_no.json'},
+             {'name': 'buffer', 'file': 'encore_buffer_yes.json'}]
+    gears = [{'name': 'no udc', 'file': 'encore_pi_noudc.json'},
+             {'name': 'udc', 'file': 'encore_pi_udc.json'}]
+    #gears = [{'name': 'no udc', 'file': 'encore_noudc.json'},
+    #         {'name': 'udc', 'file': 'encore_udc.json'}]
+    gears = [{'name': 'udc_T3', 'file': 'encore_udc_T3.json'},
+             {'name': 'udc_polarity', 'file': 'encore_udc_polarity.json'}]
+    gears = [{'name': 'udc_polarity', 'file': 'encore_udc_polarity.json'},
+             {'name': 'udc_polarity_sapp', 'file': 'encore_udc_polarity_sapp.json'}]
+    #gears = [{'name': 'udc_polarity_sapp', 'file': 'encore_udc_polarity_sapp.json'}]
+    gears = [{'name': 'som_toep', 'file': 'som_TOEP.json'},
+             {'name': 'som_zhc', 'file': 'som_ZHC.json'},]
+    #gears = [{'name': 'udc_polarity', 'file': 'encore_udc_polarity.json'},
+    #         {'name': 'udc_98hit', 'file': 'encore_udc_98hit.json'}]
+    #gears = [{'name': 'wb soulseeker', 'file': 'encore_undead_slowwb_1.json'},
+    #         {'name': 'wb brimstone', 'file': 'encore_undead_slowwb_2.json'}]
+             
+             
+    summary = []
+    for gear in gears:
+        sum_dps = 0.0
+        pconfig = load_config(gear['file'])
+
+        for eindex, encounter in enumerate(encounters):
+            
+            #if encounter == "thaddius":
+            #    tconfig["rotation"]["initial"]["common"] = ["scorch", "frostbolt", "combustion", "fireball", "mqg"]
+            #    tconfig["rotation"]["continuing"]["special"]["value"] = "scorch"
+            #    tconfig["rotation"]["continuing"]["special"]["slot"] = [0, 1, 2, 3, 4]
+            tconfig = deepcopy(pconfig)
+            
+            tconfig['timing']['duration'] = encounter['duration']
+            tconfig["buffs"]["boss"].append(encounter['name'])
+            #if eindex >= lose_songflower:
+            #    tconfig['buffs']['world'].remove('songflower_serenade')
+            for name, weight in weighting:
+                dconfig = deepcopy(tconfig)
+                if name == 'no_wb':
+                    dconfig['buffs']['world'] = []
+                value = main(dconfig, encounter['name'])
+                sum_dps += weight*value[0]
+        summary.append((gear['name'], sum_dps/len(encounters)))
+    for gear, value in summary:
+        print(f"{gear:16s}: {value - summary[0][1]:6.1f}")
+        #print(f"{gear:16s}: {value:6.1f}")
+
+class mage_state():
+    
+    def __init__(self, num_mages, num_pi, wb=True):
+    
+        if wb:
+            self._weighting = [('wb', 1.00)]
+        else:
+            self._weighting = [('no_wb', 1.00)]
+
+        self._gears = [{'name': 'simple', 'file': 'scorchfireball_all_12.json'},
+                       {'name': 'frostbolt', 'file': 'scorchduty_frostbolt_12.json'}]
+        self._num_mages = num_mages
+        self._num_pi = num_pi
+
+    def rot_diff(self, etime):
+        num_mages = self._num_mages
+        num_pi = self._num_pi
+        weighting = self._weighting
+        encounters = [
+                {'name': 'patchwork',
+                 'duration': etime,
+                 'undead': True}]
+
+        truncate = [("stats", "spell_power"),
+                    ("stats", "hit_chance"),
+                    ("stats", "crit_chance"),
+                    ("stats", "intellect"),
+                    ("buffs", "racial")]
+        cull = [("configuration", "target"),
+                ("configuration", "mqg"),
+                ("configuration", "sapp"),
+                ("configuration", "udc")]
+
+        dps = []
+        for gear in self._gears:
+            pconfig = load_config(gear['file'])
+            sum_dps = 0.0
+            for eindex, encounter in enumerate(encounters):
+                #if encounter == "thaddius":
+                #    tconfig["rotation"]["initial"]["common"] = ["scorch", "frostbolt", "combustion", "fireball", "mqg"]
+                #    tconfig["rotation"]["continuing"]["special"]["value"] = "scorch"
+                #    tconfig["rotation"]["continuing"]["special"]["slot"] = [0, 1, 2, 3, 4]
+                tconfig = deepcopy(pconfig)
+                tconfig['configuration']['num_mages'] = num_mages
+                for t1, t2 in truncate:
+                    tconfig[t1][t2] = tconfig[t1][t2][:num_mages]
+                for c1, c2 in cull:
+                    tconfig[c1][c2] = [val for val in tconfig[c1][c2] if val < num_mages]
+                tconfig["configuration"]["pi"] = list(range(num_mages - num_pi, num_mages))
+                
+                tconfig['timing']['duration'] = encounter['duration']
+                tconfig["buffs"]["boss"].append(encounter['name'])
+                #if eindex >= lose_songflower:
+                #    tconfig['buffs']['world'].remove('songflower_serenade')
+                for name, weight in weighting:
+                    dconfig = deepcopy(tconfig)
+                    if name == 'no_wb':
+                        dconfig['buffs']['world'] = []
+                    value = main(dconfig, encounter['name'])
+                    sum_dps += weight*value[0]
+            dps.append(sum_dps/len(encounters))
+        
+        return (dps[1] - dps[0])/dps[0]
+
+
+def time_clown():
+    bounds = [20.0, 150.0]
+
+    fid = open("at90_nwb.csv", "wt")
+    for num_mages in range(3, 11):
+        for num_pi in range(0, 6):
+            print("    starting", num_mages, num_pi)
+            if num_pi > num_mages:
+                continue
+            state = mage_state(num_mages, num_pi, wb=False)
+            dif90 = state.rot_diff(90.0)
+            print(f"    {num_mages:d} {num_pi:d} {100*dif90:5.2f}")
+            fid.write(f"{num_mages:d},{num_pi:d},{200*dif90:5.2f}\n")
+            #if state.rot_diff(bounds[0] - 10.0) >= 0.0:
+            #    eq_tim = 0.0
+            #elif state.rot_diff(bounds[1] + 50.0) <= 5.0:w
+            #    eq_tim = 600.0
+            #else:
+            #    rr = optimize.root_scalar(state.rot_diff, bracket=bounds, xtol=1.0)
+            #    eq_tim = rr.root
+            #print(f"    {num_mages:d} {num_pi:d} {eq_tim:5.1f}")
+            #fid.write(f"{num_mages:d},{num_pi:d},{eq_tim:5.1f}\n")
+    fid.close()
+
+
+def naxx_new_buff():
+    
+    # missing gothic, 4H, 2x spider, sapp
+    #weighting = [('wb', 0.75), ('no_wb', 0.25)]
+    weighting = [('wb', 1.00)]
+    #weighting = [('no_wb', 1.00)]
+    encounters = [
+            {'name': 'patchwork',
+             'duration': 150.0,
+             'undead': True}]
+    
+    gears = [{'name': 'simple', 'file': 'scorchfireball_all_12.json'},
+             {'name': 'frostbolt', 'file': 'scorchduty_frostbolt_12.json'},
+             {'name': 'pyro', 'file': 'scorchduty_pyro_12.json'}]
+             #{'name': 'pyro nopi', 'file': 'scorchduty_pyro_nopi.json'},
+             #{'name': 'same simple', 'file': 'same_scorchfireball_all.json'},
+             #{'name': 'same simple2', 'file': 'same_scorchfireball_all2.json'},
+             #{'name': 'same pyro', 'file': 'same_scorchduty_pyro.json'}]
+             
+    truncate = [("stats", "spell_power"),
+               ("stats", "hit_chance"),
+               ("stats", "crit_chance"),
+               ("stats", "intellect"),
+               ("buffs", "racial")]
+    cull = [("configuration", "target"),
+            ("configuration", "mqg"),
+            ("configuration", "sapp"),
+            ("configuration", "udc")]
+
+    fid = open("big_out.csv", "wt")
+
+
+    for num_mages in range(4, 11):
+        for num_pi in range(1, 6):               
+            summary = []
+            for gear in gears:
+                sum_dps = 0.0
+                pconfig = load_config(gear['file'])
+        
+                for eindex, encounter in enumerate(encounters):
+                    
+                    #if encounter == "thaddius":
+                    #    tconfig["rotation"]["initial"]["common"] = ["scorch", "frostbolt", "combustion", "fireball", "mqg"]
+                    #    tconfig["rotation"]["continuing"]["special"]["value"] = "scorch"
+                    #    tconfig["rotation"]["continuing"]["special"]["slot"] = [0, 1, 2, 3, 4]
+                    tconfig = deepcopy(pconfig)
+                    tconfig['configuration']['num_mages'] = num_mages
+                    for t1, t2 in truncate:
+                        tconfig[t1][t2] = tconfig[t1][t2][:num_mages]
+                    for c1, c2 in cull:
+                        tconfig[c1][c2] = [val for val in tconfig[c1][c2] if val < num_mages]
+                    tconfig["configuration"]["pi"] = list(range(num_mages - num_pi, num_mages))
+                    
+                    tconfig['timing']['duration'] = encounter['duration']
+                    tconfig["buffs"]["boss"].append(encounter['name'])
+                    #if eindex >= lose_songflower:
+                    #    tconfig['buffs']['world'].remove('songflower_serenade')
+                    for name, weight in weighting:
+                        dconfig = deepcopy(tconfig)
+                        if name == 'no_wb':
+                            dconfig['buffs']['world'] = []
+                        value = main(dconfig, encounter['name'])
+                        sum_dps += weight*value[0]
+                    fid.write(f"{num_mages:d},{num_pi:d},{gear['name']:s},{sum_dps/len(encounters):6.1f}\r\n")
+                summary.append((gear['name'], sum_dps/len(encounters)))
+            for gear, value in summary:
+                print(f"{num_mages:d} mages {gear:16s} {value:6.1f}")
+                #print(f"{gear:16s}: {value:6.1f}")
+    fid.close()
+
+def time_comparison():
+    
+    gears = [{'name': 'Tear + Sapp', 'file': 'encore_undead_tear.json'},
+             {'name': 'MQG + Sapp', 'file': 'encore_undead_twoactive.json'},
+             {'name': 'MQG + Mark', 'file': 'encore_undead_mqgmark.json'},
+             {'name': 'Sapp + Mark', 'file': 'encore_undead_sappmark.json'},
+             {'name': 'Tear + Mark', 'file': 'encore_undead_tearmark.json'},
+             {'name': 'MQG + Tear', 'file': 'encore_undead_mqgtear.json'}]
+    #gears = [{'name': 'Sapp + Mark', 'file': 'encore_undead_sappmark.json'}]
+
+    configs = [(gear['name'], load_config(gear['file'])) for gear in gears]
+    out = [[] for dummy in range(len(configs))]
+
+    etimes = np.array(list(range(25, 76, 3)) + list(range(80, 251, 10)))
+    #etimes = np.array([100.0])
+    for etime in etimes:
+        for index, config in enumerate(configs):
+            tconfig = deepcopy(config[1])
+            #tconfig['buffs']['world'] = []
+            tconfig['timing']['duration'] = {
+                    "mean": etime,
+                    "var": 3.0,
+                    "clip": [0.0, 10000.0]}
+            value = main(tconfig, config[0])
+            out[index].append(value[0])
+            
+    plt.close('all')
+    plt.figure(figsize=(8.0, 5.5), dpi=200)
+    plt.title('{# mages = 5, world buffs, no PI}')
+    for conf, ou in zip(configs, out):
+        plt.plot(etimes, np.array(ou), label=conf[0])
+    plt.xlabel('Encounter Duration (seconds)')
+    plt.ylabel('Average DPS')
+    plt.xlim(0, 250)
+    plt.legend()
+    plt.savefig("Trinkets_undead.png")
+
+
+if __name__ == '__main__':
+    #simple_crit()
+    #time_compare()
+    #distribution()
+    #config_file = "../config/solo_group_lim_wb.json"
+    #with open(config_file, 'rt') as fid:
+    #    config = json.load(fid)
+    #name = os.path.split(config_file)[-1].split('.')[0]
+    #print('starting', name)
+    #naxx_upgrade_comparison2()
+    #naxx_stat_comparison()
+    #naxx_player_comparison2()
+    #loatheb_stat_weights(config)
+    #thaddius_stat_weights(config)
+    #fivepi_stat_weights(config)
+    #twopi_stat_weights(config)
+    #crit(config)
+    #naxx_simple_comparison()
+    #naxx_new_buff()
+    time_comparison()
+    
