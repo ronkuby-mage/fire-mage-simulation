@@ -182,6 +182,10 @@ class Constant():
         ## debugging
         self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion',  'sapp      ', 'toep      ', 'zhc       ', 'mqg       ', 'power inf ']
         self._LOG_SIM = _LOG_SIM
+        
+        self._RES_AMOUNT = [0.75, 0.5, 0.25]
+        self._RES_THRESH = [0.9066, 96.78, 99.45]
+        self._RESISTANCE_MODIFIER = 0.966975
 
 class ArrayGenerator():
 

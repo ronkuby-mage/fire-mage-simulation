@@ -184,14 +184,19 @@ class Encounter():
                 boss['ignite_count'][gbl_icrits[rem_val]] = 0
                 boss['ignite_value'][gbl_icrits[rem_val]] = 0.0
 
+                # extend by 4 secs, reset timer if no more ticks (31MAR22)
+                # comment this section and uncomment next section to return to classic mechanics
+                new_tick = np.where((boss['tick_timer'][gbl_icrits] > C._IGNITE_TICK) & (boss['ignite_count'][gbl_icrits] > 0))[0]
+                boss['tick_timer'][gbl_icrits[new_tick]] = C._IGNITE_TICK
+                boss['ignite_timer'][gbl_icrits] = C._IGNITE_TIME + epsilon
+
                 # add tick if 1 tick remaining
                 # comment this section and uncomment next section to return to TBC mechanics
-                new_tick = np.where(boss['ignite_timer'][gbl_icrits] <= C._IGNITE_TICK)[0]
-                boss['ignite_timer'][gbl_icrits[new_tick]] += C._IGNITE_TICK
+                #new_tick = np.where(boss['ignite_timer'][gbl_icrits] <= C._IGNITE_TICK)[0]
+                #boss['ignite_timer'][gbl_icrits[new_tick]] += C._IGNITE_TICK
 
                 ## refresh ignite to full 4 seconds
                 #boss['ignite_timer'][gbl_icrits] = C._IGNITE_TIME + epsilon
-                
 
                 # if we dont have a full stack
                 mod_val = np.where(boss['ignite_count'][gnot_crit_clean] < C._IGNITE_STACK)[0]
@@ -300,12 +305,21 @@ class Encounter():
             self._subtime(tic, add_time)
         
             ignite_expire = boss['ignite_timer'][tic] <= 0.0
-            yes_expire = tic[np.where(ignite_expire)[0]]
-            boss['tick_timer'][yes_expire] = C._LONG_TIME
-            
             no_expire = tic[np.where(np.logical_not(ignite_expire))[0]]
-            boss['tick_timer'][no_expire] = C._IGNITE_TICK
 
+            # new ignite mechanics (31MAR22) comment this section and uncomment block below to revert
+            refresh_array = boss['ignite_timer'][tic] >= 2.0
+            new_ignite = tic[np.where(refresh_array)[0]]
+            no_ignite = tic[np.where(np.logical_not(refresh_array))[0]]
+            boss['tick_timer'][new_ignite] = C._IGNITE_TICK
+            boss['tick_timer'][no_ignite] = C._LONG_TIME
+
+            ## uncomment to revert
+            #yes_expire = tic[np.where(ignite_expire)[0]]
+            #boss['tick_timer'][yes_expire] = C._LONG_TIME
+            #boss['tick_timer'][no_expire] = C._IGNITE_TICK
+            #multiplier = np.ones(no_expire.shape)
+            
             scorch = C._SCORCH_MULTIPLIER*boss['scorch_count'][no_expire]
             multiplier = C._COE_MULTIPLIER*boss['ignite_multiplier'][no_expire]
             multiplier *= 1.0 + scorch*(boss['scorch_timer'][no_expire] > 0.0).astype(np.float)
@@ -410,6 +424,11 @@ class Encounter():
             self._arrays['global']['ignite'][still_going] += self._ignite[still_going]
             if not still_going.size:
                 break
+            
+        self._arrays['global']['total_damage'] -= (1 - C._RESISTANCE_MODIFIER)*self._arrays['global']['ignite']
+        self._arrays['global']['total_damage'] *= C._RESISTANCE_MODIFIER
+        self._arrays['global']['crit'] *= C._RESISTANCE_MODIFIER
+        self._arrays['global']['ignite'] *= C._RESISTANCE_MODIFIER*C._RESISTANCE_MODIFIER
         
         if C._LOG_SIM >= 0:
             print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]))
