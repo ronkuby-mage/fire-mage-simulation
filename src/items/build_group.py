@@ -1,12 +1,12 @@
 import os
 import json
 import pickle
-from items import CharInfo
+from items.items import CharInfo
 
 __savefile = "items.dat"
         
 if __name__ == "__main__":
-    encounter = "pinkteam"
+    encounter = "patchwork"
     template = "template.json"
 
     if os.path.exists(__savefile):
