@@ -1,0 +1,90 @@
+{
+   "stats": {
+      "spell_power": [
+         612
+      ],
+      "hit_chance": [
+         0.1
+      ],
+      "crit_chance": [
+         0.07
+      ],
+      "intellect": [
+         304
+      ]
+   },
+   "buffs": {
+      "raid": [
+         "arcane_intellect",
+         "improved_mark"
+      ],
+      "consumes": [
+         "greater_arcane_elixir",
+         "elixir_of_greater_firepower",
+         "flask_of_supreme_power",
+         "brilliant_wizard_oil"
+      ],
+      "world": [],
+      "racial": [
+         "human"
+      ],
+      "boss": []
+   },
+   "configuration": {
+      "num_mages": 1,
+      "target": [
+         0
+      ],
+      "sapp": [],
+      "toep": [],
+      "zhc": [],
+      "mqg": [],
+      "pi": [],
+      "udc": [],
+      "name": [
+         "mage1"
+      ]
+   },
+   "rotation": {
+      "initial": {
+         "common": [
+            "scorch",
+            "scorch",
+            "scorch",
+            "scorch",
+            "scorch",
+            "scorch",
+            "combustion",
+            "sapp",
+            "zhc",
+            "toep",
+            "pyroblast",
+            "pi",
+            "mqg",
+            "fireball"
+         ],
+         "other": []
+      },
+      "continuing": {
+         "default": "fireball",
+         "special": {
+            "slot": [
+               0
+            ],
+            "value": "maintain_scorch"
+         }
+      }
+   },
+   "timing": {
+      "duration": {
+         "mean": 80.0,
+         "var": 5.0,
+         "clip": [
+            20.0,
+            200.0
+         ]
+      },
+      "delay": 1.0,
+      "response": 0.05
+   }
+}

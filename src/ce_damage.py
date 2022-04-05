@@ -32,19 +32,38 @@ def time_comparison():
     
     for num_mages in range(1, max_mages + 1):
         config = load_config(f"mages_{num_mages:d}.json")
+        config["configuration"]["target"] = list(range(num_mages))
         config["timing"]["delay"] = 3.0
-        config["rotation"]["continuing"]["special"] = {"slot": list(range(num_mages)), "value": "scorch"}
-        config["stats"]["spell_power"] = [785 for aa in range(num_mages)]
+        osim_size = 50.0*sim_sizes[num_mages]
+
+        config["stats"]["spell_power"] = [745 for aa in range(num_mages)]
         config["stats"]["crit_chance"] = [0.15 for aa in range(num_mages)]
-        config["stats"]["intellect"] = [317 for aa in range(num_mages)]
+        config["stats"]["intellect"] = [302 for aa in range(num_mages)]
+        config["configuration"]["sapp"] = list(range(num_mages))
+        config["buffs"]["raid"].append("blessing_of_kings")
         config["buffs"]["consumes"] = {
              "greater_arcane_elixir",
              "elixir_of_greater_firepower",
              "flask_of_supreme_power",
              "blessed_wizard_oil"}
-        config["configuration"]["sapp"] = list(range(num_mages))
-        osim_size = 150.0*sim_sizes[num_mages]
+        config["buffs"]["world"] = {
+            "rallying_cry_of_the_dragonslayer",
+            "spirit_of_zandalar",
+            "dire_maul_tribute",
+            "songflower_serenade",
+            "sayges_dark_fortune_of_damage"}
+        config["configuration"]["mqg"] = list(range(num_mages))
+        config["configuration"]["pi"] = list(range(num_mages))
 
+
+
+        #config['timing']['duration'] = {
+        #        "mean": 300.0,
+        #        "var": 3.0,
+        #        "clip": [0.0, 10000.0]}
+        #sim_size = int(osim_size*10/120**0.5)
+        #main(config, f"{num_mages:d}", sim_size=sim_size)[0]
+        #dksok()
         for etime in etimes:
             sim_size = int(osim_size*10/etime**0.5)
             tconfig = deepcopy(config)
@@ -52,17 +71,14 @@ def time_comparison():
                     "mean": etime,
                     "var": 3.0,
                     "clip": [0.0, 10000.0]}
-            value_0 = main(tconfig, f"{num_mages:d} {etime:3.0f}  0", sim_size=sim_size)[0]
-            tconfig["stats"]["spell_power"][-1] += 30
-            value_sp = main(tconfig, f"{num_mages:d} {etime:3.0f} sp", sim_size=sim_size)[0]
-            tconfig["stats"]["spell_power"][-1] -= 30
-            tconfig["stats"]["crit_chance"][-1] += 0.03
-            value_cr = main(tconfig, f"{num_mages:d} {etime:3.0f} cr", sim_size=sim_size)[0]
-            out[num_mages - 1].append(10.0*(value_cr - value_0)/(value_sp - value_0))
+            value_0 = main(tconfig, f"{num_mages:d} {etime:3.0f}  fb ", sim_size=sim_size)[0]
+            tconfig["rotation"]["continuing"]["special"] = {"slot": list(range(num_mages)), "value": "scorch"}
+            value_1 = main(tconfig, f"{num_mages:d} {etime:3.0f}  sc ", sim_size=sim_size)[0]
+            out[num_mages - 1].append((value_1 - value_0)/num_mages)
             
     plt.close('all')
     plt.figure(figsize=(8.0, 5.5), dpi=200)
-    plt.title(f"SoM Crit Values (Longer Encounters, no WBs, ignite hold, Phase 6 Gear)")
+    plt.title(f"SoM Damage (Shorter Encounters, WBs, Phase 6 Gear)")
     for num_mages, ou in enumerate(out):
         #plt.plot(etimes, np.array(ou), label=config["configuration"]["name"][index])
         label = f"{num_mages + 1:d} mages"
@@ -72,11 +88,11 @@ def time_comparison():
                  np.array(ou),
                  label=label)
     plt.xlabel('Encounter Duration (seconds)')
-    plt.ylabel('SP per 1% Crit')
+    plt.ylabel('DPS Difference per Mage (Ignite Hold - Always Fireball) Rotations')
     plt.grid()
     plt.xlim(0, 600)
     plt.legend()
-    plt.savefig("som_crit_phase6_scorch.png")
+    plt.savefig("ce_rotation_phase6.png")
 
 if __name__ == '__main__':
     time_comparison()

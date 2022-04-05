@@ -36,6 +36,17 @@ def time_comparison():
         config["timing"]["delay"] = 3.0
         osim_size = 50.0*sim_sizes[num_mages]
 
+        # uncomment for phase 6 gear
+        config["stats"]["spell_power"] = [785 for aa in range(num_mages)]
+        config["stats"]["crit_chance"] = [0.15 for aa in range(num_mages)]
+        config["stats"]["intellect"] = [302 for aa in range(num_mages)]
+        config["buffs"]["consumes"] = {
+             "greater_arcane_elixir",
+             "elixir_of_greater_firepower",
+             "flask_of_supreme_power",
+             "blessed_wizard_oil"}
+        config["configuration"]["sapp"] = list(range(num_mages))
+
         #config['timing']['duration'] = {
         #        "mean": 300.0,
         #        "var": 3.0,
@@ -57,7 +68,7 @@ def time_comparison():
             
     plt.close('all')
     plt.figure(figsize=(8.0, 5.5), dpi=200)
-    plt.title(f"SoM Damage (Longer Encounters, no WBs, Phase 4 BiS)")
+    plt.title(f"SoM Damage (Longer Encounters, no WBs, Phase 6 Gear)")
     for num_mages, ou in enumerate(out):
         #plt.plot(etimes, np.array(ou), label=config["configuration"]["name"][index])
         label = f"{num_mages + 1:d} mages"
@@ -67,11 +78,11 @@ def time_comparison():
                  np.array(ou),
                  label=label)
     plt.xlabel('Encounter Duration (seconds)')
-    plt.ylabel('Scorch Rotation - Fireball Rotation Damage (Full Team)')
+    plt.ylabel('DPS Difference per Mage (Ignite Hold - Always Fireball) Rotations')
     plt.grid()
     plt.xlim(0, 600)
     plt.legend()
-    plt.savefig("som_mages_damage4.png")
+    plt.savefig("som_rotation_phase6.png")
 
 if __name__ == '__main__':
     time_comparison()

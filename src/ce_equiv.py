@@ -24,7 +24,7 @@ def load_config(cfn):
         
 def time_comparison():
     max_mages = 7
-    etimes = np.array(list(range(25, 90, 5)) + list(range(90, 271, 15)) + list(range(300, 601, 30)))
+    etimes = np.array(list(range(25, 90, 5)) + list(range(90, 241, 15)) + list(range(300, 601, 30)))
     
     out = [[] for dummy in range(max_mages)]
     
@@ -34,15 +34,23 @@ def time_comparison():
         config = load_config(f"mages_{num_mages:d}.json")
         config["timing"]["delay"] = 3.0
         config["rotation"]["continuing"]["special"] = {"slot": list(range(num_mages)), "value": "scorch"}
-        config["stats"]["spell_power"] = [785 for aa in range(num_mages)]
+        config["stats"]["spell_power"] = [745 for aa in range(num_mages)]
         config["stats"]["crit_chance"] = [0.15 for aa in range(num_mages)]
-        config["stats"]["intellect"] = [317 for aa in range(num_mages)]
+        config["stats"]["intellect"] = [302 for aa in range(num_mages)]
+        config["buffs"]["raid"].append("blessing_of_kings")
         config["buffs"]["consumes"] = {
              "greater_arcane_elixir",
              "elixir_of_greater_firepower",
              "flask_of_supreme_power",
              "blessed_wizard_oil"}
-        config["configuration"]["sapp"] = list(range(num_mages))
+        config["buffs"]["world"] = {
+            "rallying_cry_of_the_dragonslayer",
+            "spirit_of_zandalar",
+            "dire_maul_tribute",
+            "songflower_serenade",
+            "sayges_dark_fortune_of_damage"}
+        config["configuration"]["mqg"] = list(range(num_mages))
+        config["configuration"]["pi"] = list(range(num_mages))
         osim_size = 150.0*sim_sizes[num_mages]
 
         for etime in etimes:
@@ -62,7 +70,7 @@ def time_comparison():
             
     plt.close('all')
     plt.figure(figsize=(8.0, 5.5), dpi=200)
-    plt.title(f"SoM Crit Values (Longer Encounters, no WBs, ignite hold, Phase 6 Gear)")
+    plt.title(f"CE Crit Values (Shorter Encounters, WBs, Always Fireball, Phase 6 Gear)")
     for num_mages, ou in enumerate(out):
         #plt.plot(etimes, np.array(ou), label=config["configuration"]["name"][index])
         label = f"{num_mages + 1:d} mages"
@@ -76,7 +84,7 @@ def time_comparison():
     plt.grid()
     plt.xlim(0, 600)
     plt.legend()
-    plt.savefig("som_crit_phase6_scorch.png")
+    plt.savefig("ce_crit_phase6_scorch.png")
 
 if __name__ == '__main__':
     time_comparison()

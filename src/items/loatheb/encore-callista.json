@@ -1,0 +1,185 @@
+{
+    "name": "callista",
+    "phase": 6,
+    "character": {
+        "name": "Encore",
+        "level": 60,
+        "gameClass": "MAGE",
+        "race": "HUMAN",
+        "faction": "ALLIANCE"
+    },
+    "items": [
+        {
+            "name": "Frostfire Circlet",
+            "id": 22498,
+            "enchant": {
+                "name": "Presence of Sight",
+                "id": 2588,
+                "itemId": 19787
+            },
+            "slot": "HEAD"
+        },
+        {
+            "name": "Choker of the Fire Lord",
+            "id": 18814,
+            "slot": "NECK"
+        },
+        {
+            "name": "Frostfire Shoulderpads",
+            "id": 22499,
+            "enchant": {
+                "name": "Zandalar Signet of Mojo",
+                "id": 2605,
+                "itemId": 20076
+            },
+            "slot": "SHOULDERS"
+        },
+        {
+            "name": "Frostfire Robe",
+            "id": 22496,
+            "enchant": {
+                "name": "Enchant Chest - Greater Stats",
+                "id": 1891,
+                "spellId": 20025
+            },
+            "slot": "CHEST"
+        },
+        {
+            "name": "Eyestalk Waist Cord",
+            "id": 22730,
+            "slot": "WAIST"
+        },
+        {
+            "name": "Leggings of Polarity",
+            "id": 23070,
+            "enchant": {
+                "name": "Presence of Sight",
+                "id": 2588,
+                "itemId": 19787
+            },
+            "slot": "LEGS"
+        },
+        {
+            "name": "Frostfire Sandals",
+            "id": 22500,
+            "enchant": {
+                "name": "Enchant Boots - Minor Speed",
+                "id": 911,
+                "spellId": 13890
+            },
+            "slot": "FEET"
+        },
+        {
+            "name": "Frostfire Bindings",
+            "id": 22503,
+            "enchant": {
+                "name": "Enchant Bracer - Greater Intellect",
+                "id": 1883,
+                "spellId": 20008
+            },
+            "slot": "WRISTS"
+        },
+        {
+            "name": "Frostfire Gloves",
+            "id": 22501,
+            "enchant": {
+                "name": "Enchant Gloves - Fire Power",
+                "id": 2616,
+                "spellId": 25078
+            },
+            "slot": "HANDS"
+        },
+        {
+            "name": "Frostfire Ring",
+            "id": 23062,
+            "slot": "FINGER_1"
+        },
+        {
+            "name": "Ring of the Eternal Flame",
+            "id": 23237,
+            "slot": "FINGER_2"
+        },
+        {
+            "name": "Mind Quickening Gem",
+            "id": 19339,
+            "slot": "TRINKET_1"
+        },
+        {
+            "name": "Neltharion's Tear",
+            "id": 19379,
+            "slot": "TRINKET_2"
+        },
+        {
+            "name": "Cloak of the Necropolis",
+            "id": 23050,
+            "slot": "BACK"
+        },
+        {
+            "name": "Wraith Blade",
+            "id": 22807,
+            "enchant": {
+                "name": "Enchant  Weapon - Spell Power",
+                "id": 2504,
+                "spellId": 22749
+            },
+            "slot": "MAIN_HAND"
+        },
+        {
+            "name": "Jin'do's Bag of Whammies",
+            "id": 19891,
+            "slot": "OFF_HAND"
+        },
+        {
+            "name": "Doomfinger",
+            "id": 22821,
+            "slot": "RANGED"
+        }
+    ],
+    "consumables": [],
+    "buffs": [],
+    "talents": [],
+    "points": [
+        {
+            "name": "Fire WB",
+            "stats": {
+                "spellDamage": 1,
+                "fireDamage": 1,
+                "spellHit": 15,
+                "spellCrit": 10,
+                "intellect": 0.2
+            }
+        }
+    ],
+    "stats": {
+        "agility": 39,
+        "arcaneDamage": 641,
+        "armor": 1044,
+        "attackPower": 58,
+        "crit": 5.41,
+        "defense": 300,
+        "dodge": 5.41,
+        "fireDamage": 695,
+        "frostDamage": 641,
+        "healing": 641,
+        "health": 3530,
+        "holyDamage": 641,
+        "intellect": 336,
+        "mainHandSpeed": 1.8,
+        "mana": 5973,
+        "natureDamage": 641,
+        "parry": 5,
+        "rangedSpeed": 1.5,
+        "shadowDamage": 641,
+        "spellCrit": 17.84,
+        "spellDamage": 641,
+        "spellHit": 9,
+        "spellPen": 23,
+        "spirit": 166,
+        "stamina": 234,
+        "strength": 34
+    },
+    "exportOptions": {
+        "buffs": true,
+        "talents": true
+    }
+}
