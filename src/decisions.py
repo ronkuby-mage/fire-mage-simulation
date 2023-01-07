@@ -166,68 +166,73 @@ class Decider():
         C = self._C
         decisions = -np.ones(still_going.size).astype(np.int32)
 
-        if "special" in self._rotation['continuing']:
-            # if need scorch then always scorch
-            # if want scorch, if no cooldown available, cast scorch
-
-            is_special = np.zeros(next_hit.size, dtype=np.bool)
-            for slot in self._rotation['continuing']['special']['slot']:
-                is_special |= next_hit == slot
-            not_special = np.where(np.logical_not(is_special))[0]
-
-            special = np.where(is_special)[0]
-            if special.size:
-                need_scorch = (arrays['boss']['scorch_timer'][still_going[special]] < C._MAX_SCORCH_REMAIN) |\
-                              (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK)
-                need_scorch &= (arrays['player']['spell_type'][still_going[special], next_hit[special]] != C._CAST_SCORCH)|\
-                               (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK - 1)
-                if self._rotation['continuing']['special']['value'] in ['maintain_scorch', 'scorch']:
-
-                    # first check if scorch is about to expire
-                    scorch = np.where(need_scorch)[0]
-                    if scorch.size:
-                        decisions[special[scorch]] = C._CAST_SCORCH
-
-                    # then check if we have a cooldown
-                    no_scorch_yet = np.where(np.logical_not(need_scorch))[0]
-                    comb_array = arrays['player']['comb_cooldown'][still_going[special[no_scorch_yet]], next_hit[special[no_scorch_yet]]] <= 0.0
-                    combustion = np.where(comb_array)[0]
-                    if combustion.size:
-                        decisions[special[no_scorch_yet[combustion]]] = C._DECIDE["combustion"]
-                    used_buff = comb_array
-                    for buff in range(C._BUFFS):
-                        buff_ready = arrays['player']['buff_cooldown'][buff][still_going[special[no_scorch_yet]], next_hit[special[no_scorch_yet]]] <= 0.0
-                        buff_it = np.where(buff_ready&np.logical_not(used_buff))[0]
-                        if buff_it.size:
-                            decisions[special[no_scorch_yet[buff_it]]] = C._BUFF_CAST_TYPE[buff]
-                        used_buff |= buff_ready
-
-                    # then check want scorch
-                    avail = np.where(np.logical_not(used_buff))[0]
-                    if self._rotation['continuing']['special']['value'] == 'scorch':
-                        # scorch if ignite is active, and full stack
-                        want_scorch = (arrays['boss']['ignite_timer'][still_going[special[no_scorch_yet[avail]]]] > 0.0) &\
-                                      (arrays['boss']['ignite_count'][still_going[special[no_scorch_yet[avail]]]] == C._IGNITE_STACK)
-                        # and no trinkets active
+        not_special = np.ones(decisions.size, dtype=np.bool)
+        for key in self._rotation['continuing']:
+            if "special" in key:
+                # if need scorch then always scorch
+                # if want scorch, if no cooldown available, cast scorch
+    
+                is_special = np.zeros(next_hit.size, dtype=np.bool)
+                for slot in self._rotation['continuing'][key]['slot']:
+                    is_special |= next_hit == slot
+                not_special[is_special] = False
+    
+                special = np.where(is_special)[0]
+                if special.size:
+                    need_scorch = (arrays['boss']['scorch_timer'][still_going[special]] < C._MAX_SCORCH_REMAIN) |\
+                                  (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK)
+                    need_scorch &= (arrays['player']['spell_type'][still_going[special], next_hit[special]] != C._CAST_SCORCH)|\
+                                   (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK - 1)
+                    if self._rotation['continuing'][key]['value'] in ['maintain_scorch', 'scorch', 'scorch_wep']:
+    
+                        # first check if scorch is about to expire
+                        scorch = np.where(need_scorch)[0]
+                        if scorch.size:
+                            decisions[special[scorch]] = C._CAST_SCORCH
+    
+                        # then check if we have a cooldown
+                        no_scorch_yet = np.where(np.logical_not(need_scorch))[0]
+                        comb_array = arrays['player']['comb_cooldown'][still_going[special[no_scorch_yet]], next_hit[special[no_scorch_yet]]] <= 0.0
+                        combustion = np.where(comb_array)[0]
+                        if combustion.size:
+                            decisions[special[no_scorch_yet[combustion]]] = C._DECIDE["combustion"]
+                        used_buff = comb_array
                         for buff in range(C._BUFFS):
-                            want_scorch &= arrays['player']['buff_timer'][buff][still_going[special[no_scorch_yet[avail]]], next_hit[special[no_scorch_yet[avail]]]] <= 0.0
-                        want_scorch &= arrays['player']['comb_left'][still_going[special[no_scorch_yet[avail]]], next_hit[special[no_scorch_yet[avail]]]] <= 0
-                    else:
-                        want_scorch = np.zeros(avail.shape, dtype=avail.dtype)
-
-                    to_scorch = np.where(want_scorch)[0]
-                    if to_scorch.size:
-                        decisions[special[no_scorch_yet[avail[to_scorch]]]] = C._CAST_SCORCH
-                    
-                    on_default = np.where(np.logical_not(want_scorch))[0]
-                    if on_default.size:
-                        decisions[special[no_scorch_yet[avail[on_default]]]] = C._DECIDE[self._rotation['continuing']['default']]
-
-                else: # not sure what this is for
-                    decisions[special] = C._DECIDE[self._rotation['continuing']['special']['value']]
-        else:
-            not_special = np.arange(decisions.size)
-
+                            buff_ready = arrays['player']['buff_cooldown'][buff][still_going[special[no_scorch_yet]], next_hit[special[no_scorch_yet]]] <= 0.0
+                            buff_it = np.where(buff_ready&np.logical_not(used_buff))[0]
+                            if buff_it.size:
+                                decisions[special[no_scorch_yet[buff_it]]] = C._BUFF_CAST_TYPE[buff]
+                            used_buff |= buff_ready
+    
+                        # then check want scorch
+                        avail = np.where(np.logical_not(used_buff))[0]
+                        if self._rotation['continuing'][key]['value'] in ['scorch', 'scorch_wep']:
+                            # scorch if ignite is active, and full stack
+                            want_scorch = (arrays['boss']['ignite_timer'][still_going[special[no_scorch_yet[avail]]]] > 0.0) &\
+                                          (arrays['boss']['ignite_count'][still_going[special[no_scorch_yet[avail]]]] == C._IGNITE_STACK)
+                            # and no trinkets active
+                            if self._rotation['continuing'][key]['value'] != 'scorch_wep':
+                                for buff in range(C._BUFFS):
+                                    want_scorch &= arrays['player']['buff_timer'][buff][still_going[special[no_scorch_yet[avail]]], next_hit[special[no_scorch_yet[avail]]]] <= 0.0
+                                want_scorch &= arrays['player']['comb_left'][still_going[special[no_scorch_yet[avail]]], next_hit[special[no_scorch_yet[avail]]]] <= 0
+                        else:
+                            want_scorch = np.zeros(avail.shape, dtype=avail.dtype)
+    
+                        to_scorch = np.where(want_scorch)[0]
+                        if to_scorch.size:
+                            #ssc = (2*next_hit[special[no_scorch_yet[avail[to_scorch]]]] + arrays['player']['comb_cooldown'][still_going[special[no_scorch_yet[avail[to_scorch]]]],
+                            #             next_hit[special[no_scorch_yet[avail[to_scorch]]]]]//1.5) % 5 
+                            decisions[special[no_scorch_yet[avail[to_scorch]]]] = C._CAST_SCORCH
+                            #decisions[special[no_scorch_yet[avail[to_scorch[np.where(ssc == 0)]]]]] = C._CAST_FIRE_BLAST
+                        
+                        on_default = np.where(np.logical_not(want_scorch))[0]
+                        if on_default.size:
+                            decisions[special[no_scorch_yet[avail[on_default]]]] = C._DECIDE[self._rotation['continuing']['default']]
+    
+                    else: # not sure what this is for
+                        decisions[special] = C._DECIDE[self._rotation['continuing'][key]['value']]
+        
+        not_special = np.where(not_special)[0]
         if not_special.size:
             comb_array = arrays['player']['comb_cooldown'][still_going[not_special], next_hit[not_special]] <= 0.0
             combustion = np.where(comb_array)[0]

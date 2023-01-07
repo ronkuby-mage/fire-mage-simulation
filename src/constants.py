@@ -184,8 +184,9 @@ class Constant():
         self._LOG_SIM = _LOG_SIM
         
         self._RES_AMOUNT = [0.75, 0.5, 0.25]
-        self._RES_THRESH = [0.9066, 96.78, 99.45]
-        self._RESISTANCE_MODIFIER = 0.966975
+        self._RES_THRESH = [0.9066, 0.9678, 0.9945]
+        #self._RESISTANCE_MODIFIER = 0.966975
+        self._RESISTANCE_MODIFIER = 0.940997        
 
 class ArrayGenerator():
 
@@ -255,9 +256,15 @@ class ArrayGenerator():
         arrays["player"]["spell_power"] += 150*("flask_of_supreme_power" in self._params["buffs"]["consumes"])
         arrays["player"]["spell_power"] += 60*("blessed_wizard_oil" in self._params["buffs"]["consumes"])
         arrays["player"]["spell_power"] += 36*("brilliant_wizard_oil" in self._params["buffs"]["consumes"])
+        arrays["player"]["spell_power"] += 23*("very_berry_cream" in self._params["buffs"]["consumes"])
         
         intellect = np.tile(np.array(self._params["stats"]["intellect"], dtype=np.float)[None, :], (sim_size, 1))
-        intellect += 31.0*float("arcane_intellect" in self._params["buffs"]["raid"]) + 1.35*12.0*float("improved_mark" in self._params["buffs"]["raid"])
+        intellect += 31.0*float("arcane_intellect" in self._params["buffs"]["raid"])
+        intellect += 1.35*12.0*float("improved_mark" in self._params["buffs"]["raid"])
+        intellect += 30.0*float("stormwind_gift_of_friendship" in self._params["buffs"]["consumes"])
+        intellect += 25.0*float("infallible_mind" in self._params["buffs"]["consumes"])
+        intellect += 10.0*float("runn_tum_tuber_surprise" in self._params["buffs"]["consumes"])
+
         intellect *= (1 + 0.1*float("blessing_of_kings" in self._params["buffs"]["raid"]))*(1 + 0.15*float("spirit_of_zandalar" in self._params["buffs"]["world"]))
         racial = np.array([1.05 if rac == "gnome" else 1.0 for rac in self._params["buffs"]["racial"]])
         intellect *= racial
@@ -276,6 +283,11 @@ class ArrayGenerator():
         arrays["player"]["hit_chance"] = 0.89 + np.tile(np.array(self._params["stats"]["hit_chance"])[None, :], (sim_size, 1))
         arrays["player"]["hit_chance"] = np.minimum(0.99, arrays["player"]["hit_chance"])
         
+        if False:
+            for index in self._params["configuration"]["target"]:
+                print(f'Spell Power = {arrays["player"]["spell_power"][0][index]:.0f}  Crit Chance = {100*arrays["player"]["crit_chance"][0][index]:.2f}  Int = {intellect[0][index]:.1f}')
+            dwplwd()
+        
         for key, val in C._BUFF_LOOKUP.items():
             for index in self._params["configuration"][key]:
                 arrays["player"]["buff_cooldown"][val][:, index] = 0.0
@@ -285,7 +297,7 @@ class ArrayGenerator():
         arrays["player"]["target"] = np.array(self._params["configuration"]["target"]).reshape(1, len(self._params["configuration"]["target"]))
       
         return arrays
-            
+
 def log_message():
     print('LOG:')
     print('    KEY:')

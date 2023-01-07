@@ -244,11 +244,11 @@ class Encounter():
                     if C._LOG_SIM in sph:
                         sub_index = sph.tolist().index(C._LOG_SIM)
                         if  sub_index in lcl_crits:
-                            message2 = 'crits for {:4.0f} '.format((1.0 + C._CRIT_DAMAGE)*spell_damage[sub_index])
+                            message2 = 'crits for {:5.0f} '.format((1.0 + C._CRIT_DAMAGE)*spell_damage[sub_index])
                         elif sub_index in lcl_icrits:
-                            message2 = 'crits for {:4.0f} '.format((1.0 + C._ICRIT_DAMAGE)*spell_damage[sub_index])
+                            message2 = 'crits for {:5.0f} '.format((1.0 + C._ICRIT_DAMAGE)*spell_damage[sub_index])
                         else:
-                            message2 = ' hits for {:4.0f} '.format(spell_damage[sub_index])
+                            message2 = ' hits for {:5.0f} '.format(spell_damage[sub_index])
 
                 # scorch
                 scorch_out = sph[np.where(boss['scorch_timer'][sph] <= 0.0)[0]]
@@ -276,7 +276,7 @@ class Encounter():
                     is_zhc = 'zhc' if buffs[C._BUFF_ZHC][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
                     is_mqg = 'mqg' if buffs[C._BUFF_MQG][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
                     is_pi =  'pi' if buffs[C._BUFF_POWER_INFUSION][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '  '
-                    status = ' ic {:d} it {:4.2f} in {:s} id {:4.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d} {:s} {:s} {:s} {:s} {:s}'
+                    status = ' ic {:d} it {:4.2f} in {:s} id {:5.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d} {:s} {:s} {:s} {:s} {:s}'
                     ival = boss['tick_timer'][C._LOG_SIM]
                     istat = '{:4.2f}'.format(ival) if ival > 0.0 and ival <= 2.0 else ' off'
                     status = status.format(boss['ignite_count'][C._LOG_SIM],
@@ -431,7 +431,7 @@ class Encounter():
         self._arrays['global']['ignite'] *= C._RESISTANCE_MODIFIER*C._RESISTANCE_MODIFIER
         
         if C._LOG_SIM >= 0:
-            print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]))
+            print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C._LOG_SIM]))
             print('average damage = {:9.1f}'.format(self._arrays['global']['total_damage'].mean()))
             print('std damage = {:7.1f}'.format(self._arrays['global']['total_damage'].std()))
             print('crit damage = {:9.1f}'.format(self._arrays['global']['crit'].mean()))
@@ -439,13 +439,18 @@ class Encounter():
 
         dp_mage = self._arrays['global']['player']/self._arrays['global']['duration']
         solo_mage = dp_mage + self._arrays['global']['ignite']*len(self._config["target"])/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration']
+        frac_up1 = (solo_mage > 3700.0).sum()/dp_mage.size
+        frac_up2 = (solo_mage > 4000.0).sum()/dp_mage.size
+        frac_up3 = (solo_mage > 4400.0).sum()/dp_mage.size
+        frac_up4 = (solo_mage > 4800.0).sum()/dp_mage.size
+        frac_up5 = (solo_mage > 5240.0).sum()/dp_mage.size
         if ret_dist:
             return solo_mage
-        npm = 9*dp_mage.size//10
-        opc = dp_mage.size//100
+        npm = (977*dp_mage.size)//1000
+        npm2 = (23*dp_mage.size)//1000
         smage = np.sort(solo_mage)
 
-        return solo_mage.mean(), solo_mage.std(), smage[(npm - opc):(npm + opc)].mean()
+        return solo_mage.mean(), solo_mage.std(), smage[npm], frac_up1, frac_up2, frac_up3, frac_up4, frac_up5, smage[npm2]
 
 def get_damage(params, ret_dist=False):
     array_generator = constants.ArrayGenerator(params)
