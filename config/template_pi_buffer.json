@@ -1,0 +1,93 @@
+{
+   "stats": {
+      "spell_power": [
+         612,
+         612,
+         612,
+         612
+      ],
+      "hit_chance": [
+         0.1,
+         0.1,
+         0.1,
+         0.1
+      ],
+      "crit_chance": [
+         0.07,
+         0.07,
+         0.07,
+         0.07
+      ],
+      "intellect": [
+         304,
+         304,
+         304,
+         304
+      ]
+   },
+   "buffs": {
+      "raid": [],
+      "consumes": [],
+      "world": [],
+      "racial": [],
+      "boss": []
+   },
+   "configuration": {
+      "num_mages": 0,
+      "target": [],
+      "sapp": [],
+      "toep": [],
+      "zhc": [],
+      "mqg": [],
+      "pi": [],
+      "udc": [],
+      "name": []
+   },
+   "rotation": {
+      "initial": {
+         "common": [
+            "scorch",
+            "scorch"
+         ],
+         "have_pi": [
+            "sapp",
+            "combustion",
+            "pyroblast",
+            "pi",
+            "fireball",
+            "fireball",
+            "fireball"
+         ],
+         "other": [
+            "frostbolt",
+            "combustion",
+            "frostbolt",
+            "frostbolt",
+            "frostbolt",
+            "fireball",
+            "mqg"
+         ]
+      },
+      "continuing": {
+         "default": "fireball",
+         "special": {
+            "slot": [
+               0
+            ],
+            "value": "scorch_wep"
+         }
+      }
+   },
+   "timing": {
+      "duration": {
+         "mean": 80.0,
+         "var": 5.0,
+         "clip": [
+            20.0,
+            200.0
+         ]
+      },
+      "delay": 1.0,
+      "response": 0.05
+   }
+}

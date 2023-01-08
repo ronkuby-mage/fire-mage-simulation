@@ -7,6 +7,7 @@ __savefile = "items.dat"
         
 if __name__ == "__main__":
     encounter = "loatheb"
+    encounter = "pink-team"
     template = "template.json"
 
     if os.path.exists(__savefile):

@@ -210,12 +210,12 @@ class ArrayGenerator():
 
         return array
         
-    def run(self, C):
+    def run(self, C, dur_dist):
         sim_size = self._params['sim_size']
         num_mages = self._params['configuration']['num_mages']
         arrays = {
             'global': {
-                'total_damage': np.zeros(sim_size),
+                'total_damage': [[] for dummy in range(sim_size)] if dur_dist else np.zeros(sim_size),
                 'running_time': np.zeros(sim_size),
                 'decision': np.zeros(sim_size).astype(np.bool),
                 'ignite': np.zeros(sim_size),
