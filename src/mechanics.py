@@ -147,6 +147,12 @@ class Encounter():
                 spell_damage = C._SPELL_BASE[spell_type] + \
                                C._SPELL_RANGE[spell_type]*np.random.rand(sph.size) +\
                                C._SP_MULTIPLIER[spell_type]*(player['spell_power'][sph, next_hit] + buff_damage)
+                rolls = np.random.rand(sph.size)
+                conditions = [np.logical_and(rolls >= ll, rolls < ul) for ll, ul in zip(C._RES_THRESH, C._RES_THRESH_UL)]
+                partials = np.piecewise(rolls, conditions, C._RES_AMOUNT)
+                partials[np.logical_not(C._IS_FIRE[spell_type].astype(np.bool))] = 1.0
+                spell_damage *= partials
+
                 spell_damage *= C._COE_MULTIPLIER*C._DAMAGE_MULTIPLIER[spell_type] # CoE + talents
                 scorch = C._IS_FIRE[spell_type]*C._SCORCH_MULTIPLIER*boss['scorch_count'][sph]
                 spell_damage *= 1.0 + scorch*(boss['scorch_timer'][sph] > 0.0).astype(np.float)
@@ -325,6 +331,11 @@ class Encounter():
             scorch = C._SCORCH_MULTIPLIER*boss['scorch_count'][no_expire]
             multiplier = C._COE_MULTIPLIER*boss['ignite_multiplier'][no_expire]
             multiplier *= 1.0 + scorch*(boss['scorch_timer'][no_expire] > 0.0).astype(np.float)
+            rolls = np.random.rand(multiplier.size)
+            conditions = [np.logical_and(rolls >= ll, rolls < ul) for ll, ul in zip(C._RES_THRESH, C._RES_THRESH_UL)]
+            partials = np.piecewise(rolls, conditions, C._RES_AMOUNT)
+            multiplier *= partials
+
             self._damage[no_expire] += multiplier*boss['ignite_value'][no_expire]
             self._ignite[no_expire] += multiplier*boss['ignite_value'][no_expire]
             if C._LOG_SIM >= 0:
@@ -431,11 +442,11 @@ class Encounter():
             if not still_going.size:
                 break
         if self._dur_dist is None:
-            self._arrays['global']['total_damage'] -= (1 - C._RESISTANCE_MODIFIER)*self._arrays['global']['ignite']
-            self._arrays['global']['total_damage'] *= C._RESISTANCE_MODIFIER
-            self._arrays['global']['player'] *= C._RESISTANCE_MODIFIER
-            self._arrays['global']['crit'] *= C._RESISTANCE_MODIFIER
-            self._arrays['global']['ignite'] *= C._RESISTANCE_MODIFIER*C._RESISTANCE_MODIFIER
+            #self._arrays['global']['total_damage'] -= (1 - C._RESISTANCE_MODIFIER)*self._arrays['global']['ignite']
+            #self._arrays['global']['total_damage'] *= C._RESISTANCE_MODIFIER
+            #self._arrays['global']['player'] *= C._RESISTANCE_MODIFIER
+            #self._arrays['global']['crit'] *= C._RESISTANCE_MODIFIER
+            #self._arrays['global']['ignite'] *= C._RESISTANCE_MODIFIER*C._RESISTANCE_MODIFIER
             
             if C._LOG_SIM >= 0 and self._dur_dist is None:
                 print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C._LOG_SIM]))
@@ -487,8 +498,8 @@ class Encounter():
             total_dam = total_dam.mean(axis=1)
             ignite_dam = ignite_dam.mean(axis=1)
             
-            total_dam -= (1 - C._RESISTANCE_MODIFIER)*ignite_dam
-            total_dam *= C._RESISTANCE_MODIFIER
+            #total_dam -= (1 - C._RESISTANCE_MODIFIER)*ignite_dam
+            #total_dam *= C._RESISTANCE_MODIFIER
 
             return total_dam
 

@@ -183,8 +183,9 @@ class Constant():
         self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion',  'sapp      ', 'toep      ', 'zhc       ', 'mqg       ', 'power inf ']
         self._LOG_SIM = _LOG_SIM
         
-        self._RES_AMOUNT = [0.75, 0.5, 0.25]
-        self._RES_THRESH = [0.9066, 0.9678, 0.9945]
+        self._RES_AMOUNT = [1.0, 0.75, 0.5, 0.25]
+        self._RES_THRESH = [0.0, 0.8303, 0.9415, 0.9905]
+        self._RES_THRESH_UL = [0.8303, 0.9415, 0.9905, 1.0]
         #self._RESISTANCE_MODIFIER = 0.966975
         self._RESISTANCE_MODIFIER = 0.940997        
 
