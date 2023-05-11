@@ -39,7 +39,9 @@
             "greater_arcane_elixir",
             "elixir_of_greater_firepower",
             "flask_of_supreme_power",
-            "brilliant_wizard_oil"
+            "brilliant_wizard_oil",
+            "infallible_mind",
+            "runn_tum_tuber_surprise"
         ],
         "world": [
             "rallying_cry_of_the_dragonslayer",
@@ -86,8 +88,8 @@
             "common": [
                 "scorch",
                 "scorch",
-                "combustion",
                 "sapp",
+                "combustion",
                 "zhc",
                 "toep",
                 "pyroblast",

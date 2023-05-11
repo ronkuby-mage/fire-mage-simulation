@@ -54,7 +54,7 @@
             "combustion",
             "pyroblast",
             "pi",
-            "fireball",
+            "mqg",
             "fireball",
             "fireball"
          ],
@@ -74,7 +74,8 @@
             "slot": [
                0
             ],
-            "value": "scorch_wep"
+            "value": "cobimf",
+            "cast_point_remain": 0.50
          }
       }
    },

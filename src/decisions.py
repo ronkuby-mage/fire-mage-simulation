@@ -183,7 +183,7 @@ class Decider():
                                   (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK)
                     need_scorch &= (arrays['player']['spell_type'][still_going[special], next_hit[special]] != C._CAST_SCORCH)|\
                                    (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK - 1)
-                    if self._rotation['continuing'][key]['value'] in ['maintain_scorch', 'scorch', 'scorch_wep']:
+                    if self._rotation['continuing'][key]['value'] in ['maintain_scorch', 'scorch', 'scorch_wep', 'cobimf']:
     
                         # first check if scorch is about to expire
                         scorch = np.where(need_scorch)[0]
@@ -206,12 +206,12 @@ class Decider():
     
                         # then check want scorch
                         avail = np.where(np.logical_not(used_buff))[0]
-                        if self._rotation['continuing'][key]['value'] in ['scorch', 'scorch_wep']:
+                        if self._rotation['continuing'][key]['value'] in ['scorch', 'scorch_wep', 'cobimf']:
                             # scorch if ignite is active, and full stack
                             want_scorch = (arrays['boss']['ignite_timer'][still_going[special[no_scorch_yet[avail]]]] > 0.0) &\
                                           (arrays['boss']['ignite_count'][still_going[special[no_scorch_yet[avail]]]] == C._IGNITE_STACK)
                             # and no trinkets active
-                            if self._rotation['continuing'][key]['value'] != 'scorch_wep':
+                            if self._rotation['continuing'][key]['value'] not in ['scorch_wep', 'cobimf']:
                                 for buff in range(C._BUFFS):
                                     want_scorch &= arrays['player']['buff_timer'][buff][still_going[special[no_scorch_yet[avail]]], next_hit[special[no_scorch_yet[avail]]]] <= 0.0
                                 want_scorch &= arrays['player']['comb_left'][still_going[special[no_scorch_yet[avail]]], next_hit[special[no_scorch_yet[avail]]]] <= 0
@@ -224,6 +224,18 @@ class Decider():
                             #             next_hit[special[no_scorch_yet[avail[to_scorch]]]]]//1.5) % 5 
                             decisions[special[no_scorch_yet[avail[to_scorch]]]] = C._CAST_SCORCH
                             #decisions[special[no_scorch_yet[avail[to_scorch[np.where(ssc == 0)]]]]] = C._CAST_FIRE_BLAST
+                            if self._rotation['continuing'][key]['value'] == 'cobimf':
+                                short_cut = special[no_scorch_yet[avail[to_scorch]]]
+                                react_time = self._rotation['continuing'][key]['cast_point_remain']
+                                run_low = C._DECISION_POINT - react_time 
+                                should_fb = (arrays['player']['fb_cooldown'][still_going[short_cut], next_hit[short_cut]] <= 0.0) &\
+                                            ((arrays['boss']['ignite_timer'][still_going[short_cut]] <= run_low) |\
+                                             (arrays['player']['crit_too_late'][still_going[short_cut], next_hit[short_cut]] &\
+                                             (arrays['boss']['ignite_timer'][still_going[short_cut]] > C._IGNITE_TIME - react_time)))
+                                fire_blast = np.where(should_fb)[0]
+                                if fire_blast.size:
+                                    decisions[special[no_scorch_yet[avail[to_scorch[fire_blast]]]]] = C._CAST_FIRE_BLAST
+                                arrays['player']['crit_too_late'][still_going[short_cut], next_hit[short_cut]] = False
                         
                         on_default = np.where(np.logical_not(want_scorch))[0]
                         if on_default.size:

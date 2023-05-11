@@ -12,7 +12,6 @@ class Constant():
         self._INCINERATE = True
         self._CLEANSING = True
         self._SIMPLE_SPELL = False
-        self._GCD = 1.0 # global cooldown "cast time"
         
         self._ROTATION_SIMSIZE = 3000
         self._CRIT_SIMSIZE = 50000
@@ -66,6 +65,8 @@ class Constant():
 
         self._COE_MULTIPLIER = 1.1
         self._SCORCH_MULTIPLIER = 0.03
+        
+        self._FIRE_BLAST_COOLDOWN = 7.0 # two talent points
 
         self._CAST_SCORCH = 0
         self._CAST_PYROBLAST = 1
@@ -93,7 +94,7 @@ class Constant():
         self._IS_SCORCH = np.array([True, False, False, False, False])
         self._IS_FIRE = np.array([1.0, 1.0, 1.0, 1.0, 0.0])
         self._INCIN_BONUS = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
-        self._CAST_TIME = np.array([1.5, 6.0, 3.0, 0.0, 3.0, self._GCD])
+        self._CAST_TIME = np.array([1.5, 6.0, 3.0, 0.0, 3.0, self._GLOBAL_COOLDOWN])
         self._SPELL_TIME = np.array([0.0, 0.875, 0.875, 0.0, 0.75])
 
         if self._FIREBALL_RANK == 11:
@@ -187,7 +188,9 @@ class Constant():
         self._RES_THRESH = [0.0, 0.8303, 0.9415, 0.9905]
         self._RES_THRESH_UL = [0.8303, 0.9415, 0.9905, 1.0]
         #self._RESISTANCE_MODIFIER = 0.966975
-        self._RESISTANCE_MODIFIER = 0.940997        
+        self._RESISTANCE_MODIFIER = 0.940997
+        
+        self._DECISION_POINT = 2.0
 
 class ArrayGenerator():
 
@@ -244,6 +247,8 @@ class ArrayGenerator():
                 'buff_timer': [np.zeros((sim_size, num_mages)) for aa in range(C._BUFFS)],
                 'buff_cooldown': [np.inf*np.ones((sim_size, num_mages)) for aa in range(C._BUFFS)],
                 'buff_ticks': [np.zeros((sim_size, num_mages)).astype(np.int32) for aa in range(C._DAMAGE_BUFFS)],
+                'fb_cooldown': np.zeros((sim_size, num_mages)),
+                'crit_too_late': np.zeros((sim_size, num_mages)).astype(np.bool),
                 'gcd': np.zeros((sim_size, num_mages))
             }
         }
