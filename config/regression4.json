@@ -1,0 +1,141 @@
+{
+   "stats": {
+      "spell_power": [
+         729,
+         729,
+         525,
+         525,
+         525,
+         525,
+         525
+      ],
+      "hit_chance": [
+         0.1,
+         0.1,
+         0.07,
+         0.07,
+         0.07,
+         0.07,
+         0.07
+      ],
+      "crit_chance": [
+         0.17,
+         0.17,
+         0.08,
+         0.08,
+         0.08,
+         0.08,
+         0.08
+      ],
+      "intellect": [
+         318,
+         318,
+         300,
+         300,
+         300,
+         300,
+         300
+      ]
+   },
+   "buffs": {
+      "raid": [
+         "arcane_intellect",
+         "blessing_of_kings",
+         "improved_mark"
+      ],
+      "consumes": [
+         "greater_arcane_elixir",
+         "elixir_of_greater_firepower",
+         "flask_of_supreme_power",
+         "brilliant_wizard_oil",
+         "stormwind_gift_of_friendship",
+         "very_berry_cream",
+         "runn_tum_tuber_surprise"
+      ],
+      "world": [],
+      "racial": [
+         "human",
+         "human",
+         "human",
+         "human",
+         "human",
+         "human",
+         "human"
+      ],
+      "boss": [""]
+   },
+   "configuration": {
+      "num_mages": 7,
+      "target": [
+	 0,
+	 1
+      ],
+       "sapp": [
+	 0,
+	 1
+      ],
+      "toep": [],
+      "zhc": [],
+      "mqg": [
+         0,
+         1
+      ],
+      "pi": [
+	 0,
+	 1
+      ],
+      "udc": [],
+      "name": [
+	 "mage1",
+	 "mage2",
+	 "mage3",
+	 "mage4",
+	 "mage5",
+	 "mage6",
+	 "mage7"
+      ]
+   },
+   "rotation": {
+      "initial": {
+         "common": [
+	    "sapp",  
+            "scorch"
+         ],
+         "have_pi": [
+            "combustion",
+            "pyroblast",
+            "pi",
+            "fireball",
+            "fireball"
+         ],
+         "other": [
+            "frostbolt",
+            "combustion",
+            "frostbolt",
+            "frostbolt",
+            "frostbolt"
+         ]
+      },
+      "continuing": {
+         "default": "fireball",
+         "special1": {
+            "slot": [
+               2
+            ],
+            "value": "maintain_scorch"
+         }
+      }
+   },
+   "timing": {
+      "duration": {
+         "mean": 60.0,
+         "var": 10.0,
+         "clip": [
+            30.0,
+            120.0
+         ]
+      },
+      "delay": 1.0,
+      "response": 0.05
+   }
+}
