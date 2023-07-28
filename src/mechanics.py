@@ -24,6 +24,7 @@ class Encounter():
         player['cast_timer'][sub, :] -= add_time[:, None]
         player['spell_timer'][sub, :] -= add_time[:, None]
         player['comb_cooldown'][sub, :] -= add_time[:, None]
+        player['fb_cooldown'][sub, :] -= add_time[:, None]
         boss['ignite_timer'][sub] -= add_time
         boss['tick_timer'][sub] -= add_time
         boss['scorch_timer'][sub] -= add_time
@@ -32,6 +33,8 @@ class Encounter():
             player['buff_cooldown'][buff][sub, :] -= add_time[:, None]
         for debuff in range(C._DEBUFFS):
             boss['debuff_timer'][debuff][sub] -= add_time
+        boss['spell_vulnerability'][sub] -= add_time
+        player['nightfall'][sub, :] -= add_time[:, None]
 
     def _do_cast(self, still_going, cast_array):
         C = self._C
@@ -58,6 +61,9 @@ class Encounter():
             no_instant = np.where(np.logical_not(instant_array))[0]
             player['spell_type'][cst[no_instant], next_hit[no_instant]] = player['cast_type'][cst[no_instant], next_hit[no_instant]]
             player['spell_timer'][cst[no_instant], next_hit[no_instant]] = C._SPELL_TIME[player['cast_type'][cst[no_instant], next_hit[no_instant]]]
+            
+            fire_blast = np.where(player['cast_type'][cst, next_hit] == C._CAST_FIRE_BLAST)[0]
+            player['fb_cooldown'][cst[fire_blast], next_hit[fire_blast]] = C._FIRE_BLAST_COOLDOWN
 
             # apply instant spells
             combustion = np.where(player['cast_type'][cst, next_hit] == C._CAST_COMBUSTION)[0]
@@ -137,7 +143,9 @@ class Encounter():
                 is_clean = np.where(the_cleaner)[0]
                 not_clean = np.where(np.logical_not(the_cleaner))[0]
                 
-                buff_damage = np.zeros(sph.size)
+                is_dragonling = np.logical_and(self._arrays['global']['running_time'][sph] >= boss['dragonling'],
+                                               self._arrays['global']['running_time'][sph] < boss['dragonling'] + C._DRAGONLING_DURATION).astype(np.float)
+                buff_damage = C._DRAGONLING_BUFF*is_dragonling
                 for buff in range(C._DAMAGE_BUFFS):
                     active = (player['buff_timer'][buff][sph, next_hit] > 0.0).astype(np.float)
                     ticks = player['buff_ticks'][buff][sph, next_hit]
@@ -158,6 +166,8 @@ class Encounter():
                 spell_damage *= 1.0 + scorch*(boss['scorch_timer'][sph] > 0.0).astype(np.float)
                 pi = (player['buff_timer'][C._BUFF_POWER_INFUSION][sph, next_hit] > 0.0).astype(np.float)
                 spell_damage *= 1.0 + C._POWER_INFUSION*pi
+                spell_damage *= 1.0 + C._NIGHTFALL_BUFF*(boss["spell_vulnerability"][sph] > 0.0).astype(np.float)
+                
                 spell_damage[not_clean] *= C._NORMAL_BUFF
                 spell_damage[is_clean] *= C._NORMAL_BUFF_C
                 self._damage[sph] += spell_damage
@@ -191,6 +201,10 @@ class Encounter():
                 rem_val = np.where(boss['ignite_timer'][gbl_icrits] <= 0.0)[0]
                 boss['ignite_count'][gbl_icrits[rem_val]] = 0
                 boss['ignite_value'][gbl_icrits[rem_val]] = 0.0
+
+                # record late crits
+                rem_val = np.where(boss['ignite_timer'][gbl_icrits] < C._DECISION_POINT)[0]
+                player['crit_too_late'][gbl_icrits[rem_val], :] = True
 
                 # extend by 4 secs, reset timer if no more ticks (31MAR22)
                 # comment this section and uncomment next section to return to classic mechanics
@@ -331,6 +345,8 @@ class Encounter():
             scorch = C._SCORCH_MULTIPLIER*boss['scorch_count'][no_expire]
             multiplier = C._COE_MULTIPLIER*boss['ignite_multiplier'][no_expire]
             multiplier *= 1.0 + scorch*(boss['scorch_timer'][no_expire] > 0.0).astype(np.float)
+            multiplier *= 1.0 + C._NIGHTFALL_BUFF*(boss["spell_vulnerability"][no_expire] > 0.0).astype(np.float)
+
             rolls = np.random.rand(multiplier.size)
             conditions = [np.logical_and(rolls >= ll, rolls < ul) for ll, ul in zip(C._RES_THRESH, C._RES_THRESH_UL)]
             partials = np.piecewise(rolls, conditions, C._RES_AMOUNT)
@@ -346,6 +362,25 @@ class Encounter():
                                          self._arrays['global']['running_time'][C._LOG_SIM],
                                          multiplier[sub_index]*boss['ignite_value'][C._LOG_SIM]))
 
+    def _do_proc(self, still_going, proc_array):
+        C = self._C
+        player = self._arrays['player']        
+        boss = self._arrays['boss']
+
+        proc_hits = np.where(proc_array)[0]
+        if proc_hits.size > 0:
+            proc = still_going[proc_hits]
+            next_proc = np.argmin(player['nightfall'][proc, :], axis=1)
+            add_time = np.min(player['nightfall'][proc, :], axis=1)
+
+            self._subtime(proc, add_time)
+
+            player['nightfall'][proc, next_proc] = player["nightfall_period"][next_proc]
+
+            rolls = np.random.rand(proc.size)
+            procs = np.where(rolls < C._NIGHTFALL_PROB)[0]
+            boss["spell_vulnerability"][proc[procs]] = C._NIGHTFALL_DURATION
+
     def _advance(self):
         going_array = (self._arrays['global']['running_time'] < self._arrays['global']['duration'])
         going_array &= np.logical_not(self._arrays['global']['decision'])
@@ -357,15 +392,23 @@ class Encounter():
         cast_timer = np.copy(np.min(self._arrays['player']['cast_timer'][still_going, :], axis=1))
         spell_timer = np.copy(np.min(self._arrays['player']['spell_timer'][still_going, :], axis=1))
         tick_timer = np.copy(self._arrays['boss']['tick_timer'][still_going])
-        cast_array = (cast_timer < spell_timer) & (cast_timer < tick_timer)
+        proc_timer = np.copy(np.min(self._arrays['player']['nightfall'][still_going, :], axis=1))
+        cast_array = (cast_timer < spell_timer) & (cast_timer < tick_timer) & (cast_timer < proc_timer)
+
+        # casts
         self._do_cast(still_going, cast_array)
 
         # spell hits
-        spell_array = np.logical_not(cast_array) & (spell_timer < tick_timer)
+        spell_array = np.logical_not(cast_array) & (spell_timer < tick_timer) & (spell_timer < proc_timer)
         self._do_spell(still_going, spell_array)
 
-        tick_array = np.logical_not(cast_array | spell_array)
+        # ticks
+        tick_array = np.logical_not(cast_array | spell_array) & (tick_timer < proc_timer)
         self._do_tick(still_going, tick_array)
+        
+        # procs
+        proc_array = np.logical_not(cast_array | spell_array | tick_array)
+        self._do_proc(still_going, proc_array)
     
         return True
     
@@ -465,6 +508,7 @@ class Encounter():
             if ret_dist:
                 return solo_mage
             npm = (977*dp_mage.size)//1000
+            #npm = (900*dp_mage.size)//1000 # kill this!
             npm2 = (23*dp_mage.size)//1000
             smage = np.sort(solo_mage)
     

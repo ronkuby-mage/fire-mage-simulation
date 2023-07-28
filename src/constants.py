@@ -147,7 +147,6 @@ class Constant():
         self._CRIT_BUFF_C = (1.0 if not self._CLEANSING else 1.02)
         self._IGNITE_BUFF_C = double_dip*(1.0 if not self._CLEANSING else 1.02)
 
-
         self._IGNITE_DAMAGE = 0.2
         self._ICRIT_DAMAGE = 0.5
         self._CRIT_DAMAGE = 1.0 if self._FROSTBOLT_TALENTED else 0.5
@@ -191,6 +190,13 @@ class Constant():
         self._RESISTANCE_MODIFIER = 0.940997
         
         self._DECISION_POINT = 2.0
+        
+        self._DRAGONLING_DURATION = 60.0
+        self._DRAGONLING_BUFF = 300
+        
+        self._NIGHTFALL_PROB = 0.15
+        self._NIGHTFALL_BUFF = 0.15
+        self._NIGHTFALL_DURATION = 5.0
 
 class ArrayGenerator():
 
@@ -234,7 +240,9 @@ class ArrayGenerator():
                 'scorch_timer': np.zeros(sim_size),
                 'scorch_count': np.zeros(sim_size).astype(np.int32),
                 'debuff_timer': [np.zeros(sim_size) for aa in range(C._DEBUFFS)],
-                'debuff_avail': [np.zeros(sim_size).astype(np.int32) for aa in range(C._DEBUFFS)]},
+                'debuff_avail': [np.zeros(sim_size).astype(np.int32) for aa in range(C._DEBUFFS)],
+                'dragonling': -C._DRAGONLING_DURATION,
+                'spell_vulnerability': np.zeros((sim_size))},
             'player': {
                 'cast_type': C._CAST_GCD*np.ones((sim_size, num_mages)).astype(np.int32),
                 'spell_timer': C._LONG_TIME*np.ones((sim_size, num_mages)),
@@ -249,6 +257,7 @@ class ArrayGenerator():
                 'buff_ticks': [np.zeros((sim_size, num_mages)).astype(np.int32) for aa in range(C._DAMAGE_BUFFS)],
                 'fb_cooldown': np.zeros((sim_size, num_mages)),
                 'crit_too_late': np.zeros((sim_size, num_mages)).astype(np.bool),
+                'nightfall': np.inf*np.ones((sim_size)).reshape(sim_size, 1),
                 'gcd': np.zeros((sim_size, num_mages))
             }
         }
@@ -301,7 +310,15 @@ class ArrayGenerator():
         arrays["player"]["cleaner"] = np.array(self._params["configuration"]["udc"]).reshape(1, len(self._params["configuration"]["udc"]))
         arrays["player"]["pi"] = np.array(self._params["configuration"]["pi"]).reshape(1, len(self._params["configuration"]["pi"]))
         arrays["player"]["target"] = np.array(self._params["configuration"]["target"]).reshape(1, len(self._params["configuration"]["target"]))
-      
+
+        if "proc" in self._params["buffs"]:
+            arrays["boss"]["dragonling"] = self._params["buffs"]["proc"]["dragonling"]
+            nightfall = []
+            for period in self._params["buffs"]["proc"]["nightfall"]:
+                nightfall.append(period*np.ones((sim_size)))
+            arrays["player"]["nightfall"] = np.stack(nightfall, axis=1)
+            arrays["player"]["nightfall_period"] = np.array(self._params["buffs"]["proc"]["nightfall"])
+
         return arrays
 
 def log_message():
