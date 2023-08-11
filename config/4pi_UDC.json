@@ -1,0 +1,128 @@
+{
+   "stats": {
+      "spell_power": [
+         810,
+         810,
+         781,
+         781
+      ],
+      "hit_chance": [
+         0.1,
+         0.1,
+         0.1,
+         0.1
+      ],
+      "crit_chance": [
+        0.13,
+        0.13,
+        0.15,
+        0.15
+     ],
+      "intellect": [
+         300,
+         300,
+         284,
+         284
+      ]
+   },
+   "buffs": {
+      "raid": [
+         "arcane_intellect",
+         "blessing_of_kings",
+         "improved_mark"
+      ],
+      "consumes": [
+         "greater_arcane_elixir",
+         "elixir_of_greater_firepower",
+         "flask_of_supreme_power",
+         "brilliant_wizard_oil",
+         "very_berry_cream"
+      ],
+      "world": [
+         "rallying_cry_of_the_dragonslayer",
+         "spirit_of_zandalar",
+         "dire_maul_tribute",
+         "songflower_serenade",
+         "sayges_dark_fortune_of_damage"
+      ],
+      "racial": [
+         "human",
+         "human",
+         "human",
+         "human"
+      ],
+      "boss": []
+   },
+   "configuration": {
+      "num_mages": 4,
+      "target": [
+         0,
+         1,
+         2,
+         3
+      ],
+      "sapp": [
+         0,
+         1,
+         2,
+         3
+      ],
+      "toep": [],
+      "zhc": [],
+      "mqg": [],
+      "pi": [
+         0,
+         1,
+         2,
+         3
+      ],
+      "udc": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "name": [
+         "mage1",
+         "mage2",
+         "mage3",
+         "mage4"
+      ]
+   },
+   "rotation": {
+      "initial": {
+         "common": [
+            "scorch",
+            "scorch"
+         ],
+         "other": [
+            "sapp",
+            "combustion",
+            "pyroblast",
+            "pi",
+            "fireball"
+         ]
+      },
+      "continuing": {
+         "default": "fireball",
+         "special": {
+            "slot": [
+               3
+            ],
+            "value": "maintain_scorch"
+         }
+      }
+   },
+   "timing": {
+      "duration": {
+         "mean": 150.0,
+         "var": 15.0,
+         "clip": [
+            20.0,
+            1000.0
+         ]
+      },
+      "delay": 2.0,
+      "response": 0.05
+   }
+}

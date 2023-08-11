@@ -12,7 +12,7 @@ def output_info(values, nm):
     print(f"mean: {values[0]/nm:.0f}  std: {values[1]/nm:.1f}  low 2sig: {values[8]/nm:.0f}  high 2sig: {values[2]/nm:.0f}")
 
 def main(config, name, ret_dist=False):
-    sim_size = 100000
+    sim_size = 300000
     config["sim_size"] = sim_size
     values = get_damage(config, ret_dist=ret_dist)
     print(f"  {name}={values[_TYPE]:7.2f}")
@@ -37,15 +37,15 @@ def last_player():
     #encounter = "record_run_fb"
     #encounter = "three_thaddius"
     #encounter = "2pi_no_UDC"
-    #encounter = "2_mages_dragon_nightfall"
-    encounter = "2_mages_dragon_nightfall_go_for_it"
+    encounter = "4_mages_dragon_nightfall"
+    #encounter = "4_mages_dragon_nightfall_max_2std"
 
     # changes 4 mage pi no UDC
     
 
     config = load_config(encounter + ".json")
     to_mod = config["configuration"]["target"]
-    to_mod = [1]
+    #to_mod = [1]
     #config["timing"]["delay"] = 3.0
     config["timing"]["delay"] = 2.0
     #config["buffs"]["boss"] = "loatheb"
@@ -57,7 +57,7 @@ def last_player():
             "clip": [3.0, 10000.0]}
     print(config)
     value = main(config, "v0")
-    if True:
+    if False:
         output_info(value, len(config["configuration"]["target"]))
     else:
         output_info(value, len(config["configuration"]["target"]))
