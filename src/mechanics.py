@@ -144,10 +144,10 @@ class Encounter():
                 not_clean = np.where(np.logical_not(the_cleaner))[0]
                 
                 is_dragonling = np.logical_and(self._arrays['global']['running_time'][sph] >= boss['dragonling'],
-                                               self._arrays['global']['running_time'][sph] < boss['dragonling'] + C._DRAGONLING_DURATION).astype(np.float)
+                                               self._arrays['global']['running_time'][sph] < boss['dragonling'] + C._DRAGONLING_DURATION).astype(np.float32)
                 buff_damage = C._DRAGONLING_BUFF*is_dragonling
                 for buff in range(C._DAMAGE_BUFFS):
-                    active = (player['buff_timer'][buff][sph, next_hit] > 0.0).astype(np.float)
+                    active = (player['buff_timer'][buff][sph, next_hit] > 0.0).astype(np.float32)
                     ticks = player['buff_ticks'][buff][sph, next_hit]
                     buff_damage += active*(C._BUFF_DAMAGE[buff] + ticks*C._BUFF_PER_TICK[buff])
                     player['buff_ticks'][buff][sph, next_hit] += 1
@@ -158,15 +158,15 @@ class Encounter():
                 rolls = np.random.rand(sph.size)
                 conditions = [np.logical_and(rolls >= ll, rolls < ul) for ll, ul in zip(C._RES_THRESH, C._RES_THRESH_UL)]
                 partials = np.piecewise(rolls, conditions, C._RES_AMOUNT)
-                partials[np.logical_not(C._IS_FIRE[spell_type].astype(np.bool))] = 1.0
+                partials[np.logical_not(C._IS_FIRE[spell_type].astype(bool))] = 1.0
                 spell_damage *= partials
 
                 spell_damage *= C._COE_MULTIPLIER*C._DAMAGE_MULTIPLIER[spell_type] # CoE + talents
                 scorch = C._IS_FIRE[spell_type]*C._SCORCH_MULTIPLIER*boss['scorch_count'][sph]
-                spell_damage *= 1.0 + scorch*(boss['scorch_timer'][sph] > 0.0).astype(np.float)
-                pi = (player['buff_timer'][C._BUFF_POWER_INFUSION][sph, next_hit] > 0.0).astype(np.float)
+                spell_damage *= 1.0 + scorch*(boss['scorch_timer'][sph] > 0.0).astype(np.float32)
+                pi = (player['buff_timer'][C._BUFF_POWER_INFUSION][sph, next_hit] > 0.0).astype(np.float32)
                 spell_damage *= 1.0 + C._POWER_INFUSION*pi
-                spell_damage *= 1.0 + C._NIGHTFALL_BUFF*(boss["spell_vulnerability"][sph] > 0.0).astype(np.float)
+                spell_damage *= 1.0 + C._NIGHTFALL_BUFF*(boss["spell_vulnerability"][sph] > 0.0).astype(np.float32)
                 
                 spell_damage[not_clean] *= C._NORMAL_BUFF
                 spell_damage[is_clean] *= C._NORMAL_BUFF_C
@@ -176,22 +176,21 @@ class Encounter():
 
                 # handle critical hit/ignite ** READ HERE FOR MOST OF THE IGNITE MECHANICS **
                 comb_crit = C._PER_COMBUSTION*player['comb_stack'][sph, next_hit] - C._IS_SCORCH[spell_type] # scorch and batching
-                comb_crit *= (player['comb_left'][sph, next_hit] > 0).astype(np.float)
+                comb_crit *= (player['comb_left'][sph, next_hit] > 0).astype(np.float32)
                 comb_crit *= C._IS_FIRE[spell_type]
                 
                 crit_chance = player['crit_chance'][sph, next_hit] + comb_crit + C._INCIN_BONUS[spell_type]
                 crit_array = np.random.rand(sph.size) < crit_chance
                 
-                ignite_array = crit_array & C._IS_FIRE[spell_type].astype(np.bool)
+                ignite_array = crit_array & C._IS_FIRE[spell_type].astype(bool)
 
-                lcrit_clean = np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & the_cleaner)[0]
-                lnot_crit_clean = np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & np.logical_not(the_cleaner))[0]
+                lcrit_clean = np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_cleaner)[0]
+                lnot_crit_clean = np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & np.logical_not(the_cleaner))[0]
+                gcrit_clean = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_cleaner)[0]]
+                gnot_crit_clean = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & np.logical_not(the_cleaner))[0]]
 
-                gcrit_clean = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & the_cleaner)[0]]
-                gnot_crit_clean = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & np.logical_not(the_cleaner))[0]]
-
-                lcrit_play = np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & the_player)[0]
-                gcrit_play = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(np.bool) & the_player)[0]]
+                lcrit_play = np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_player)[0]
+                gcrit_play = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_player)[0]]
 
                 lcl_icrits = np.where(ignite_array)[0]
                 gbl_icrits = sph[lcl_icrits]
@@ -344,8 +343,8 @@ class Encounter():
             
             scorch = C._SCORCH_MULTIPLIER*boss['scorch_count'][no_expire]
             multiplier = C._COE_MULTIPLIER*boss['ignite_multiplier'][no_expire]
-            multiplier *= 1.0 + scorch*(boss['scorch_timer'][no_expire] > 0.0).astype(np.float)
-            multiplier *= 1.0 + C._NIGHTFALL_BUFF*(boss["spell_vulnerability"][no_expire] > 0.0).astype(np.float)
+            multiplier *= 1.0 + scorch*(boss['scorch_timer'][no_expire] > 0.0).astype(np.float32)
+            multiplier *= 1.0 + C._NIGHTFALL_BUFF*(boss["spell_vulnerability"][no_expire] > 0.0).astype(np.float32)
 
             rolls = np.random.rand(multiplier.size)
             conditions = [np.logical_and(rolls >= ll, rolls < ul) for ll, ul in zip(C._RES_THRESH, C._RES_THRESH_UL)]
@@ -429,7 +428,7 @@ class Encounter():
         on_gcd = np.where(decisions < C._CAST_GCD)[0]
         player['cast_timer'][still_going[on_gcd], next_hit[on_gcd]] += C._CAST_TIME[decisions[on_gcd]]
         # mind quickening gem
-        mqg = (player['buff_timer'][C._BUFF_MQG][still_going[on_gcd], next_hit[on_gcd]] > 0.0).astype(np.float)
+        mqg = (player['buff_timer'][C._BUFF_MQG][still_going[on_gcd], next_hit[on_gcd]] > 0.0).astype(np.float32)
         player['cast_timer'][still_going[on_gcd], next_hit[on_gcd]] /= (1.0 + C._MQG*mqg)
     
         player['gcd'][still_going[on_gcd], next_hit[on_gcd]] = np.maximum(0.0, C._GLOBAL_COOLDOWN + react_time[on_gcd] - player['cast_timer'][still_going[on_gcd], next_hit[on_gcd]])
@@ -442,7 +441,7 @@ class Encounter():
                                          next_hit[sub_index] + 1,
                                          C._LOG_SPELL[player['cast_type'][still_going[sub_index], next_hit[sub_index]]])
                 print(message)
-        self._arrays['global']['decision'] = np.zeros(self._arrays['global']['decision'].shape, dtype=np.bool)
+        self._arrays['global']['decision'] = np.zeros(self._arrays['global']['decision'].shape, dtype=bool)
     
     def run(self, ret_dist):
         double_dip = (1.0 + 0.1*float("sayges_dark_fortune_of_damage" in self._world_buffs))

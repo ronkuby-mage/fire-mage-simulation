@@ -227,7 +227,7 @@ class ArrayGenerator():
             'global': {
                 'total_damage': [[] for dummy in range(sim_size)] if dur_dist else np.zeros(sim_size),
                 'running_time': np.zeros(sim_size),
-                'decision': np.zeros(sim_size).astype(np.bool),
+                'decision': np.zeros(sim_size).astype(bool),
                 'ignite': np.zeros(sim_size),
                 'crit': np.zeros(sim_size),
                 'player': np.zeros(sim_size)},
@@ -256,7 +256,7 @@ class ArrayGenerator():
                 'buff_cooldown': [np.inf*np.ones((sim_size, num_mages)) for aa in range(C._BUFFS)],
                 'buff_ticks': [np.zeros((sim_size, num_mages)).astype(np.int32) for aa in range(C._DAMAGE_BUFFS)],
                 'fb_cooldown': np.zeros((sim_size, num_mages)),
-                'crit_too_late': np.zeros((sim_size, num_mages)).astype(np.bool),
+                'crit_too_late': np.zeros((sim_size, num_mages)).astype(bool),
                 'nightfall': np.inf*np.ones((sim_size)).reshape(sim_size, 1),
                 'gcd': np.zeros((sim_size, num_mages))
             }
@@ -273,7 +273,7 @@ class ArrayGenerator():
         arrays["player"]["spell_power"] += 36*("brilliant_wizard_oil" in self._params["buffs"]["consumes"])
         arrays["player"]["spell_power"] += 23*("very_berry_cream" in self._params["buffs"]["consumes"])
         
-        intellect = np.tile(np.array(self._params["stats"]["intellect"], dtype=np.float)[None, :], (sim_size, 1))
+        intellect = np.tile(np.array(self._params["stats"]["intellect"], dtype=np.float32)[None, :], (sim_size, 1))
         intellect += 31.0*float("arcane_intellect" in self._params["buffs"]["raid"])
         intellect += 1.35*12.0*float("improved_mark" in self._params["buffs"]["raid"])
         intellect += 30.0*float("stormwind_gift_of_friendship" in self._params["buffs"]["consumes"])

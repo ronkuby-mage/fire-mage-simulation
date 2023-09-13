@@ -166,13 +166,13 @@ class Decider():
         C = self._C
         decisions = -np.ones(still_going.size).astype(np.int32)
 
-        not_special = np.ones(decisions.size, dtype=np.bool)
+        not_special = np.ones(decisions.size, dtype=bool)
         for key in self._rotation['continuing']:
             if "special" in key:
                 # if need scorch then always scorch
                 # if want scorch, if no cooldown available, cast scorch
     
-                is_special = np.zeros(next_hit.size, dtype=np.bool)
+                is_special = np.zeros(next_hit.size, dtype=bool)
                 for slot in self._rotation['continuing'][key]['slot']:
                     is_special |= next_hit == slot
                 not_special[is_special] = False
