@@ -8,24 +8,54 @@ from PyQt5.QtWidgets import (
     QTabWidget,
     QCheckBox,
     QWidget,
+    QLabel
 )
+from PyQt5.QtCore import Qt
 import qdarkstyle
-#from style import QDarkPalette
+from config_select import ConfigList
+
 
 class Window(QWidget):
+
+    _DEFAULT_HEIGHT = 800
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Fire Mage Simulation")
-        self.resize(1000, 800)
+        self.resize(1200, self._DEFAULT_HEIGHT)
         # Create a top-level layout
-        layout = QVBoxLayout()
-        self.setLayout(layout)
+        self.toplayout = QVBoxLayout()
         # Create the tab widget with two tabs
         tabs = QTabWidget()
-        tabs.addTab(self.generalTabUI(), "General")
-        tabs.addTab(self.networkTabUI(), "Network")
-        tabs.setAutoFillBackground(True)
-        layout.addWidget(tabs)
+        tabs.addTab(self.generalTabUI(), "Simulation")
+        tabs.addTab(self.networkTabUI(), "Scenario")
+        self._config_list = ConfigList()
+
+        self.toplayout.addWidget(tabs)
+        self.toplayout.addWidget(self._config_list)
+        self.setLayout(self.toplayout)
+        self._last_height = None
+
+        # enable custom window hint
+        self.setWindowFlags(self.windowFlags() | Qt.CustomizeWindowHint)
+
+        # disable (but not hide) close button
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowMaximizeButtonHint)        
+        #self.setWindowFlag(Qt.WindowMaximizeButtonHint, False)
+
+    def show(self):
+        super().show()
+        self._zero_height = self._config_list.geometry().height()
+        self._last_height = self._zero_height
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        if self._last_height is not None:
+            current_height = self._config_list.geometry().height()
+            if current_height != self._last_height:
+                new_height = self._DEFAULT_HEIGHT - self._zero_height + current_height
+                self.resize(1200, new_height)
+                self._last_height = current_height
 
     def generalTabUI(self):
         """Create the General page UI."""
