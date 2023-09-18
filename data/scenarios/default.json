@@ -17,7 +17,7 @@
          0.19,
          0.19,
          0.21
-     ],
+      ],
       "intellect": [
          318,
          318,
@@ -27,23 +27,23 @@
    },
    "buffs": {
       "raid": [
-         "arcane_intellect",
          "blessing_of_kings",
-         "improved_mark"
+         "improved_mark",
+         "arcane_intellect"
       ],
       "consumes": [
-         "greater_arcane_elixir",
-         "elixir_of_greater_firepower",
+         "very_berry_cream",
          "flask_of_supreme_power",
+         "greater_arcane_elixir",
          "brilliant_wizard_oil",
-         "very_berry_cream"
+         "elixir_of_greater_firepower"
       ],
       "world": [
-         "rallying_cry_of_the_dragonslayer",
-         "spirit_of_zandalar",
          "dire_maul_tribute",
          "songflower_serenade",
-         "sayges_dark_fortune_of_damage"
+         "rallying_cry_of_the_dragonslayer",
+         "sayges_dark_fortune_of_damage",
+         "spirit_of_zandalar"
       ],
       "racial": [
          "human",
@@ -97,14 +97,14 @@
          ]
       },
       "continuing": {
-        "default": "fireball",
-        "special": {
-           "slot": [
-              3
-           ],
-           "value": "cobimf",
-           "cast_point_remain": 0.50            
-        }
+         "default": "fireball",
+         "special": {
+            "slot": [
+               3
+            ],
+            "value": "cobimf",
+            "cast_point_remain": 0.5
+         }
       }
    },
    "timing": {

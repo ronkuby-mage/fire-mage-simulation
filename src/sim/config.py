@@ -3,13 +3,17 @@ import json
 
 class ConfigList():
 
-    def __init__(self, directory, filenames):
-        self._configs = [Config(directory, filename) for filename in filenames]
-        self._filenames = filenames
+    def __init__(self, directory, filename):
+        self._configs = [Config(directory, filename)]
+        self._filenames = [filename]
         self._directory = directory
+        self._index = 0
 
-    def config(self, index):
-        return self._configs[index]
+    def current(self):
+        return self._configs[self._index]
+    
+    def set_index(self, index):
+        self._index = index
 
 class Config():
 

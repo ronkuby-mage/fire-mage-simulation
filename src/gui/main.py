@@ -25,7 +25,7 @@ class Window(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.config_list = ConfigList(self._CONFIG_DIRECTORY, [self._CONFIG_DEFAULT])
+        self.config_list = ConfigList(self._CONFIG_DIRECTORY, self._CONFIG_DEFAULT)
 
         self.setWindowTitle("Fire Mage Simulation")
         self.resize(self._DEFAULT_WIDTH, self._DEFAULT_HEIGHT)
@@ -36,8 +36,8 @@ class Window(QWidget):
         self.tabs.addTab(self.generalTabUI(), "Simulation")
         self._scenario = Scenario(self.config_list)
         self.tabs.addTab(self._scenario, "Scenario")
-        self._config_widget = ConfigListWidget(self.config_list, expand=False)
-        self._config_widget.set_trigger(self._scenario.update)
+        self._config_widget = ConfigListWidget(self.config_list, self._scenario.update, expand=False)
+        self._scenario.set_changed_trigger(self._config_widget.changed_trigger)
 
         self.toplayout.addWidget(self.tabs)
         self.toplayout.addWidget(self._config_widget)

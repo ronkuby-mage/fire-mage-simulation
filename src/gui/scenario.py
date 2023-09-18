@@ -24,12 +24,9 @@ class Scenario(QStackedWidget):
 
         super().__init__()
 
-        # future: need to change based on the selected config
-        self._config = config_list.config(0)
-
-        self._group = Group(self._config)
-        self._buffs = Buffs(self._config)
-        self._rotation = Rotation(self._config)
+        self._group = Group(config_list)
+        self._buffs = Buffs(config_list)
+        self._rotation = Rotation(config_list)
 
         self._character = Character()
 
@@ -55,10 +52,10 @@ class Scenario(QStackedWidget):
         self._buffs.fill()
         self._rotation.fill()
 
-    def set_config(self, config):
-        self._group.set_config(config)
-        self._buffs.set_config(config)
-        self._rotation.set_config(config)
+    def set_changed_trigger(self, changed_trigger):
+        self._group.set_changed_trigger(changed_trigger)
+        self._buffs.set_changed_trigger(changed_trigger)
+        self._rotation.set_changed_trigger(changed_trigger)
 
 class Buffs(QWidget):
 
@@ -86,11 +83,10 @@ class Buffs(QWidget):
         }
     _BOSSES = ["", "loatheb", "thaddius"]
 
-    def __init__(self, initial_config):
+    def __init__(self, config_list):
         super().__init__()
-
-        config = initial_config.config()
-
+        self._changed_trigger = None
+        self._config = config_list
         self._buffs = {}
         layout = QHBoxLayout()
         for buff_type in self._BUFFS:
@@ -120,14 +116,10 @@ class Buffs(QWidget):
             column.setLayout(clayout)
             layout.addWidget(column)
         self.setLayout(layout)
-        self.set_config(initial_config)
         self.fill()
 
-    def set_config(self, config):
-        self._config = config
-
     def fill(self):
-        config = self._config.config()
+        config = self._config.current().config()
 
         for buff_type in self._BUFFS:
             for buff_name in self._BUFFS[buff_type]:
@@ -136,7 +128,7 @@ class Buffs(QWidget):
         self._buffs["boss"].setCurrentIndex(self._BOSSES.index(config["buffs"]["boss"]))
 
     def modify_buff(self, buff_type, buff_name):
-        config = self._config.config()
+        config = self._config.current().config()
         state = self._buffs[buff_name].isChecked()
         atm = set(config["buffs"][buff_type])
         if state:
@@ -144,19 +136,28 @@ class Buffs(QWidget):
         elif buff_name in atm:
             atm.remove(buff_name)
         config["buffs"][buff_type] = list(atm)
+        if self._changed_trigger is not None:
+            self._changed_trigger()
 
     def modify_boss(self):
-        config = self._config.config()
+        config = self._config.current().config()
         boss = self._buffs["boss"].currentText()
         config["buffs"]["boss"] = boss
+        if self._changed_trigger is not None:
+            self._changed_trigger()
+
+    def set_changed_trigger(self, changed_trigger):
+        self._changed_trigger = changed_trigger
 
 class Rotation(QWidget):
 
     _SPELLS = list(Constant(0.0)._DECIDE.keys())
     _MAX_SPELLS = 12
 
-    def __init__(self, initial_config):
+    def __init__(self, config_list):
         super().__init__()
+        self._changed_trigger = None
+        self._config = config_list
         layout = QVBoxLayout()
         layout.addWidget(QLabel("Opening"))
         table = QTableWidget(self._MAX_SPELLS, 1, self)
@@ -166,39 +167,61 @@ class Rotation(QWidget):
         for row in range(table.rowCount()):
             combo = QComboBox()
             combo.addItems(self._SPELLS)
+            combo.currentIndexChanged.connect(lambda state, x=row: self.modify_initial(x))
             self._initial.append(combo)
             table.setCellWidget(row, 0, combo)
         layout.addWidget(table)
         self.setLayout(layout)
-
-        self.set_config(initial_config)
         self.fill()
 
-    def set_config(self, config):
-        self._config = config
-
     def fill(self):
-        config = self._config.config()
+        config = self._config.current().config()
         for idx, spell in enumerate(config["rotation"]["initial"]["other"]):
             self._initial[idx].setCurrentIndex(self._SPELLS.index(spell))
 
         for jdx in range(idx, self._MAX_SPELLS):
-            self._initial[jdx].addItem("")
+            if jdx:
+                self._initial[jdx].addItem("")
             if jdx != idx:
                 self._initial[jdx].setCurrentText("")
                 if jdx != idx + 1:
                     self._initial[jdx].setEnabled(False)
 
+    def modify_initial(self, row):
+        config = self._config.current().config()
+        spell = self._initial[row].currentText()
+        if not spell:
+            if row < len(config["rotation"]["initial"]["other"]):
+                config["rotation"]["initial"]["other"].pop()
+                if row > 1:
+                    self._initial[row - 1].addItem("")
+                if row < self._MAX_SPELLS - 1:
+                    self._initial[row + 1].setEnabled(False)
+        elif row >= len(config["rotation"]["initial"]["other"]):
+            config["rotation"]["initial"]["other"].append(spell)
+            if row > 1:
+                self._initial[row - 1].removeItem(len(self._SPELLS))
+            if row < self._MAX_SPELLS - 1:
+                self._initial[row + 1].setEnabled(True)
+        else:
+            config["rotation"]["initial"]["other"][row] = spell
+        if self._changed_trigger is not None:
+            self._changed_trigger()
+
+    def set_changed_trigger(self, changed_trigger):
+        self._changed_trigger = changed_trigger
+
 class Group(QWidget):
 
-    def __init__(self, initial_config):
+    def __init__(self, config_list):
         super().__init__()
+        self._changed_trigger = None
+        self._config = config_list
+        config = self._config.current().config()
         layout = QVBoxLayout()
         self._mages = []
-        config = initial_config.config()
         for idx in range(config["configuration"]["num_mages"]):
-            mage = Mage(idx)
-            mage.set_config(initial_config)
+            mage = Mage(config_list, idx)
             self._mages.append(mage)
             layout.addWidget(mage)
         self.setLayout(layout)
@@ -208,9 +231,9 @@ class Group(QWidget):
         for mage in self._mages:
             mage.fill()
 
-    def set_config(self, config):
+    def set_changed_trigger(self, changed_trigger):
         for mage in self._mages:
-            mage.set_config(config)
+            mage.set_changed_trigger(changed_trigger)
 
 class Mage(QWidget):
 
@@ -220,8 +243,10 @@ class Mage(QWidget):
     _BOOLEANS = ["sapp", "toep", "zhc", "mqg", "udc", "pi", "target"]
     _RACIALS = ["human", "undead", "gnome"]
 
-    def __init__(self, index):
+    def __init__(self, config_list, index):
         super().__init__()
+        self._changed_trigger = None
+        self._config = config_list
         self._index = index
         layout = QHBoxLayout()
         layout.addWidget(QLabel(f"Mage {index + 1:d}"))
@@ -253,11 +278,8 @@ class Mage(QWidget):
         layout.addWidget(self._racial)
         self.setLayout(layout)
 
-    def set_config(self, config):
-        self._config = config
-
     def fill(self):
-        config = self._config.config()
+        config = self._config.current().config()
         for key in self._stats:
             value = config["stats"][self._STATS_MAP[key]][self._index]
             if "%" in key:
@@ -273,7 +295,7 @@ class Mage(QWidget):
         self._racial.setCurrentIndex(self._RACIALS.index(config["buffs"]["racial"][self._index]))
 
     def modify_stat(self, name):
-        config = self._config.config()
+        config = self._config.current().config()
         stype = self._STAT_TYPES[self._STATS.index(name)]
         sval = self._stats[name].text()
         if not sval:
@@ -284,9 +306,11 @@ class Mage(QWidget):
         else:
             value = int(sval)
         config["stats"][self._STATS_MAP[name]][self._index] = value
+        if self._changed_trigger is not None:
+            self._changed_trigger()
 
     def modify_boolean(self, name):
-        config = self._config.config()
+        config = self._config.current().config()
         state = self._booleans[name].isChecked()
         atm = set(config["configuration"][name])
         if state:
@@ -294,8 +318,15 @@ class Mage(QWidget):
         elif self._index in atm:
             atm.remove(self._index)
         config["configuration"][name] = list(atm)
+        if self._changed_trigger is not None:
+            self._changed_trigger()
 
     def modify_racial(self):
-        config = self._config.config()
+        config = self._config.current().config()
         racial = self._racial.currentText()
         config["buffs"]["racial"][self._index] = racial
+        if self._changed_trigger is not None:
+            self._changed_trigger()
+
+    def set_changed_trigger(self, changed_trigger):
+        self._changed_trigger = changed_trigger

@@ -15,15 +15,17 @@ from PyQt5.QtWidgets import (
 
 class ConfigListWidget(QWidget):
 
-    def __init__(self, config_list, expand=True):
+    def __init__(self, config_list, update_trigger, expand=True):
         super().__init__()
+        self._update_trigger = update_trigger
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
-        self._items = [ConfigWidget(0, self.item_signal, config=config_list.config(0))]
+        self._items = [ConfigWidget(0, self.item_signal, self.update, config=config_list.current())]
         self.layout.addWidget(self._items[0])
         self._expand = expand
         self._set_size()
         self._config_list = config_list
+        self._index = 0
 
     def _set_size(self):
         for item in self._items[:-1]:
@@ -35,21 +37,28 @@ class ConfigListWidget(QWidget):
             self.layout.removeWidget(self._items[-1])
             self._items = self._items[:-1]
         else:
-            self._items.append(ConfigWidget(len(self._items), self.item_signal))
+            self._items.append(ConfigWidget(len(self._items), self.item_signal, self.update))
             self.layout.addWidget(self._items[-1])
         self._set_size()
 
-    # update to current index
-    def set_trigger(self, update_function):
-        self._update_function = update_function
-        self._items[0].set_trigger(update_function)
+    def set_index(self, index):
+        self._index = index
+        self._config_list.set_index(index)
+
+    def changed_trigger(self):
+        self._items[self._index].modify()
+
+    def update(self, index):
+        if index == self._index:
+            self._update_trigger()
 
 class ConfigWidget(QWidget):
 
-    def __init__(self, index, item_signal, config=None):
+    def __init__(self, index, item_signal, update_trigger, config=None):
         super().__init__()
         self._index = index
         self._config = config
+        self._update_trigger = update_trigger
         sidelayout = QHBoxLayout()
 
         self._filename = QLineEdit()
@@ -83,7 +92,7 @@ class ConfigWidget(QWidget):
     def _load(self):
         try:
             self._config.load(self._filename.text())
-            self._update_function()
+            self._update_trigger(self._index)
             self._filename.setStyleSheet("border:1px solid rgb(0, 255, 0); ")
         except FileNotFoundError:
             msg = QMessageBox()
@@ -110,6 +119,3 @@ class ConfigWidget(QWidget):
     def set_last(self, is_last):
         self._add_button.setEnabled(is_last)
         self._del_button.setEnabled(is_last if self._index else False)
-
-    def set_trigger(self, update_function):
-        self._update_function = update_function
