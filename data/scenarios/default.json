@@ -13,10 +13,10 @@
          0.1
       ],
       "crit_chance": [
-        0.19,
-        0.19,
-        0.19,
-        0.21
+         0.19,
+         0.19,
+         0.19,
+         0.21
      ],
       "intellect": [
          318,
@@ -44,15 +44,14 @@
          "dire_maul_tribute",
          "songflower_serenade",
          "sayges_dark_fortune_of_damage"
-      ]
-    },
+      ],
       "racial": [
          "human",
          "human",
          "human",
          "human"
       ],
-      "boss": []
+      "boss": ""
    },
    "configuration": {
       "num_mages": 4,
@@ -87,11 +86,9 @@
    },
    "rotation": {
       "initial": {
-         "common": [
-            "scorch",
-            "scorch"
-         ],
          "other": [
+            "scorch",
+            "scorch",
             "sapp",
             "combustion",
             "pyroblast",

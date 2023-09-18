@@ -10,7 +10,6 @@ class Constant():
         self._FROSTBOLT_TALENTED = False
         self._FROSTBOLT_RANK = 11
         self._INCINERATE = True
-        self._CLEANSING = True
         self._SIMPLE_SPELL = False
         
         self._ROTATION_SIMSIZE = 3000
@@ -143,9 +142,9 @@ class Constant():
         self._CRIT_BUFF = 1.0
         self._IGNITE_BUFF = double_dip
 
-        self._NORMAL_BUFF_C = double_dip*(1.0 if not self._CLEANSING else 1.02)
-        self._CRIT_BUFF_C = (1.0 if not self._CLEANSING else 1.02)
-        self._IGNITE_BUFF_C = double_dip*(1.0 if not self._CLEANSING else 1.02)
+        self._NORMAL_BUFF_C = double_dip*1.02
+        self._CRIT_BUFF_C = 1.02
+        self._IGNITE_BUFF_C = double_dip*1.02
 
         self._IGNITE_DAMAGE = 0.2
         self._ICRIT_DAMAGE = 0.5
@@ -292,7 +291,7 @@ class ArrayGenerator():
         arrays["player"]["crit_chance"] += 0.05*float("songflower_serenade" in self._params["buffs"]["world"])
         arrays["player"]["crit_chance"] += 0.03*float("dire_maul_tribute" in self._params["buffs"]["world"])
         arrays["player"]["crit_chance"] += intellect/5950
-        arrays["player"]["crit_chance"] += 0.60*float("loatheb" in self._params["buffs"]["boss"])
+        arrays["player"]["crit_chance"] += 0.60*float(self._params["buffs"]["boss"] == "loatheb")
         arrays["player"]["crit_chance"] = np.minimum(1.00, arrays["player"]["crit_chance"])
         
         arrays["player"]["hit_chance"] = 0.89 + np.tile(np.array(self._params["stats"]["hit_chance"])[None, :], (sim_size, 1))
@@ -312,12 +311,14 @@ class ArrayGenerator():
         arrays["player"]["target"] = np.array(self._params["configuration"]["target"]).reshape(1, len(self._params["configuration"]["target"]))
 
         if "proc" in self._params["buffs"]:
-            arrays["boss"]["dragonling"] = self._params["buffs"]["proc"]["dragonling"]
-            nightfall = []
-            for period in self._params["buffs"]["proc"]["nightfall"]:
-                nightfall.append(period*np.ones((sim_size)))
-            arrays["player"]["nightfall"] = np.stack(nightfall, axis=1)
-            arrays["player"]["nightfall_period"] = np.array(self._params["buffs"]["proc"]["nightfall"])
+            if "dragonling" in self._params["buffs"]["proc"]:
+                arrays["boss"]["dragonling"] = self._params["buffs"]["proc"]["dragonling"]
+            if "nightfall" in self._params["buffs"]["proc"]:
+                nightfall = []
+                for period in self._params["buffs"]["proc"]["nightfall"]:
+                    nightfall.append(period*np.ones((sim_size)))
+                arrays["player"]["nightfall"] = np.stack(nightfall, axis=1)
+                arrays["player"]["nightfall_period"] = np.array(self._params["buffs"]["proc"]["nightfall"])
 
         return arrays
 

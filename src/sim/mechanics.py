@@ -1,6 +1,6 @@
 import numpy as np
-import constants
-from decisions import Decider
+from . import constants
+from .decisions import Decider
 
 class Encounter():
 
@@ -445,7 +445,7 @@ class Encounter():
     
     def run(self, ret_dist):
         double_dip = (1.0 + 0.1*float("sayges_dark_fortune_of_damage" in self._world_buffs))
-        double_dip *= (1.0 + 1.9*float("thaddius" in self._boss_buffs))
+        double_dip *= (1.0 + 1.9*float(self._boss_buffs == "thaddius"))
         C = constants.Constant(double_dip)
         self._C = C
 
