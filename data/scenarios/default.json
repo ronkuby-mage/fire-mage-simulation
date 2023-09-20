@@ -98,7 +98,7 @@
       },
       "continuing": {
          "default": "fireball",
-         "special": {
+         "special1": {
             "slot": [
                3
             ],

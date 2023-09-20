@@ -37,7 +37,6 @@ class Window(QWidget):
         self._scenario = Scenario(self.config_list)
         self.tabs.addTab(self._scenario, "Scenario")
         self._config_widget = ConfigListWidget(self.config_list, self._scenario.update, expand=False)
-        self._scenario.set_changed_trigger(self._config_widget.changed_trigger)
 
         self.toplayout.addWidget(self.tabs)
         self.toplayout.addWidget(self._config_widget)
@@ -55,6 +54,8 @@ class Window(QWidget):
         super().show()
         self._zero_height = self._config_widget.geometry().height()
         self._last_height = self._zero_height
+        self._scenario.update()
+        self._scenario.set_changed_trigger(self._config_widget.changed_trigger)
 
     def paintEvent(self, event):
         super().paintEvent(event)
