@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (
     QApplication,
     QPushButton,
     QBoxLayout,
+    QGridLayout,
     QVBoxLayout,
     QHBoxLayout,
     QTabWidget,
@@ -13,9 +14,11 @@ from PyQt5.QtWidgets import (
     QWidget,
     QStackedWidget,
     QLabel,
-    QHeaderView
+    QHeaderView,
+    QGroupBox,
+    QFrame
 )
-from PyQt5.QtGui import QIntValidator, QDoubleValidator, QIcon, QPixmap
+from PyQt5.QtGui import QIntValidator, QDoubleValidator, QIcon
 from PyQt5.QtCore import Qt, QSize
 from .icon_edit import get_pixmap
 from .character import Character
@@ -63,92 +66,260 @@ class Scenario(QStackedWidget):
     def mod_mages(self, stype: int):
         self._rotation.mod_mages(stype)
 
-class Buffs(QWidget):
+class Buffs(QGroupBox):
+    _VALUES = ["name",
+               "row",
+               "col",
+               "tooltip",
+               "icon_fn",
+               "enabled"]
 
     _BUFFS = {
         "world": [
-            "rallying_cry_of_the_dragonslayer",
-            "spirit_of_zandalar",
-            "dire_maul_tribute",
-            "songflower_serenade",
-            "sayges_dark_fortune_of_damage"],
+            ("rallying_cry_of_the_dragonslayer", 0, 0, "Ony", "inv_misc_head_dragon_01.jpg", True),
+            ("spirit_of_zandalar", 0, 1, "Heart", "ability_creature_poison_05.jpg", True),
+            ("dire_maul_tribute", 1, 0, "DMT", "spell_holy_lesserheal02.jpg", True),
+            ("songflower_serenade", 1, 1, "Songflower", "spell_holy_mindvision.jpg", True),
+            ("sayges_dark_fortune_of_damage", 2, 0, "DMF", "inv_misc_orb_02.jpg", True),
+            ("traces_of_silithus", 2, 1, "Silithus", "spell_nature_timestop.jpg", False)],
         "consumes": [
-            "greater_arcane_elixir",
-            "elixir_of_greater_firepower",
-            "flask_of_supreme_power",
-            "brilliant_wizard_oil",
-            "blessed_wizard_oil",
-            "very_berry_cream",
-            "infallible_mind",
-            "stormwind_gift_of_friendship",
-            "runn_tum_tuber_surprise"],
+            ("greater_arcane_elixir", 0, 0, "GAE", "inv_potion_25.jpg", True),
+            ("elixir_of_greater_firepower", 0, 1, "Greater Firepower", "inv_potion_60.jpg", True),
+            ("flask_of_supreme_power", 0, 2, "FoSP", "inv_potion_41.jpg", True),
+            ("brilliant_wizard_oil", 1, 0, "Brilliant Oil", "inv_potion_105.jpg", True),
+            ("blessed_wizard_oil", 1, 1, "Blessed Oil", "inv_potion_26.jpg", True),
+            ("very_berry_cream", 1, 2, "VDay Candy", "inv_valentineschocolate02.jpg", True),
+            ("infallible_mind", 2, 0, "BL Int", "spell_ice_lament.jpg", True),
+            ("stormwind_gift_of_friendship", 2, 1, "VDay Int", "inv_misc_gift_03.jpg", True),
+            ("runn_tum_tuber_surprise", 2, 2, "Tuber", "inv_misc_food_63.jpg", True)],
         "raid": [
-             "arcane_intellect",
-             "blessing_of_kings",
-             "improved_mark"]
-        }
+             ("arcane_intellect", 0, 0, "Int", "spell_holy_magicalsentry.jpg", True),
+             ("blessing_of_kings", 1, 0, "BoK", "spell_magic_greaterblessingofkings.jpg", True),
+             ("improved_mark", 2, 0, "Mark", "spell_nature_regeneration.jpg", True)]
+        }   
     _BOSSES = ["", "loatheb", "thaddius"]
+    _DRAGONLING_DEFAULT = 30.0
+    _DRAGONLING_ICON_FN = "spell_fire_fireball.jpg"
+    _NIGHTFALL_DEFAULT = 2.55
+    _NIGHTFALL_ICON_FN = "spell_holy_elunesgrace.jpg"
+    _MAX_NIGHTFALL = 5
 
     def __init__(self, config_list):
         super().__init__()
+        self.setTitle("Buffs")
         self._changed_trigger = None
         self._config = config_list
         self._buffs = {}
-        layout = QHBoxLayout()
-        for buff_type in self._BUFFS:
-            column = QWidget()
-            clayout = QVBoxLayout()
-            for buff_name in self._BUFFS[buff_type]:
-                mod_name = " ".join(buff_name.split("_"))
-                row = QWidget()
-                rlayout = QHBoxLayout()
-                rlayout.addWidget(QLabel(f"{mod_name:s}"))
-                self._buffs[buff_name] = QCheckBox()
-                self._buffs[buff_name].stateChanged.connect(lambda state, x=buff_type, y=buff_name: self.modify_buff(x, y))
-                rlayout.addWidget(self._buffs[buff_name])
-                row.setLayout(rlayout)
-                clayout.addWidget(row)
-            if buff_type == "raid":
-                row = QWidget()
-                rlayout = QHBoxLayout()
-                rlayout.addWidget(QLabel(f"boss"))
-                self._buffs["boss"] = QComboBox()
-                self._buffs["boss"].addItems(self._BOSSES)
-                self._buffs["boss"].currentIndexChanged.connect(self.modify_boss)
-                rlayout.addWidget(self._buffs["boss"])
-                row.setLayout(rlayout)
-                clayout.addWidget(row)
 
-            column.setLayout(clayout)
-            layout.addWidget(column)
+        layout = QHBoxLayout()
+
+        misc = QGroupBox("Misc")
+        misc_layout = QGridLayout()
+        misc_layout.setSpacing(0)
+        misc_layout.addWidget(QLabel(f"boss"), 0, 1)
+        self._buffs["boss"] = QComboBox()
+        self._buffs["boss"].addItems(self._BOSSES)
+        self._buffs["boss"].currentIndexChanged.connect(self.modify_boss)
+        misc_layout.addWidget(self._buffs["boss"], 0, 2)
+        self._buffs["dragonling"] = QPushButton(self)
+        self._buffs["dragonling"].setStyleSheet("QPushButton { background-color: transparent; border: 0px }")
+        self._buffs["dragonling"].setCheckable(True)
+        self._buffs["dragonling"].setToolTip("Arcanite Dragonling")
+        icon = QIcon()
+        icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN))
+        self._buffs["dragonling"].setIcon(icon)
+        self._buffs["dragonling"].setIconSize(QSize(25, 25))
+        #self._buffs["dragonling"].clicked.connect(self.toggle_dragon)
+        misc_layout.addWidget(self._buffs["dragonling"], 1, 0)
+        misc_layout.addWidget(QLabel(f"Dragonling | Stack Time"), 1, 1)
+        self._buffs["dragonling_time"] = QLineEdit()
+        validator = QDoubleValidator()
+        validator.setBottom(0.0)
+        self._buffs["dragonling_time"].setValidator(validator)
+        self._buffs["dragonling_time"].textChanged.connect(self.time_dragon)
+        misc_layout.addWidget(self._buffs["dragonling_time"], 1, 2)
+
+        self._buffs["nightfall"] = []
+        self._buffs["nightfall_timer"] = []
+        for index in range(self._MAX_NIGHTFALL):
+            nightfall = QPushButton(self)
+            nightfall.setStyleSheet("QPushButton { background-color: transparent; border: 0px }")
+            nightfall.setCheckable(True)
+            nightfall.setToolTip("Nightfall")
+            icon = QIcon()
+            icon.addPixmap(get_pixmap(self._NIGHTFALL_ICON_FN))
+            nightfall.setIcon(icon)
+            nightfall.setIconSize(QSize(25, 25))
+            #nightfall.clicked.connect(lambda state, x=index: self.toggle_nightfall(x))
+            misc_layout.addWidget(nightfall, index + 2, 0)
+            self._buffs["nightfall"].append(nightfall)
+            misc_layout.addWidget(QLabel(f"Swing Timer {index + 1:d}"), index + 2, 1)
+            swing = QLineEdit()
+            validator = QDoubleValidator()
+            validator.setBottom(0.0)
+            swing.setValidator(validator)
+            swing.textChanged.connect(lambda state, x=index: self.timer_nightfall(x))
+            misc_layout.addWidget(swing, index + 2, 2)
+            self._buffs["nightfall_timer"].append(swing)
+        misc.setLayout(misc_layout)
+        layout.addWidget(misc)
+
+        layout.addStretch()
+        for buff_type in self._BUFFS:
+            grid = QGroupBox(buff_type.capitalize())
+            grid_layout = QGridLayout()
+            grid_layout.setSpacing(0)
+            for index, vals in enumerate(self._BUFFS[buff_type]):
+                name = vals[self._VALUES.index("name")]
+                tooltip = vals[self._VALUES.index("tooltip")]
+                icon_fn = vals[self._VALUES.index("icon_fn")]
+                row = vals[self._VALUES.index("row")]
+                col = vals[self._VALUES.index("col")]
+
+                self._buffs[name] = QPushButton(self)
+                self._buffs[name].setStyleSheet("QPushButton { background-color: transparent; border: 0px }")
+                self._buffs[name].setCheckable(True)
+                self._buffs[name].setToolTip(tooltip)
+                icon = QIcon()
+                icon.addPixmap(get_pixmap(icon_fn))
+                self._buffs[name].setIcon(icon)
+                self._buffs[name].setIconSize(QSize(40, 40))
+                self._buffs[name].clicked.connect(lambda state, x=buff_type, y=index: self.modify_button(x, y))
+                grid_layout.addWidget(self._buffs[name], row, col)
+            grid.setLayout(grid_layout)
+            layout.addWidget(grid)
+            layout.addStretch()
+
         self.setLayout(layout)
-        #self.fill()
 
     def fill(self):
         config = self._config.current().config()
 
-        for buff_type in self._BUFFS:
-            for buff_name in self._BUFFS[buff_type]:
-                state = 1 if buff_name in config["buffs"][buff_type] else 0
-                self._buffs[buff_name].setChecked(state)
         self._buffs["boss"].setCurrentIndex(self._BOSSES.index(config["buffs"]["boss"]))
+        for nightfall_timer in self._buffs["nightfall_timer"]:
+            nightfall_timer.setEnabled(False)
+        if "proc" in config["buffs"]:
+            icon = QIcon()
+            if "dragonling" in config["buffs"]["proc"]:
+                icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=False))
+                self._buffs["dragonling_time"].setText(str(config["buffs"]["proc"]["dragonling"]))
+            else:
+                icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=True))
+            self._buffs["dragonling"].setIcon(icon)
+            if "nightfall" in config["buffs"]["proc"]:
+                for index, val in enumerate(config["buffs"]["proc"]["nightfall"]):
+                    icon = QIcon()
+                    icon.addPixmap(get_pixmap(icon_fn, fade=False))
+                    self._buffs["nightfall"][index].setIcon(icon)
+                    self._buffs["nightfall"][index].setChecked(True)
+                    self._buffs["nightfall_timer"][index].setText(str(val))
+                self._buffs["nightfall_timer"][index].setEnabled(True)
+                if index + 1 < self._MAX_NIGHTFALL:
+                    self._buffs["nightfall_timer"][index + 1].setEnabled(True)
+                for index2 in range(index + 1, self._MAX_NIGHTFALL):
+                    icon = QIcon()
+                    icon.addPixmap(get_pixmap(icon_fn, fade=True))
+                    self._buffs["nightfall"][index2].setIcon(icon)
+            else:
+                self._buffs["nightfall_timer"][0].setEnabled(True)
+                for index in range(self._MAX_NIGHTFALL):
+                    icon = QIcon()
+                    icon.addPixmap(get_pixmap(icon_fn, fade=True))
+                    self._buffs["nightfall"][index].setIcon(icon)
+        else:
+            icon = QIcon()
+            icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=True))
+            self._buffs["dragonling"].setIcon(icon)
+            self._buffs["nightfall_timer"][0].setEnabled(True)
+            for index in range(self._MAX_NIGHTFALL):
+                icon = QIcon()
+                icon.addPixmap(get_pixmap(self._NIGHTFALL_ICON_FN, fade=True))
+                self._buffs["nightfall"][index].setIcon(icon)
 
-    def modify_buff(self, buff_type, buff_name):
-        config = self._config.current().config()
-        state = self._buffs[buff_name].isChecked()
-        atm = set(config["buffs"][buff_type])
-        if state:
-            atm.add(buff_name)
-        elif buff_name in atm:
-            atm.remove(buff_name)
-        config["buffs"][buff_type] = list(atm)
-        if self._changed_trigger is not None:
-            self._changed_trigger()
+        for btype in self._BUFFS:
+            for vals in self._BUFFS[btype]:
+                name = vals[self._VALUES.index("name")]
+                icon_fn = vals[self._VALUES.index("icon_fn")]
+                enabled = vals[self._VALUES.index("enabled")]
+
+                state = 1 if name in config["buffs"][btype] else 0
+                self._buffs[name].setChecked(state)
+                icon = QIcon()
+                icon.addPixmap(get_pixmap(icon_fn, fade=not state))
+                self._buffs[name].setIcon(icon)
+                self._buffs[name].setEnabled(enabled)
 
     def modify_boss(self):
         config = self._config.current().config()
         boss = self._buffs["boss"].currentText()
         config["buffs"]["boss"] = boss
+        if self._changed_trigger is not None:
+            self._changed_trigger()
+       
+    def time_dragon(self):
+        config = self._config.current().config()
+        value = self._buffs["dragonling_time"].text()
+        icon = QIcon()
+        if value:
+            if "proc" not in config["buffs"]:
+                config["buffs"]["proc"] = {"dragonling": float(value)}
+            else:
+                config["buffs"]["proc"]["dragonling"] = float(value)
+            icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=False))
+        else:
+            icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=True))
+        self._buffs["dragonling"].setIcon(icon)
+
+        if self._changed_trigger is not None:
+            self._changed_trigger()
+
+       
+    def timer_nightfall(self, index):
+        config = self._config.current().config()
+        value = self._buffs["nightfall_timer"][index].text()
+        icon = QIcon()
+        icon.addPixmap(get_pixmap(self._NIGHTFALL_ICON_FN, fade=not value))
+        self._buffs["nightfall"][index].setIcon(icon)
+        if value:
+            if "proc" not in config["buffs"]:
+                config["buffs"]["proc"] = {"nightfall": [float(value)]}
+            elif "nightfall" not in config["buffs"]["proc"]:
+                config["buffs"]["proc"]["nightfall"] = [float(value)]
+            else:
+                config["buffs"]["proc"]["nightfall"].append(float(value))
+            if index + 1 < self._MAX_NIGHTFALL:
+                self._buffs["nightfall_timer"][index + 1].setEnabled(True)
+        else:
+            if "proc" in config["buffs"]:
+                if "nightfall" in config["buffs"]["proc"]:
+                    config["buffs"]["proc"]["nightfall"].pop()
+                    if not config["buffs"]["proc"]["nightfall"]:
+                        config["buffs"]["proc"].pop("nightfall")
+                        if not config["buffs"]["proc"]:
+                            config["buffs"].pop("proc")
+                    else:
+                        if index > 0:
+                            self._buffs["nightfall_timer"][index - 1].setEnabled(True)
+        if self._changed_trigger is not None:
+            self._changed_trigger()
+
+    def modify_button(self, btype, index):
+        config = self._config.current().config()
+
+        vals = self._BUFFS[btype][index]
+        name = vals[self._VALUES.index("name")]
+        icon_fn = vals[self._VALUES.index("icon_fn")]
+
+        state = self._buffs[name].isChecked()
+        icon = QIcon()
+        icon.addPixmap(get_pixmap(icon_fn, fade=not state))
+        self._buffs[name].setIcon(icon)
+        atm = config["buffs"][btype]
+        if state:
+            atm.append(name)
+        elif name in atm:
+            atm.remove(name)
+        config["buffs"][btype] = atm
         if self._changed_trigger is not None:
             self._changed_trigger()
 
@@ -174,7 +345,7 @@ class Rotation(QWidget):
         layout = QVBoxLayout()
 
         # initial rotation
-        layout.addWidget(QLabel("Opening"))
+        layout.addWidget(QLabel("Rotation"))
         table = QTableWidget(self._MAX_SPELLS, 2, self)
         table.horizontalHeader().hide()
         table.verticalHeader().hide()
@@ -210,6 +381,7 @@ class Rotation(QWidget):
         for idx in range(self._MAX_SPECIALS):
             this_special = {}
             table = QTableWidget(3, 2, self)
+            table.setToolTip(self._SPECIAL_DOC)
             table.horizontalHeader().hide()
             table.verticalHeader().hide()
             table.setCellWidget(0, 0, (QLabel(f"Special {idx + 1:d}")))
@@ -263,6 +435,7 @@ class Rotation(QWidget):
         self._default.setCurrentIndex(self._SPELLS.index(spell))
 
         specials = 0
+        slots_taken = set()
         for key, val in config["rotation"]["continuing"].items():
             if "special" in key:
                 index = int(key.split("special")[1]) - 1
@@ -273,12 +446,13 @@ class Rotation(QWidget):
                 slot = val["slot"][0]
                 self._special[index]["mage"].clear()
                 num_mages = config["configuration"]["num_mages"]
-                self._special[index]["mage"].addItems([f"mage {m + 1:d}" for m in range(num_mages)])
+                self._special[index]["mage"].addItems([f"mage {m + 1:d}" for m in range(num_mages) if m not in slots_taken])
                 self._special[index]["mage"].setCurrentText(f"mage {slot + 1:d}")
                 if stype == "cobimf":
                     param_val = val["cast_point_remain"]
                     self._special[index]["param"].setText(str(param_val))
                 specials += 1
+                slots_taken.add(slot)
         if specials > 1:
             self._special[specials - 1]["type"].addItem("")
 
@@ -345,17 +519,23 @@ class Rotation(QWidget):
                             config["rotation"]["continuing"][f"special{row + 1:d}"].pop("cast_point_remain")
                     config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] = spell
             else:
-                if spell:
+                specials = len([1 for key in config["rotation"]["continuing"] if "special" in key])
+                if spell and specials < config["configuration"]["num_mages"]:
+                    slots_taken = set()
+                    for key, val in config["rotation"]["continuing"].items():
+                        if "special" in key:
+                            slots_taken.add(val["slot"][0])
+                    slots_taken = list(slots_taken)
+
                     config["rotation"]["continuing"][f"special{row + 1:d}"] = {"value": spell}
                     self._special[row]["mage"].setEnabled(True)
                     num_mages = config["configuration"]["num_mages"]
-                    self._special[row]["mage"].addItems([f"mage {m + 1:d}" for m in range(num_mages)])
-                    self._special[row]["mage"].setCurrentText(f"mage 1")
+                    self._special[row]["mage"].addItems([f"mage {m + 1:d}" for m in range(num_mages) if m not in slots_taken])
+                    self._special[row]["mage"].setCurrentText(f"mage {slots_taken[0] + 1:d}")
                     config["rotation"]["continuing"][f"special{row + 1:d}"]["slot"] = [0] # more hard code
                     if spell == "cobimf":
                         self._special[row]["param"].setEnabled(True)
                         self._special[row]["param"].setText("0.5") # bad hard-coded value
-                        #config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = 0.5
                     if row > 0:
                         self._special[row - 1]["type"].removeItem(len(self._SPECIALS))
                     if row + 1 < self._MAX_SPECIALS:
@@ -376,19 +556,29 @@ class Rotation(QWidget):
         self._changed_trigger = changed_trigger
 
     def mod_mages(self, stype: int):
-        pass
+        config = self._config.current().config()
+        num_mages = config["configuration"]["num_mages"]
+        for key, val in config["rotation"]["continuing"].items():
+            if "special" in key:
+                slot = val["slot"][0]
+                if slot == num_mages:
+                    config["rotation"]["continuing"][key]["slot"] = [slot - 1]
+        self.fill()
 
-class Group(QWidget):
+class Group(QGroupBox):
 
     _MAX_MAGES = 9
     _CONFIG_KEYS = ["target", "sapp", "toep", "zhc", "mqg", "udc", "pi"]
 
     def __init__(self, config_list, mod_mages_signal):
         super().__init__()
+        self.setTitle("Mages")
         self._changed_trigger = None
         self._config = config_list
         config = self._config.current().config()
         self.layout = QVBoxLayout()
+        self.layout.setSpacing(0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self._mages = []
         for idx in range(self._MAX_MAGES):
             mage = Mage(config_list, idx, self.mod_mages)
@@ -484,6 +674,7 @@ class Mage(QWidget):
         self._config = config_list
         self._index = index
         layout = QHBoxLayout()
+        layout.setContentsMargins(3, 5, 3, 5)
         layout.addWidget(QLabel(f"Mage {index + 1:d}"))
 
         self._stats = {}
@@ -511,7 +702,6 @@ class Mage(QWidget):
             self._buttons[button].setIcon(icon)
             self._buttons[button].setIconSize(QSize(25, 25))
             self._buttons[button].clicked.connect(lambda state, x=button: self.modify_button(x))
-            #self._buttons[button].toggled.connect(lambda state, x=button: self.modify_button(x))
             layout.addWidget(self._buttons[button])
 
 

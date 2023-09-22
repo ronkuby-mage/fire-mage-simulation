@@ -8,13 +8,13 @@ _ICONS_DIR = "./data/icons"
 def numpy_to_qt_image(image):
     height, width, channel = image.shape
     bytesPerLine = 3 * width
-    return QImage(image.data, width, height, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
+    return QImage(image.data, width, height, bytesPerLine, QImage.Format_RGB888)
 
 def numpy_to_qt_pixmap(image):
     return QPixmap(numpy_to_qt_image(image))
 
 def get_pixmap(filename, fade=True):
-    fade_factor = 0.3
+    fade_factor = 0.15
     fullfile = os.path.join(_ICONS_DIR, filename)
     if not fade:
         return QPixmap(fullfile)

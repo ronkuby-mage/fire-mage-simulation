@@ -60,9 +60,11 @@ class ConfigWidget(QWidget):
         self._config = config
         self._update_trigger = update_trigger
         sidelayout = QHBoxLayout()
+        sidelayout.setContentsMargins(3, 5, 3, 5)
 
         self._filename = QLineEdit()
         self._filename.textChanged.connect(self.modify)
+        self._filename.setMaximumWidth(200)
         self._load_button = QPushButton("Load", self)
         self._save_button = QPushButton("Save", self)
         self._load_button.setMaximumWidth(130)
@@ -77,6 +79,7 @@ class ConfigWidget(QWidget):
         self._add_button.clicked.connect(lambda: item_signal(1))
         self._del_button.clicked.connect(lambda: item_signal(0))
 
+        sidelayout.addStretch()
         sidelayout.addWidget(QLabel(f"Scenario {self._index + 1:d}"))
         sidelayout.addWidget(self._filename)
         sidelayout.addWidget(self._load_button)
