@@ -1,12 +1,9 @@
 import json
 from PyQt5.QtWidgets import (
-    QApplication,
     QPushButton,
-    QBoxLayout,
     QGridLayout,
     QVBoxLayout,
     QHBoxLayout,
-    QTabWidget,
     QTableWidget,
     QComboBox,
     QCheckBox,
@@ -15,8 +12,7 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
     QLabel,
     QHeaderView,
-    QGroupBox,
-    QFrame
+    QGroupBox
 )
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QIcon
 from PyQt5.QtCore import Qt, QSize
@@ -52,16 +48,22 @@ class Scenario(QStackedWidget):
 
         self.addWidget(scen)
         self.addWidget(self._character)
+        self._changed_trigger = None
 
     def update(self):
+        temp_ct = self._changed_trigger
+        self.set_changed_trigger(None)
         self._group.fill()
         self._buffs.fill()
         self._rotation.fill()
+        self.set_changed_trigger(temp_ct)
 
     def set_changed_trigger(self, changed_trigger):
+        self._changed_trigger = changed_trigger
         self._group.set_changed_trigger(changed_trigger)
         self._buffs.set_changed_trigger(changed_trigger)
         self._rotation.set_changed_trigger(changed_trigger)
+        
 
     def mod_mages(self, stype: int):
         self._rotation.mod_mages(stype)
@@ -129,7 +131,6 @@ class Buffs(QGroupBox):
         icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN))
         self._buffs["dragonling"].setIcon(icon)
         self._buffs["dragonling"].setIconSize(QSize(25, 25))
-        #self._buffs["dragonling"].clicked.connect(self.toggle_dragon)
         misc_layout.addWidget(self._buffs["dragonling"], 1, 0)
         misc_layout.addWidget(QLabel(f"Dragonling | Stack Time"), 1, 1)
         self._buffs["dragonling_time"] = QLineEdit()
@@ -150,7 +151,6 @@ class Buffs(QGroupBox):
             icon.addPixmap(get_pixmap(self._NIGHTFALL_ICON_FN))
             nightfall.setIcon(icon)
             nightfall.setIconSize(QSize(25, 25))
-            #nightfall.clicked.connect(lambda state, x=index: self.toggle_nightfall(x))
             misc_layout.addWidget(nightfall, index + 2, 0)
             self._buffs["nightfall"].append(nightfall)
             misc_layout.addWidget(QLabel(f"Swing Timer {index + 1:d}"), index + 2, 1)

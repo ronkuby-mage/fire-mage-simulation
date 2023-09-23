@@ -14,6 +14,7 @@ import qdarkstyle
 from .config_select import ConfigListWidget
 from .scenario import Scenario
 from ..sim.config import ConfigList
+from .simulation import Simulation
 
 class Window(QWidget):
 
@@ -33,10 +34,11 @@ class Window(QWidget):
         self.toplayout = QVBoxLayout()
         # Create the tab widget with two tabs
         self.tabs = QTabWidget()
-        self.tabs.addTab(self.generalTabUI(), "Simulation")
         self._scenario = Scenario(self.config_list)
+        self._config_widget = ConfigListWidget(self.config_list, self._scenario.update)
+        self._simulation = Simulation(self.config_list, self._config_widget.filenames)
+        self.tabs.addTab(self._simulation, "Simulation")
         self.tabs.addTab(self._scenario, "Scenario")
-        self._config_widget = ConfigListWidget(self.config_list, self._scenario.update, expand=False)
 
         self.toplayout.addWidget(self.tabs)
         self.toplayout.addWidget(self._config_widget)
@@ -44,6 +46,7 @@ class Window(QWidget):
         self._last_height = None
 
         # enable custom window hint
+        self.setWindowFlags(self.windowFlags() | Qt.MSWindowsFixedSizeDialogHint)        
         self.setWindowFlags(self.windowFlags() | Qt.CustomizeWindowHint)
 
         # disable (but not hide) close button
@@ -65,15 +68,6 @@ class Window(QWidget):
                 new_height = self._DEFAULT_HEIGHT - self._zero_height + current_height
                 self.resize(self._DEFAULT_WIDTH, new_height)
                 self._last_height = current_height
-
-    def generalTabUI(self):
-        """Create the General page UI."""
-        generalTab = QWidget()
-        layout = QVBoxLayout()
-        layout.addWidget(QCheckBox("General Option 1"))
-        layout.addWidget(QCheckBox("General Option 2"))
-        generalTab.setLayout(layout)
-        return generalTab
 
 if __name__ == "__main__":
     app = QApplication([])
