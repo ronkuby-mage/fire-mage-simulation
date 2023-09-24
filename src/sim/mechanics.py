@@ -4,7 +4,7 @@ from .decisions import Decider
 
 class Encounter():
 
-    def __init__(self, array_generator, rotation, response, var, config, world_buffs, boss_buffs, dur_dist):
+    def __init__(self, array_generator, rotation, response, var, config, world_buffs, boss_buffs, run_params):
         self._array_generator = array_generator
         self._rotation = rotation
         self._response = response
@@ -12,7 +12,7 @@ class Encounter():
         self._config = config
         self._world_buffs = world_buffs
         self._boss_buffs = boss_buffs
-        self._dur_dist = dur_dist
+        self._run_params = run_params
 
     def _subtime(self, sub, add_time):
         C = self._C
@@ -443,13 +443,15 @@ class Encounter():
                 print(message)
         self._arrays['global']['decision'] = np.zeros(self._arrays['global']['decision'].shape, dtype=bool)
     
-    def run(self, ret_dist):
+    def run(self):
         double_dip = (1.0 + 0.1*float("sayges_dark_fortune_of_damage" in self._world_buffs))
         double_dip *= (1.0 + 1.9*float(self._boss_buffs == "thaddius"))
         C = constants.Constant(double_dip)
         self._C = C
 
-        self._arrays = self._array_generator.run(C, self._dur_dist is not None)
+        over_time = True if self._run_params["type"] == "over_time" else False
+
+        self._arrays = self._array_generator.run(C, over_time)
 
         decider = Decider(C,
                           self._rotation,
@@ -474,7 +476,7 @@ class Encounter():
             self._apply_decisions(still_going, decisions, next_hit)
             while self._advance():
                 still_going = np.where(self._arrays['global']['running_time'] < self._arrays['global']['duration'])[0]
-            if self._dur_dist is None:
+            if not over_time:
                 self._arrays['global']['total_damage'][still_going] += self._damage[still_going]
                 self._arrays['global']['crit'][still_going] += self._crit[still_going]
                 self._arrays['global']['ignite'][still_going] += self._ignite[still_going]
@@ -483,14 +485,14 @@ class Encounter():
                     self._arrays['global']['total_damage'][sidx].append((stime, self._damage[sidx], self._ignite[sidx]))
             if not still_going.size:
                 break
-        if self._dur_dist is None:
+        if not over_time:
             #self._arrays['global']['total_damage'] -= (1 - C._RESISTANCE_MODIFIER)*self._arrays['global']['ignite']
             #self._arrays['global']['total_damage'] *= C._RESISTANCE_MODIFIER
             #self._arrays['global']['player'] *= C._RESISTANCE_MODIFIER
             #self._arrays['global']['crit'] *= C._RESISTANCE_MODIFIER
             #self._arrays['global']['ignite'] *= C._RESISTANCE_MODIFIER*C._RESISTANCE_MODIFIER
             
-            if C._LOG_SIM >= 0 and self._dur_dist is None:
+            if C._LOG_SIM >= 0 and not over_time:
                 print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C._LOG_SIM]))
                 print('average damage = {:9.1f}'.format(self._arrays['global']['total_damage'].mean()))
                 print('std damage = {:7.1f}'.format(self._arrays['global']['total_damage'].std()))
@@ -499,54 +501,43 @@ class Encounter():
     
             dp_mage = self._arrays['global']['player']/self._arrays['global']['duration']
             solo_mage = dp_mage + self._arrays['global']['ignite']*len(self._config["target"])/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration']
-            frac_up1 = (solo_mage > 3700.0).sum()/dp_mage.size
-            frac_up2 = (solo_mage > 4000.0).sum()/dp_mage.size
-            frac_up3 = (solo_mage > 4400.0).sum()/dp_mage.size
-            frac_up4 = (solo_mage > 4800.0).sum()/dp_mage.size
-            frac_up5 = (solo_mage > 5240.0).sum()/dp_mage.size
-            if ret_dist:
-                return solo_mage
-            npm = (977*dp_mage.size)//1000
-            #npm = (900*dp_mage.size)//1000 # kill this!
-            npm2 = (23*dp_mage.size)//1000
             smage = np.sort(solo_mage)
     
-            return solo_mage.mean(), solo_mage.std(), smage[npm], frac_up1, frac_up2, frac_up3, frac_up4, frac_up5, smage[npm2]
+            return smage
         else:
-            sim_size = len(self._arrays['global']['total_damage'])
-            dur_dist = self._dur_dist
-            cutoff = self._var*np.random.randn(len(dur_dist), sim_size)
-            for didx, dur in enumerate(dur_dist):
-                cutoff[didx, :] += dur
-            cutoff[cutoff < 0.0] = 0.0
+            pass
+            # COMMENT FOR NOW
+            # sim_size = len(self._arrays['global']['total_damage'])
+            # dur_dist = self._dur_dist
+            # cutoff = self._var*np.random.randn(len(dur_dist), sim_size)
+            # for didx, dur in enumerate(dur_dist):
+            #     cutoff[didx, :] += dur
+            # cutoff[cutoff < 0.0] = 0.0
             
-            total_dam = np.zeros((len(dur_dist), sim_size))
-            ignite_dam = np.zeros((len(dur_dist), sim_size))
-            for sidx in range(sim_size):
-                cuts = cutoff[:, sidx]
-                ptime = 0.0
-                total_damage = 0.0
-                total_ignite = 0.0
-                for ctime, damage, ignite in self._arrays['global']['total_damage'][sidx]:
-                    if ptime > 0.0:
-                        for didx, cut in enumerate(cuts):
-                            if ctime > cut and ptime <= cut:
-                                total_dam[didx, sidx] = total_damage/cut
-                                ignite_dam[didx, sidx] = total_ignite/cut
-                    total_damage += damage
-                    total_ignite += ignite
-                    ptime = ctime
-                total_dam[ctime <= cuts, sidx] = total_damage/ctime
-                ignite_dam[ctime <= cuts, sidx] = total_ignite/ctime
-            total_dam = total_dam.mean(axis=1)
-            ignite_dam = ignite_dam.mean(axis=1)
-            
-            #total_dam -= (1 - C._RESISTANCE_MODIFIER)*ignite_dam
-            #total_dam *= C._RESISTANCE_MODIFIER
+            # total_dam = np.zeros((len(dur_dist), sim_size))
+            # ignite_dam = np.zeros((len(dur_dist), sim_size))
+            # for sidx in range(sim_size):
+            #     cuts = cutoff[:, sidx]
+            #     ptime = 0.0
+            #     total_damage = 0.0
+            #     total_ignite = 0.0
+            #     for ctime, damage, ignite in self._arrays['global']['total_damage'][sidx]:
+            #         if ptime > 0.0:
+            #             for didx, cut in enumerate(cuts):
+            #                 if ctime > cut and ptime <= cut:
+            #                     total_dam[didx, sidx] = total_damage/cut
+            #                     ignite_dam[didx, sidx] = total_ignite/cut
+            #         total_damage += damage
+            #         total_ignite += ignite
+            #         ptime = ctime
+            #     total_dam[ctime <= cuts, sidx] = total_damage/ctime
+            #     ignite_dam[ctime <= cuts, sidx] = total_ignite/ctime
+            # total_dam = total_dam.mean(axis=1)
+            # ignite_dam = ignite_dam.mean(axis=1)
+            #
+            #return total_dam
 
-            return total_dam
-
-def get_damage(params, ret_dist=False, dur_dist=None):
+def get_damage(params, run_params):
     array_generator = constants.ArrayGenerator(params)
     encounter = Encounter(array_generator,
                           params['rotation'],
@@ -555,6 +546,6 @@ def get_damage(params, ret_dist=False, dur_dist=None):
                           params['configuration'],
                           params["buffs"]["world"],
                           params["buffs"]["boss"],
-                          dur_dist)
-    return encounter.run(ret_dist)
+                          run_params)
+    return encounter.run()
 

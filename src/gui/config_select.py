@@ -20,6 +20,7 @@ class ConfigListWidget(QWidget):
     def __init__(self, config_list, update_trigger, expand=True):
         super().__init__()
         self._update_trigger = update_trigger
+        self._settings_refresh = None
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         self._items = [ConfigWidget(0, self.item_signal, self.update, self.select_trigger, config=config_list.current())]
@@ -53,6 +54,8 @@ class ConfigListWidget(QWidget):
             self.set_index(len(self._items) - 1)
             self.changed_trigger()
         self._set_size()
+        if self._settings_refresh is not None:
+            self._settings_refresh()
 
     def select_trigger(self, index: int):
         if index == self._index: #do nothing
@@ -66,6 +69,8 @@ class ConfigListWidget(QWidget):
         self._config_list.set_index(index)
         self._update_trigger()
         self._items[self._index].select(True)
+        if self._settings_refresh is not None:
+            self._settings_refresh()
 
     def changed_trigger(self):
         self._items[self._index].modify()
@@ -76,6 +81,11 @@ class ConfigListWidget(QWidget):
 
     def filenames(self):
         return [item.filename() for item in self._items]
+    
+    def settings_refresh(self, refresh):
+        for item in self._items:
+            item.settings_refresh(refresh)
+        self._settings_refresh = refresh
 
 class ConfigWidget(QWidget):
 
@@ -84,6 +94,7 @@ class ConfigWidget(QWidget):
         self._index = index
         self._config = config
         self._update_trigger = update_trigger
+        self._settings_refresh = None
         sidelayout = QHBoxLayout()
         sidelayout.setContentsMargins(3, 5, 3, 5)
 
@@ -143,6 +154,8 @@ class ConfigWidget(QWidget):
 
     def modify(self):
         self._filename.setStyleSheet("border:1px solid rgb(255, 0, 0); ")
+        if self._settings_refresh is not None:
+            self._settings_refresh()
 
     def _user_filename(self):
         if self._config is not None:
@@ -162,3 +175,6 @@ class ConfigWidget(QWidget):
 
     def filename(self):
         return self._filename.text()
+    
+    def settings_refresh(self, refresh):
+        self._settings_refresh = refresh

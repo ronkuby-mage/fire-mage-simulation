@@ -24,6 +24,9 @@ class ConfigList():
     def set_index(self, index):
         self._index = index
 
+    def index(self):
+        return self._index
+
 class Config(object):
 
     def __init__(self, directory, filename):

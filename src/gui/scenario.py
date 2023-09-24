@@ -25,6 +25,7 @@ class Scenario(QStackedWidget):
     def __init__(self, config_list):
 
         super().__init__()
+        self._settings_refresh = None
 
         self._group = Group(config_list, self.mod_mages)
         self._buffs = Buffs(config_list)
@@ -67,6 +68,12 @@ class Scenario(QStackedWidget):
 
     def mod_mages(self, stype: int):
         self._rotation.mod_mages(stype)
+
+    def settings_refresh(self, refresh):
+        #for item in self._items:
+        #    item.settings_refresh(refresh)
+        self._settings_refresh = refresh
+
 
 class Buffs(QGroupBox):
     _VALUES = ["name",
@@ -196,7 +203,9 @@ class Buffs(QGroupBox):
         config = self._config.current().config()
 
         self._buffs["boss"].setCurrentIndex(self._BOSSES.index(config["buffs"]["boss"]))
+        self._buffs["dragonling_time"].setText("")
         for nightfall_timer in self._buffs["nightfall_timer"]:
+            nightfall_timer.setText("")
             nightfall_timer.setEnabled(False)
         if "proc" in config["buffs"]:
             icon = QIcon()

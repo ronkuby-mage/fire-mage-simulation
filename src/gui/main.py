@@ -37,6 +37,8 @@ class Window(QWidget):
         self._scenario = Scenario(self.config_list)
         self._config_widget = ConfigListWidget(self.config_list, self._scenario.update)
         self._simulation = Simulation(self.config_list, self._config_widget.filenames)
+        self._config_widget.settings_refresh(self._simulation.refresh)
+        self._scenario.settings_refresh(self._simulation.refresh)
         self.tabs.addTab(self._simulation, "Simulation")
         self.tabs.addTab(self._scenario, "Scenario")
 

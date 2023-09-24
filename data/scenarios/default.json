@@ -67,9 +67,7 @@
          2,
          3
       ],
-      "toep": [
-         0
-      ],
+      "toep": [],
       "zhc": [],
       "mqg": [],
       "pi": [
@@ -88,6 +86,7 @@
    },
    "rotation": {
       "initial": {
+         "common": [],
          "other": [
             "scorch",
             "scorch",
