@@ -443,7 +443,7 @@ class Encounter():
                 print(message)
         self._arrays['global']['decision'] = np.zeros(self._arrays['global']['decision'].shape, dtype=bool)
     
-    def run(self):
+    def run(self, update_progress):
         double_dip = (1.0 + 0.1*float("sayges_dark_fortune_of_damage" in self._world_buffs))
         double_dip *= (1.0 + 1.9*float(self._boss_buffs == "thaddius"))
         C = constants.Constant(double_dip)
@@ -480,6 +480,9 @@ class Encounter():
                 self._arrays['global']['total_damage'][still_going] += self._damage[still_going]
                 self._arrays['global']['crit'][still_going] += self._crit[still_going]
                 self._arrays['global']['ignite'][still_going] += self._ignite[still_going]
+
+                progress = 100*self._arrays['global']['running_time'].mean()/self._arrays['global']['duration'].mean()
+                update_progress.emit(progress)
             else:
                 for sidx, stime in enumerate(self._arrays['global']['running_time']):
                     self._arrays['global']['total_damage'][sidx].append((stime, self._damage[sidx], self._ignite[sidx]))
@@ -537,7 +540,7 @@ class Encounter():
             #
             #return total_dam
 
-def get_damage(params, run_params):
+def get_damage(params, run_params, progress_callback=None):
     array_generator = constants.ArrayGenerator(params)
     encounter = Encounter(array_generator,
                           params['rotation'],
@@ -547,5 +550,5 @@ def get_damage(params, run_params):
                           params["buffs"]["world"],
                           params["buffs"]["boss"],
                           run_params)
-    return encounter.run()
+    return encounter.run(progress_callback)
 

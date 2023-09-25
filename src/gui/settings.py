@@ -17,11 +17,12 @@ from PyQt5.QtWidgets import (
     QFrame
 )
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QIcon, QPixmap
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import QThreadPool
 from copy import deepcopy
 from ..sim.mechanics import get_damage
-from ..sim.config import ConfigList, Config
+from ..sim.config import ConfigList
 from typing import Callable
+from .worker import Worker
 
 class NumberOfSamples(QWidget):
 
@@ -57,7 +58,6 @@ class EncounterTime(QWidget):
     def widget(self):
         return self._number_of_samples
 
-
 class StatSettings(QWidget):
 
     _DEFAULT_TIME = 70.0
@@ -68,6 +68,8 @@ class StatSettings(QWidget):
         super().__init__()
         self._config_list = config_list
         self._filename_func = filename_func
+        self._progbar = None
+        self.threadpool = QThreadPool()        
         # stat settings need:
         # l1: list scenario currently set for editing
         # l2: setting for all mages or custom on mod
@@ -115,7 +117,7 @@ class StatSettings(QWidget):
         scen_name = self._filename_func()[index]
         self._scenario_name.setText(f"Running {scen_name:s}")
 
-    def run(self):
+    def run(self, processing_complete: Callable, handle_output: Callable):
         print("running")
         main_config = self._config_list.current().config()
         config = deepcopy(main_config)
@@ -126,10 +128,20 @@ class StatSettings(QWidget):
             "clip": [3.0, 10000.0]}
         config["sim_size"] = self._samples
         run_parameters = {"type": "distribution"}
-        return_value = get_damage(config, run_parameters)
 
-        return return_value
+        # loop starts here
+        worker = Worker(get_damage, config, run_parameters) # Any other args, kwargs are passed to the run function
+        worker.signals.result.connect(handle_output)
+        worker.signals.finished.connect(processing_complete)
+        worker.signals.progress.connect(self.update_progress)
+        self.threadpool.start(worker)
 
+    def update_progress(self, value: float):
+        if self._progbar is not None:
+            self._progbar(value)
+
+    def set_progbar(self, progbar: Callable):
+        self._progbar = progbar
 
 class CompareSettings(QWidget):
 
@@ -138,7 +150,8 @@ class CompareSettings(QWidget):
     def __init__(self, config_list: ConfigList, filename_func: Callable):
         super().__init__()
         self._config_list = config_list
-        #self._filenames = filename_func
+        self._filenames = filename_func
+        self._progbar = None
 
         # start time for y scale
         # max time for sim
@@ -158,3 +171,6 @@ class CompareSettings(QWidget):
 
     def refresh(self):
         pass
+
+    def set_progbar(self, progbar: Callable):
+        self._progbar = progbar

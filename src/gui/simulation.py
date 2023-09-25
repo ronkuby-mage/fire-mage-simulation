@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from PyQt5.QtWidgets import (
     QPushButton,
     QGridLayout,
@@ -14,21 +15,54 @@ from PyQt5.QtWidgets import (
     QHeaderView,
     QButtonGroup,
     QGroupBox,
+    QStatusBar,
     QFrame
 )
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize
-from .output import Output
 from .settings import StatSettings, CompareSettings
+from .output import StatOutput, CompareOutput
+from .icon_edit import numpy_to_qt_pixmap
+
+class Progress(QLabel):
+
+    _SHAPE = (35, 300, 3)
+    _FONT_COLOR = f"rgb(255, 255, 255)"
+    _BAR_COLOR = np.array([64, 192, 32])
+
+    def __init__(self):
+        super().__init__()
+        self.setText("")
+        self.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        self.setFixedHeight(self._SHAPE[0])
+        self.setFixedWidth(self._SHAPE[1])
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        self._pl = QLabel()
+        self._pl.setFixedHeight(20)
+        self._pl.setFixedWidth(self._SHAPE[1])
+        style = f"QLabel{{font-size: 18px; background: transparent; color: {self._FONT_COLOR:s};}}"
+        self._pl.setStyleSheet(style)
+        self._pl.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        layout.addWidget(self._pl)
+        self.setLayout(layout)
+
+    def set_value(self, value: float):
+        img = np.zeros(self._SHAPE, dtype=np.uint8)
+        frac = int(min([value*self._SHAPE[1]/100.0, self._SHAPE[1]]))
+        img[:,:frac, :] = self._BAR_COLOR
+        self.setPixmap(numpy_to_qt_pixmap(img))
+        self._pl.setText(f"{int(value):d}%")
 
 class Simulation(QWidget):
 
     _SAMPLE_DIRECTORY = "./data/samples/"
     _SIMULATION_TYPES = [
-        ("Stat Weight/Distribution", "sample.png", StatSettings),
-        ("Scenario Comparison", "sample.png", CompareSettings)
+        ("Stat Weight/Distribution", "sample.png", StatSettings, StatOutput),
+        ("Scenario Comparison", "sample.png", CompareSettings, CompareOutput)
     ]
-    _INDEX = ["name", "sample_file", "class"]
+    _INDEX = ["name", "sample_file", "setting_class", "output_class"]
 
     def __init__(self, config_list, filename_func):
         super().__init__()
@@ -59,6 +93,10 @@ class Simulation(QWidget):
             sim_name = stype[self._INDEX.index("name")]
             button = QPushButton(sim_name)
             button.setCheckable(True)
+            style = "QPushButton{font-size: 18px; color: rgb(0, 0, 0);} "
+            style += "QPushButton:hover{font-size: 18px; color: rgb(0, 0, 0);} "
+            style += "QPushButton:checked{font-size: 18px; color: rgb(255, 255, 255);}"
+            button.setStyleSheet(style)
             if index == self._simtype_index:
                 button.setChecked(True)
             select_layout.addWidget(button)
@@ -74,7 +112,7 @@ class Simulation(QWidget):
         self._settings_stack = QStackedWidget()
         self._settings = []
         for stype in self._SIMULATION_TYPES:
-            sim_class = stype[self._INDEX.index("class")]
+            sim_class = stype[self._INDEX.index("setting_class")]
             setting = sim_class(config_list, filename_func)
             self._settings_stack.addWidget(setting)
             self._settings.append(setting)
@@ -83,8 +121,16 @@ class Simulation(QWidget):
         cc_layout.addWidget(settings_frame)
 
         # progress/number of simulations
-        self._progress = QLabel("Progress")
-        cc_layout.addWidget(self._progress)
+        prog_frame = QWidget()
+        prog_layout = QHBoxLayout()
+        prog_layout.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        self._progress = Progress()
+        prog_layout.addWidget(self._progress)
+        prog_frame.setLayout(prog_layout)
+        cc_layout.addWidget(prog_frame)
+    
+        for setting in self._settings:
+            setting.set_progbar(self._progress.set_value)
 
         # run button -- note the reverse is being used
         self._run = QPushButton("Run Simulation")
@@ -103,21 +149,27 @@ class Simulation(QWidget):
         layout.addWidget(control_col)
 
         # start output
-        self._output = Output()
-        layout.addWidget(self._output)
+        self._output_stack = QStackedWidget()
+        self._output = []
+        for stype in self._SIMULATION_TYPES:
+            sim_class = stype[self._INDEX.index("output_class")]
+            output = sim_class(config_list, filename_func)
+            self._output_stack.addWidget(output)
+            self._output.append(output)
+        layout.addWidget(self._output_stack)
 
         self.setLayout(layout)
 
-    def run(self):
-        self._run.setEnabled(False)
-        #import time
-        #time.sleep(5)
-
-        return_value = self._settings[self._simtype_index].run()
-        print(return_value.shape, return_value.mean())
-
+    def processing_complete(self):
         self._run.setEnabled(True)
         self._run.setChecked(False)
+
+    def run(self):
+        self._run.setEnabled(False)
+        self._index_at_run = self._simtype_index
+        run_func = self._settings[self._simtype_index].run
+        handle_output = self._output[self._simtype_index].handle_output
+        run_func(self.processing_complete, handle_output)
 
     def modify_type(self, button: QPushButton):
         index = self._select.id(button)
@@ -126,6 +178,7 @@ class Simulation(QWidget):
         self._simtype_index = index
         self.fill_sample()
         self._settings_stack.setCurrentIndex(index)
+        self._output_stack.setCurrentIndex(index)
 
     def fill_sample(self):
         filename = self._SIMULATION_TYPES[self._simtype_index][self._INDEX.index("sample_file")]
