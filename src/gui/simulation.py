@@ -59,7 +59,7 @@ class Simulation(QWidget):
 
     _SAMPLE_DIRECTORY = "./data/samples/"
     _SIMULATION_TYPES = [
-        ("Stat Weight/Distribution", "sample.png", StatSettings, StatOutput),
+        ("Stat Weight/Distribution", "distribution.png", StatSettings, StatOutput),
         ("Scenario Comparison", "sample.png", CompareSettings, CompareOutput)
     ]
     _INDEX = ["name", "sample_file", "setting_class", "output_class"]
@@ -68,6 +68,7 @@ class Simulation(QWidget):
         super().__init__()
         self._config_list = config_list
         self._filenames = filename_func
+        self._runs = None
 
         self._simtype_index = 0
 
@@ -81,6 +82,7 @@ class Simulation(QWidget):
         sample_layout = QHBoxLayout()
         self._sample = QLabel()
         self.fill_sample()
+        sample_layout.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
         sample_layout.addWidget(self._sample)
         sample_frame.setLayout(sample_layout)
         cc_layout.addWidget(sample_frame)
@@ -129,9 +131,6 @@ class Simulation(QWidget):
         prog_frame.setLayout(prog_layout)
         cc_layout.addWidget(prog_frame)
     
-        for setting in self._settings:
-            setting.set_progbar(self._progress.set_value)
-
         # run button -- note the reverse is being used
         self._run = QPushButton("Run Simulation")
         self._run.setCheckable(True)
@@ -153,23 +152,34 @@ class Simulation(QWidget):
         self._output = []
         for stype in self._SIMULATION_TYPES:
             sim_class = stype[self._INDEX.index("output_class")]
-            output = sim_class(config_list, filename_func)
+            output = sim_class()
             self._output_stack.addWidget(output)
             self._output.append(output)
         layout.addWidget(self._output_stack)
 
         self.setLayout(layout)
 
+        for setting, output in zip(self._settings, self._output):
+            setting.set_progbar(self._progress.set_value)
+            setting.set_output(output.prepare_output)
+
     def processing_complete(self):
-        self._run.setEnabled(True)
-        self._run.setChecked(False)
+        self._run_count += 1
+        if self._run_count == self._runs:
+            self._run.setEnabled(True)
+            self._run.setChecked(False)
+
+    def set_runs(self, runs):
+        self._runs = len(runs)
+        self._output[self._index_at_run].set_runs(runs)
 
     def run(self):
         self._run.setEnabled(False)
         self._index_at_run = self._simtype_index
         run_func = self._settings[self._simtype_index].run
         handle_output = self._output[self._simtype_index].handle_output
-        run_func(self.processing_complete, handle_output)
+        self._run_count = 0
+        run_func(self.processing_complete, handle_output, self.set_runs)
 
     def modify_type(self, button: QPushButton):
         index = self._select.id(button)

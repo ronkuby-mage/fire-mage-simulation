@@ -64,15 +64,13 @@ class Scenario(QStackedWidget):
         self._group.set_changed_trigger(changed_trigger)
         self._buffs.set_changed_trigger(changed_trigger)
         self._rotation.set_changed_trigger(changed_trigger)
-        
 
     def mod_mages(self, stype: int):
         self._rotation.mod_mages(stype)
 
     def settings_refresh(self, refresh):
-        #for item in self._items:
-        #    item.settings_refresh(refresh)
         self._settings_refresh = refresh
+        self._group.settings_refresh(refresh)
 
 
 class Buffs(QGroupBox):
@@ -201,49 +199,51 @@ class Buffs(QGroupBox):
 
     def fill(self):
         config = self._config.current().config()
-
         self._buffs["boss"].setCurrentIndex(self._BOSSES.index(config["buffs"]["boss"]))
-        self._buffs["dragonling_time"].setText("")
-        for nightfall_timer in self._buffs["nightfall_timer"]:
-            nightfall_timer.setText("")
-            nightfall_timer.setEnabled(False)
+        clear_dragonling = False
+        clear_nightfall = False
         if "proc" in config["buffs"]:
-            icon = QIcon()
             if "dragonling" in config["buffs"]["proc"]:
+                icon = QIcon()
                 icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=False))
+                self._buffs["dragonling"].setIcon(icon)
                 self._buffs["dragonling_time"].setText(str(config["buffs"]["proc"]["dragonling"]))
             else:
-                icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=True))
-            self._buffs["dragonling"].setIcon(icon)
+                clear_dragonling = True
             if "nightfall" in config["buffs"]["proc"]:
                 for index, val in enumerate(config["buffs"]["proc"]["nightfall"]):
                     icon = QIcon()
-                    icon.addPixmap(get_pixmap(icon_fn, fade=False))
+                    icon.addPixmap(get_pixmap(self._NIGHTFALL_ICON_FN, fade=False))
                     self._buffs["nightfall"][index].setIcon(icon)
                     self._buffs["nightfall"][index].setChecked(True)
                     self._buffs["nightfall_timer"][index].setText(str(val))
+                    self._buffs["nightfall_timer"][index].setEnabled(False)
                 self._buffs["nightfall_timer"][index].setEnabled(True)
-                if index + 1 < self._MAX_NIGHTFALL:
-                    self._buffs["nightfall_timer"][index + 1].setEnabled(True)
                 for index2 in range(index + 1, self._MAX_NIGHTFALL):
                     icon = QIcon()
-                    icon.addPixmap(get_pixmap(icon_fn, fade=True))
+                    icon.addPixmap(get_pixmap(self._NIGHTFALL_ICON_FN, fade=True))
                     self._buffs["nightfall"][index2].setIcon(icon)
+                    self._buffs["nightfall_timer"][index2].setText("")
+                    enabled = index2 == index + 1
+                    self._buffs["nightfall_timer"][index2].setEnabled(enabled)
             else:
-                self._buffs["nightfall_timer"][0].setEnabled(True)
-                for index in range(self._MAX_NIGHTFALL):
-                    icon = QIcon()
-                    icon.addPixmap(get_pixmap(icon_fn, fade=True))
-                    self._buffs["nightfall"][index].setIcon(icon)
+                clear_nightfall = True
         else:
+            clear_nightfall = True
+            clear_dragonling = True
+        if clear_dragonling:
             icon = QIcon()
             icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=True))
             self._buffs["dragonling"].setIcon(icon)
-            self._buffs["nightfall_timer"][0].setEnabled(True)
+            self._buffs["dragonling_time"].setText("")
+        if clear_nightfall:
             for index in range(self._MAX_NIGHTFALL):
                 icon = QIcon()
                 icon.addPixmap(get_pixmap(self._NIGHTFALL_ICON_FN, fade=True))
                 self._buffs["nightfall"][index].setIcon(icon)
+                enabled = True if not index else False
+                self._buffs["nightfall_timer"][index].setEnabled(enabled)
+                self._buffs["nightfall_timer"][index].setText("")
 
         for btype in self._BUFFS:
             for vals in self._BUFFS[btype]:
@@ -269,7 +269,7 @@ class Buffs(QGroupBox):
         config = self._config.current().config()
         value = self._buffs["dragonling_time"].text()
         icon = QIcon()
-        if value:
+        if value and value != ".":
             if "proc" not in config["buffs"]:
                 config["buffs"]["proc"] = {"dragonling": float(value)}
             else:
@@ -277,6 +277,11 @@ class Buffs(QGroupBox):
             icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=False))
         else:
             icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=True))
+            if "proc" in config["buffs"]:
+                if "dragonling" in config["buffs"]["proc"]:
+                    config["buffs"]["proc"].pop("dragonling")
+                if not config["buffs"]["proc"]:
+                    config["buffs"].pop("proc")
         self._buffs["dragonling"].setIcon(icon)
 
         if self._changed_trigger is not None:
@@ -289,16 +294,20 @@ class Buffs(QGroupBox):
         icon = QIcon()
         icon.addPixmap(get_pixmap(self._NIGHTFALL_ICON_FN, fade=not value))
         self._buffs["nightfall"][index].setIcon(icon)
-        if value:
+        if value and value != ".":
             if "proc" not in config["buffs"]:
                 config["buffs"]["proc"] = {"nightfall": [float(value)]}
             elif "nightfall" not in config["buffs"]["proc"]:
                 config["buffs"]["proc"]["nightfall"] = [float(value)]
             else:
-                config["buffs"]["proc"]["nightfall"].append(float(value))
+                if index >= len(config["buffs"]["proc"]["nightfall"]):
+                    config["buffs"]["proc"]["nightfall"].append(float(value))
+                    self._buffs["nightfall_timer"][index - 1].setEnabled(False)
+                else:
+                    config["buffs"]["proc"]["nightfall"][index] = float(value)
             if index + 1 < self._MAX_NIGHTFALL:
                 self._buffs["nightfall_timer"][index + 1].setEnabled(True)
-        else:
+        elif value != ".":
             if "proc" in config["buffs"]:
                 if "nightfall" in config["buffs"]["proc"]:
                     config["buffs"]["proc"]["nightfall"].pop()
@@ -306,9 +315,10 @@ class Buffs(QGroupBox):
                         config["buffs"]["proc"].pop("nightfall")
                         if not config["buffs"]["proc"]:
                             config["buffs"].pop("proc")
-                    else:
-                        if index > 0:
-                            self._buffs["nightfall_timer"][index - 1].setEnabled(True)
+            if index > 0:
+                self._buffs["nightfall_timer"][index - 1].setEnabled(True)
+            if index + 1 < self._MAX_NIGHTFALL:
+                self._buffs["nightfall_timer"][index + 1].setEnabled(False)
         if self._changed_trigger is not None:
             self._changed_trigger()
 
@@ -556,7 +566,7 @@ class Rotation(QWidget):
                 config["rotation"]["continuing"][f"special{row + 1:d}"]["slot"] = [value]
         elif field == "param":
             value = self._special[row]["param"].text()
-            if len(value):
+            if value and value != ".":
                 config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = float(value)
         if self._changed_trigger is not None:
             self._changed_trigger()
@@ -581,6 +591,7 @@ class Group(QGroupBox):
 
     def __init__(self, config_list, mod_mages_signal):
         super().__init__()
+        self._settings_refresh = None
         self.setTitle("Mages")
         self._changed_trigger = None
         self._config = config_list
@@ -655,6 +666,11 @@ class Group(QGroupBox):
 
         if self._changed_trigger is not None:
             self._changed_trigger()
+        if self._settings_refresh is not None:
+            self._settings_refresh()
+
+    def settings_refresh(self, refresh):
+        self._settings_refresh = refresh
 
 class Mage(QWidget):
 
@@ -772,7 +788,7 @@ class Mage(QWidget):
         config = self._config.current().config()
         stype = self._STAT_TYPES[self._STATS.index(name)]
         sval = self._stats[name].text()
-        if not sval:
+        if not sval or sval == ".":
             return
         elif stype == "float":
             factor = 0.01 if "%" in name else 1.0

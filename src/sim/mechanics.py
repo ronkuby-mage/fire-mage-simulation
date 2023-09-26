@@ -482,10 +482,11 @@ class Encounter():
                 self._arrays['global']['ignite'][still_going] += self._ignite[still_going]
 
                 progress = 100*self._arrays['global']['running_time'].mean()/self._arrays['global']['duration'].mean()
-                update_progress.emit(progress)
             else:
                 for sidx, stime in enumerate(self._arrays['global']['running_time']):
                     self._arrays['global']['total_damage'][sidx].append((stime, self._damage[sidx], self._ignite[sidx]))
+                progress = 0.0
+            update_progress.emit((self._run_params["id"], progress))
             if not still_going.size:
                 break
         if not over_time:
@@ -506,7 +507,7 @@ class Encounter():
             solo_mage = dp_mage + self._arrays['global']['ignite']*len(self._config["target"])/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration']
             smage = np.sort(solo_mage)
     
-            return smage
+            return self._run_params["id"], smage
         else:
             pass
             # COMMENT FOR NOW
@@ -541,6 +542,8 @@ class Encounter():
             #return total_dam
 
 def get_damage(params, run_params, progress_callback=None):
+    if constants._LOG_SIM >= 0:
+        print(params)
     array_generator = constants.ArrayGenerator(params)
     encounter = Encounter(array_generator,
                           params['rotation'],

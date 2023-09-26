@@ -23,7 +23,7 @@ class WorkerSignals(QObject):
     finished = pyqtSignal()
     error = pyqtSignal(tuple)
     result = pyqtSignal(object)
-    progress = pyqtSignal(float)
+    progress = pyqtSignal(tuple)
 
 
 class Worker(QRunnable):

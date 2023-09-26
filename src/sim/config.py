@@ -55,7 +55,6 @@ class Config(object):
         self._filename = self._add_ext(filename)
         with open(os.path.join(self._directory, self._filename), "rt") as fid:
             self._config = json.load(fid)
-        # need to setText() on all fields of active scenario
 
     def _add_ext(self, filename):
         base, ext = os.path.splitext(filename)

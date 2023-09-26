@@ -79,8 +79,11 @@ class ConfigListWidget(QWidget):
         if index == self._index:
             self._update_trigger()
 
-    def filenames(self):
-        return [item.filename() for item in self._items]
+    def filenames(self, current=False):
+        if current:
+            return self._items[self._index].filename()
+        else:
+            return [item.filename() for item in self._items]
     
     def settings_refresh(self, refresh):
         for item in self._items:
@@ -147,6 +150,8 @@ class ConfigWidget(QWidget):
             msg.setText("File not found.")
             msg.setWindowTitle("Load Error")
             msg.exec()
+        if self._settings_refresh is not None:
+            self._settings_refresh()
     
     def _save(self):
         self._config.save(self._filename.text())
