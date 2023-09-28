@@ -9,13 +9,15 @@ class ConfigList():
         self._directory = directory
         self._index = 0
 
+    def configs(self):
+        return self._configs
+
     def current(self):
         return self._configs[self._index]
 
     def copy(self, filename):
         new_config = Config.from_config(self._directory, filename, self._configs[-1].config())
         self._configs.append(new_config)
-
         return new_config
     
     def pop(self):

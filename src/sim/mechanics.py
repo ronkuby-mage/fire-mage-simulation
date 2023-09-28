@@ -480,23 +480,15 @@ class Encounter():
                 self._arrays['global']['total_damage'][still_going] += self._damage[still_going]
                 self._arrays['global']['crit'][still_going] += self._crit[still_going]
                 self._arrays['global']['ignite'][still_going] += self._ignite[still_going]
-
-                progress = 100*self._arrays['global']['running_time'].mean()/self._arrays['global']['duration'].mean()
             else:
                 for sidx, stime in enumerate(self._arrays['global']['running_time']):
                     self._arrays['global']['total_damage'][sidx].append((stime, self._damage[sidx], self._ignite[sidx]))
-                progress = 0.0
+            progress = 100*self._arrays['global']['running_time'].mean()/self._arrays['global']['duration'].mean()
             update_progress.emit((self._run_params["id"], progress))
             if not still_going.size:
                 break
         if not over_time:
-            #self._arrays['global']['total_damage'] -= (1 - C._RESISTANCE_MODIFIER)*self._arrays['global']['ignite']
-            #self._arrays['global']['total_damage'] *= C._RESISTANCE_MODIFIER
-            #self._arrays['global']['player'] *= C._RESISTANCE_MODIFIER
-            #self._arrays['global']['crit'] *= C._RESISTANCE_MODIFIER
-            #self._arrays['global']['ignite'] *= C._RESISTANCE_MODIFIER*C._RESISTANCE_MODIFIER
-            
-            if C._LOG_SIM >= 0 and not over_time:
+            if C._LOG_SIM >= 0:
                 print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C._LOG_SIM]))
                 print('average damage = {:9.1f}'.format(self._arrays['global']['total_damage'].mean()))
                 print('std damage = {:7.1f}'.format(self._arrays['global']['total_damage'].std()))
@@ -509,37 +501,29 @@ class Encounter():
     
             return self._run_params["id"], smage
         else:
-            pass
-            # COMMENT FOR NOW
-            # sim_size = len(self._arrays['global']['total_damage'])
-            # dur_dist = self._dur_dist
-            # cutoff = self._var*np.random.randn(len(dur_dist), sim_size)
-            # for didx, dur in enumerate(dur_dist):
-            #     cutoff[didx, :] += dur
-            # cutoff[cutoff < 0.0] = 0.0
+            sim_size = len(self._arrays['global']['total_damage'])
+            dur_dist = self._run_params["dur_dist"]
+            cutoff = self._var*np.random.randn(len(dur_dist), sim_size)
+            for didx, dur in enumerate(dur_dist):
+                cutoff[didx, :] += dur
+            cutoff[cutoff < 0.0] = 0.0
             
-            # total_dam = np.zeros((len(dur_dist), sim_size))
-            # ignite_dam = np.zeros((len(dur_dist), sim_size))
-            # for sidx in range(sim_size):
-            #     cuts = cutoff[:, sidx]
-            #     ptime = 0.0
-            #     total_damage = 0.0
-            #     total_ignite = 0.0
-            #     for ctime, damage, ignite in self._arrays['global']['total_damage'][sidx]:
-            #         if ptime > 0.0:
-            #             for didx, cut in enumerate(cuts):
-            #                 if ctime > cut and ptime <= cut:
-            #                     total_dam[didx, sidx] = total_damage/cut
-            #                     ignite_dam[didx, sidx] = total_ignite/cut
-            #         total_damage += damage
-            #         total_ignite += ignite
-            #         ptime = ctime
-            #     total_dam[ctime <= cuts, sidx] = total_damage/ctime
-            #     ignite_dam[ctime <= cuts, sidx] = total_ignite/ctime
-            # total_dam = total_dam.mean(axis=1)
-            # ignite_dam = ignite_dam.mean(axis=1)
-            #
-            #return total_dam
+            total_dam = np.zeros((len(dur_dist), sim_size))
+            for sidx in range(sim_size):
+                cuts = cutoff[:, sidx]
+                ptime = 0.0
+                total_damage = 0.0
+                for ctime, damage, ignite in self._arrays['global']['total_damage'][sidx]:
+                    if ptime > 0.0:
+                        for didx, cut in enumerate(cuts):
+                            if ctime > cut and ptime <= cut:
+                                total_dam[didx, sidx] = total_damage/cut
+                    total_damage += damage
+                    ptime = ctime
+                total_dam[ctime <= cuts, sidx] = total_damage/ctime
+            total_dam = total_dam.mean(axis=1)
+            
+            return self._run_params["id"], total_dam
 
 def get_damage(params, run_params, progress_callback=None):
     if constants._LOG_SIM >= 0:

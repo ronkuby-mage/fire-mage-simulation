@@ -53,6 +53,7 @@ class ConfigListWidget(QWidget):
             self.layout.addWidget(self._items[-1])
             self.set_index(len(self._items) - 1)
             self.changed_trigger()
+            self._items[-1].settings_refresh(self._settings_refresh)
         self._set_size()
         if self._settings_refresh is not None:
             self._settings_refresh()
@@ -108,7 +109,10 @@ class ConfigWidget(QWidget):
   
         self._filename = QLineEdit()
         self._filename.textChanged.connect(self.modify)
-        self._filename.setMaximumWidth(200)
+        self._filename.setMaximumWidth(250)
+        self._filename.setMinimumWidth(200)
+        self._filename.setMaxLength(26)
+        self._filename.setContentsMargins(0, 0, 0, 0)
         self._load_button = QPushButton("Load", self)
         self._save_button = QPushButton("Save", self)
         self._load_button.setMaximumWidth(130)
@@ -144,6 +148,7 @@ class ConfigWidget(QWidget):
             self._config.load(self._filename.text())
             self._update_trigger(self._index)
             self._filename.setStyleSheet("border:1px solid rgb(0, 255, 0); ")
+            self._filename.setToolTip("")
         except FileNotFoundError:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
@@ -156,9 +161,11 @@ class ConfigWidget(QWidget):
     def _save(self):
         self._config.save(self._filename.text())
         self._filename.setStyleSheet("border:1px solid rgb(0, 255, 0); ")
+        self._filename.setToolTip("")
 
     def modify(self):
         self._filename.setStyleSheet("border:1px solid rgb(255, 0, 0); ")
+        self._filename.setToolTip("Scenario is not saved")
         if self._settings_refresh is not None:
             self._settings_refresh()
 

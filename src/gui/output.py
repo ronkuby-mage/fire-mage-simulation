@@ -27,13 +27,11 @@ import matplotlib.pyplot as plt
 from .icon_edit import numpy_to_qt_pixmap
 from skimage import io
 
-#    _OUTPUT_SIZE = 780
-#     self.setFixedWidth(self._OUTPUT_SIZE)
 class StatOutput(QWidget):
 
     _OUTPUT_SIZE = 780
     _HIST_BINS = 512
-    _EDGE_CHOP = (35, 15, 85, 75)
+    _EDGE_CHOP = (50, 20, 85, 75)
     _DPS_TYPES_ROW = ["Mean", "Min", "Max", "Median"]
     _EP_TYPES = ["crit", "hit"]
     _EP_METRICS = ["Mean", "90%"]
@@ -42,9 +40,11 @@ class StatOutput(QWidget):
         super().__init__()
         self._config = None
         self._filename = None
+        self._runs = None
         self.setFixedWidth(self._OUTPUT_SIZE)
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(5, 0, 5, 0)
         self._dist_plot = QLabel()
         layout.addWidget(self._dist_plot)
 
@@ -64,6 +64,8 @@ class StatOutput(QWidget):
             dps_layout.addStretch()
         dps_frame.setLayout(dps_layout)
         layout.addWidget(dps_frame)
+        dps_frame.setVisible(False)
+        self._frames = [dps_frame]
 
         self._ep = {}
         ep_row = QWidget()
@@ -83,6 +85,8 @@ class StatOutput(QWidget):
                 frame_layout.addStretch()
             frame.setLayout(frame_layout)
             ep_layout.addWidget(frame)
+            frame.setVisible(False)
+            self._frames.append(frame)
         ep_row.setLayout(ep_layout)
         layout.addWidget(ep_row)
 
@@ -152,15 +156,73 @@ class StatOutput(QWidget):
                         value = -value
                     str_value = "_".join([run_id3, metric])                        
                     self._ep[str_value].setText(f"{metric:s}: {value:.1f}")
+        if len(self._runs) == len(self._received):
+            for frame in self._frames:
+                frame.setVisible(True)
 
 class CompareOutput(QWidget):
     _OUTPUT_SIZE = 780
+    _EDGE_CHOP = (30, 10, 20, 30)
+    _COLORS = ["#FF0000", "#FFFF00", "#00FF00", "#007FFF", "#FF00FF"]
 
     def __init__(self):
         super().__init__()
-        self._config_list = None
-        self._filename_func = None
+        self._num_mages = None
+        self._runs = None
         self.setFixedWidth(self._OUTPUT_SIZE)
 
-    def prepare_output(self):
-        pass
+        layout = QVBoxLayout()
+        layout.setContentsMargins(5, 0, 5, 0)
+        self._plot = QLabel()
+        layout.addWidget(self._plot)
+
+        self.setLayout(layout)
+
+    def prepare_output(self, num_mages, min_time, max_time, etimes):
+        self._num_mages = num_mages
+        self._min_time = min_time
+        self._max_time = max_time
+        self._etimes = etimes
+
+    def set_runs(self, runs):
+        self._runs = runs
+        self._received = [None for dummy in range(len(runs))]
+
+    def handle_output(self, result):
+        run_id, output = result
+        index = self._runs.index(run_id)
+        output = np.array(output)/self._num_mages[index]
+        self._received[index] = output
+        if all([rec is not None for rec in self._received]):
+            ymin = 99999.9
+            ymax = 0.0
+            cmin = self._min_time
+            cmax = self._max_time
+            for yvals in self._received:
+                for ctime, yval in zip(self._etimes, yvals):
+                    if ctime >= cmin and ctime <= cmax:
+                        if yval < ymin:
+                            ymin = yval
+                        if yval > ymax:
+                            ymax = yval
+
+            tmp_filename = "temp.png"
+            plt.close('all')
+            plt.figure(figsize=(8.0, 6.75), dpi=100)
+            plt.style.use('dark_background')
+            plt.title("Scenario Comparison")
+            for idx, (run_id, values) in enumerate(zip(self._runs, self._received)):
+                plt.plot(self._etimes, values, label=run_id, color=self._COLORS[idx])
+            plt.xlabel('Encounter Duration (seconds)')
+            plt.ylabel('Damage per mage')
+            plt.grid()
+            plt.xlim(cmin, cmax)
+            plt.ylim(ymin, ymax)
+            plt.legend()
+            plt.savefig(tmp_filename)
+            data = io.imread(tmp_filename)
+            os.unlink(tmp_filename)
+            data = np.array(data[self._EDGE_CHOP[0]:(data.shape[0] - self._EDGE_CHOP[1]),
+                                self._EDGE_CHOP[2]:(data.shape[1] - self._EDGE_CHOP[3]), :3])
+            pixmap = numpy_to_qt_pixmap(data)
+            self._plot.setPixmap(pixmap)

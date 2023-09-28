@@ -32,6 +32,7 @@ class Window(QWidget):
         self.resize(self._DEFAULT_WIDTH, self._DEFAULT_HEIGHT)
         # Create a top-level layout
         self.toplayout = QVBoxLayout()
+        self.toplayout.setContentsMargins(5, 5, 5, 5)
         # Create the tab widget with two tabs
         self.tabs = QTabWidget()
         self._scenario = Scenario(self.config_list)

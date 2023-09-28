@@ -59,8 +59,8 @@ class Simulation(QWidget):
 
     _SAMPLE_DIRECTORY = "./data/samples/"
     _SIMULATION_TYPES = [
-        ("Stat Weight/Distribution", "distribution.png", StatSettings, StatOutput),
-        ("Scenario Comparison", "sample.png", CompareSettings, CompareOutput)
+        ("Stat Weights/Distribution", "distribution.png", StatSettings, StatOutput),
+        ("Scenario Comparison", "compare.png", CompareSettings, CompareOutput)
     ]
     _INDEX = ["name", "sample_file", "setting_class", "output_class"]
 
@@ -73,7 +73,6 @@ class Simulation(QWidget):
         self._simtype_index = 0
 
         layout = QHBoxLayout()
-
         control_col = QWidget()    
         cc_layout = QVBoxLayout()
 

@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from PyQt5.QtWidgets import (
     QPushButton,
     QGridLayout,
@@ -29,6 +30,7 @@ class NumberOfSamples(QWidget):
     def __init__(self, edit_func, default_value):
         super().__init__()
         layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addStretch()
         layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout.addWidget(QLabel("Number of Samples:"))
@@ -45,22 +47,23 @@ class NumberOfSamples(QWidget):
     def widget(self):
         return self._number_of_samples
 
-class EncounterTime(QWidget):
+class TimeWidget(QWidget):
 
-    def __init__(self, edit_func, default_value):
+    def __init__(self, edit_func, default_value, message, key):
         super().__init__()
         
         layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addStretch()
         layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        layout.addWidget(QLabel("Encounter Time (seconds):"))
+        layout.addWidget(QLabel(message))
         self._etime = QLineEdit(str(default_value))
         self._etime.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
         self._etime.setMaximumWidth(75)
         validator = QDoubleValidator()
         validator.setBottom(0)
         self._etime.setValidator(validator)
-        self._etime.textChanged.connect(edit_func)
+        self._etime.textChanged.connect(lambda: edit_func(key))
         layout.addWidget(self._etime)
         self.setLayout(layout)
 
@@ -68,7 +71,8 @@ class EncounterTime(QWidget):
         return self._etime
 
 class StatSettings(QWidget):
-
+    _INITIAL_DELAY = 1.0
+    _RECAST_DELAY = 0.05
     _DEFAULT_TIME = 70.0
     _DEFAULT_VAR = 0.05
     _DEFAULT_SAMPLES = 100000
@@ -80,7 +84,7 @@ class StatSettings(QWidget):
         self._filename_func = filename_func
         self._progbar = None
         self._output = None
-        self.threadpool = QThreadPool()        
+        self.threadpool = QThreadPool()
         # stat settings need:
         # l1: list scenario currently set for editing
         # l2: grid of mages pushbuttons
@@ -91,6 +95,7 @@ class StatSettings(QWidget):
         # l5: encounter time - set var to 5%
         # l6: number of samples
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
 
         index = config_list.index()
         # L1
@@ -162,11 +167,27 @@ class StatSettings(QWidget):
         ep_row2.setLayout(ep_layout2)
         layout.addWidget(ep_row2)
 
+        self._time = {}
+        self._time_widget = {}
+
+        # L4
+        self._time["duration"] = self._DEFAULT_TIME
+        self._time_widget["duration"] = TimeWidget(self.modify_time, self._DEFAULT_TIME, "Encounter Time (seconds):", "duration")
+        layout.addWidget(self._time_widget["duration"])
 
         # L5
-        self._etime = self._DEFAULT_TIME
-        self._etime_widget = EncounterTime(self.modify_etime, self._DEFAULT_TIME)
-        layout.addWidget(self._etime_widget)
+        time_row = QWidget()
+        time_layout = QHBoxLayout()
+        time_layout.setContentsMargins(0, 0, 0, 0)
+        time_layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self._time["delay"] = self._INITIAL_DELAY
+        self._time_widget["delay"] = TimeWidget(self.modify_time, self._INITIAL_DELAY, "Initial Delay", "delay")
+        time_layout.addWidget(self._time_widget["delay"])
+        self._time["response"] = self._RECAST_DELAY
+        self._time_widget["response"] = TimeWidget(self.modify_time, self._RECAST_DELAY, "Recast Delay", "response")
+        time_layout.addWidget(self._time_widget["response"])
+        time_row.setLayout(time_layout)
+        layout.addWidget(time_row)
 
         # L6
         self._samples = self._DEFAULT_SAMPLES
@@ -181,11 +202,11 @@ class StatSettings(QWidget):
         if value:
             self._samples = int(value)
 
-    def modify_etime(self):
-        widget = self._etime_widget.widget()
+    def modify_time(self, key):
+        widget = self._time_widget[key].widget()
         value = widget.text()
         if value and value != ".":
-            self._etime = float(value)
+            self._time[key] = float(value)
 
     def modify_ep(self, ep_type):
         if ep_type == "all":
@@ -233,10 +254,13 @@ class StatSettings(QWidget):
         main_config = self._config_list.current().config()
         config = deepcopy(main_config)
 
-        config['timing']['duration'] = {
-            "mean": self._etime,
-            "var": self._DEFAULT_VAR*self._etime,
-            "clip": [3.0, 10000.0]}
+        config['timing'] = {
+            "duration": {
+                "mean": self._time["duration"],
+                "var": self._DEFAULT_VAR*self._time["duration"],
+                "clip": [3.0, 10000.0]},
+            "delay": self._time["delay"],
+            "response": self._time["response"]}
         config["sim_size"] = self._samples
         run_parameters = {"type": "distribution"}
         self._output(config, self._filename_func(current=True))
@@ -288,7 +312,12 @@ class StatSettings(QWidget):
 
 class CompareSettings(QWidget):
 
-    _DEFAULT_VALUE = 100000
+    _DEFAULT_MIN = 30.0
+    _DEFAULT_MAX = 150.0
+    _INITIAL_DELAY = 1.0
+    _RECAST_DELAY = 0.05
+    _DEFAULT_VAR = 0.05
+    _DEFAULT_SAMPLES = 20000
 
     def __init__(self, config_list: ConfigList, filename_func: Callable):
         super().__init__()
@@ -296,25 +325,114 @@ class CompareSettings(QWidget):
         self._filenames = filename_func
         self._progbar = None
         self._output = None
+        self.threadpool = QThreadPool()
 
         # start time for y scale
         # max time for sim
         # number of samples
         layout = QVBoxLayout()
-        self._samples = self._DEFAULT_VALUE
-        self._num_samp = NumberOfSamples(self.modify_samples, self._DEFAULT_VALUE)
-        layout.addWidget(self._num_samp)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addStretch()
+
+        self._time = {}
+        self._time_widget = {}
+
+        # L4
+        self._time["min_time"] = self._DEFAULT_MIN
+        self._time_widget["min_time"] = TimeWidget(self.modify_time, self._DEFAULT_MIN, "Minimum Time (seconds)", "min_time")
+        self._time_widget["min_time"].widget().setToolTip("Y-scale minimum is set to the minimum damage at this time.")
+        layout.addWidget(self._time_widget["min_time"])
+
+        self._time["max_time"] = self._DEFAULT_MAX
+        self._time_widget["max_time"] = TimeWidget(self.modify_time, self._DEFAULT_MAX, "Maximum Time (seconds)", "max_time")
+        layout.addWidget(self._time_widget["max_time"])
+
+        # L5
+        self._time["delay"] = self._INITIAL_DELAY
+        self._time_widget["delay"] = TimeWidget(self.modify_time, self._INITIAL_DELAY, "Initial Delay (seconds)", "delay")
+        layout.addWidget(self._time_widget["delay"])
+
+        self._time["response"] = self._RECAST_DELAY
+        self._time_widget["response"] = TimeWidget(self.modify_time, self._RECAST_DELAY, "Recast Delay (seconds)", "response")
+        layout.addWidget(self._time_widget["response"])
+
+        #row = QWidget()
+        #row_layout = QHBoxLayout()
+        #row_layout.setContentsMargins(0, 0, 0, 0)
+        #row_layout.addStretch()
+        #row_layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        #row_layout.addWidget(QLabel("Adaptive Sample Number"))
+        #self._adaptive = QLineEdit()
+
+        # L6
+        self._samples = self._DEFAULT_SAMPLES
+        self._samples_widget = NumberOfSamples(self.modify_samples, self._DEFAULT_SAMPLES)
+        layout.addWidget(self._samples_widget)
 
         self.setLayout(layout)
 
     def modify_samples(self):
-        widget = self._num_samp.widget()
+        widget = self._samples_widget.widget()
         value = widget.text()
         if value:
             self._samples = int(value)
 
+    def modify_time(self, key):
+        widget = self._time_widget[key].widget()
+        value = widget.text()
+        if value and value != ".":
+            self._time[key] = float(value)
+
     def refresh(self):
-        pass
+        pass # no compare settings need to be adjusted based on external actions
+
+    def run(self, processing_complete: Callable, handle_output: Callable, set_runs: Callable):
+        runs = deepcopy(self._filenames())
+        if len(set(runs)) != len(runs):
+            runs = [f"{r:s}_{idx:d}" for idx, r in enumerate(runs)]
+            
+        set_runs(runs) # sets self._runs in simulation so it knows when all are done and in output
+        self._runs = runs
+        num_mages = []
+        self._latest_prog = []
+        for config_serv in self._config_list.configs():
+            num_mages.append(len(config_serv.config()["configuration"]["target"]))
+            self._latest_prog.append(0.0)
+
+        # in case the user wants to play games
+        cmax = min([max([10.0, self._time["max_time"]]), 1000.0])
+        cmin = min([max([5.0, self._time["min_time"]]), 1000.0])
+        if cmax <= cmin:
+            ave = (cmin + cmax)/2
+            etimes = np.array([ave - 2.0, ave + 2])
+        else:
+            cmin = 15*((cmin - 10)//15)
+            etimes = np.arange(cmin, cmax + 20, 5, dtype=np.int32)
+            etimes = etimes[np.where(np.logical_or(np.logical_not(np.mod(etimes, 15)), etimes < 90))[0]].astype(float)
+
+        self._output(num_mages, self._time["min_time"], self._time["max_time"], etimes) # calls "prepare_output" in output Class
+
+        for index, config_serv in enumerate(self._config_list.configs()):
+            config = deepcopy(config_serv.config())
+            config['timing'] = {
+                "duration": {
+                    "mean": self._time["max_time"] + 15.0,
+                    "var": 3.0,
+                    "clip": [3.0, 10000.0]},
+                "delay": self._time["delay"],
+                "response": self._time["response"]}
+            config["sim_size"] = self._samples
+            run_parameters = {"type": "over_time", "id": runs[index], "dur_dist": deepcopy(etimes)}
+            worker = Worker(get_damage, config, run_parameters)
+            worker.signals.result.connect(handle_output)
+            worker.signals.finished.connect(processing_complete)
+            worker.signals.progress.connect(self.update_progress)
+            self.threadpool.start(worker)
+
+    def update_progress(self, prog: tuple):
+        run_id, value = prog
+        self._latest_prog[self._runs.index(run_id)] = value
+        self._progbar(min(self._latest_prog))
 
     def set_progbar(self, progbar: Callable):
         self._progbar = progbar

@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QIcon
 from PyQt5.QtCore import Qt, QSize
+from copy import deepcopy
 from .icon_edit import get_pixmap
 from .character import Character
 from ..sim.constants import Constant
@@ -361,6 +362,7 @@ class Rotation(QWidget):
         super().__init__()
         self._changed_trigger = None
         self._config = config_list
+        self._lock = False
         layout = QVBoxLayout()
 
         # initial rotation
@@ -436,8 +438,21 @@ class Rotation(QWidget):
 
         self.setLayout(layout)
 
+    def lock(self):
+        self._lock = True
+
+    def unlock(self):
+        self._lock = False
+
     def fill(self):
         config = self._config.current().config()
+        self.lock()
+
+        for idx in range(self._MAX_SPELLS):
+            empty = [jdx for jdx in range(self._initial[idx].count()) if self._initial[idx].itemText(jdx) == ""]
+            if len(empty):
+                self._initial[idx].removeItem(empty[0])
+
         for idx, spell in enumerate(config["rotation"]["initial"]["other"]):
             self._initial[idx].setCurrentIndex(self._SPELLS.index(spell))
 
@@ -453,37 +468,67 @@ class Rotation(QWidget):
         spell = config["rotation"]["continuing"]["default"]
         self._default.setCurrentIndex(self._SPELLS.index(spell))
 
+        # and now the annoyingly complex specials
+        for idx in range(self._MAX_SPECIALS):
+            empty = [jdx for jdx in range(self._special[idx]["type"].count()) if self._special[idx]["type"].itemText(jdx) == ""]
+            if len(empty):
+                self._special[idx]["type"].removeItem(empty[0])
+
+        num_mages = config["configuration"]["num_mages"]
+        slots_taken = []
+        for key, val in config["rotation"]["continuing"].items():
+            if "special" in key:
+                slots_taken.append(val["slot"][0])
+        resort = True if len(slots_taken) > num_mages or any([slot >= num_mages for slot in slots_taken]) else False
+        if resort:
+            to_remove = []
+            specials = 0
+            for key, val in config["rotation"]["continuing"].items():
+                if "special" in key:
+                    index = int(key.split("special")[1]) - 1
+                    if index >= num_mages:
+                        to_remove.append(key)
+                    specials += 1
+            for key in to_remove:
+                config["rotation"]["continuing"].pop(key)
+            slots_taken = list(range(min([num_mages, specials])))
         specials = 0
-        slots_taken = set()
         for key, val in config["rotation"]["continuing"].items():
             if "special" in key:
                 index = int(key.split("special")[1]) - 1
-                if specials == self._MAX_SPECIALS:
-                    continue
                 stype = val["value"]
                 self._special[index]["type"].setCurrentIndex(self._SPECIALS.index(stype))
-                slot = val["slot"][0]
+                if resort:
+                    slot = specials
+                else:
+                    slot = val["slot"][0]
                 self._special[index]["mage"].clear()
-                num_mages = config["configuration"]["num_mages"]
-                self._special[index]["mage"].addItems([f"mage {m + 1:d}" for m in range(num_mages) if m not in slots_taken])
+                tst = deepcopy(slots_taken)
+                tst.remove(slot)
+                self._special[index]["mage"].addItems([f"mage {m + 1:d}" for m in range(num_mages) if m not in tst])
                 self._special[index]["mage"].setCurrentText(f"mage {slot + 1:d}")
+                self._special[index]["mage"].setEnabled(True)
                 if stype == "cobimf":
                     param_val = val["cast_point_remain"]
                     self._special[index]["param"].setText(str(param_val))
+                    self._special[index]["param"].setEnabled(True)
                 specials += 1
-                slots_taken.add(slot)
-        if specials > 1:
+        if specials:
             self._special[specials - 1]["type"].addItem("")
 
         for sidx in range(specials, self._MAX_SPECIALS):
             self._special[sidx]["type"].addItem("")
             self._special[sidx]["type"].setCurrentText("")
-            if sidx > specials:
-                self._special[sidx]["type"].setEnabled(False)
+            self._special[sidx]["type"].setEnabled(sidx == specials and sidx < num_mages)
             self._special[sidx]["mage"].setEnabled(False)
+            self._special[sidx]["mage"].clear()
             self._special[sidx]["param"].setEnabled(False)
+            self._special[sidx]["param"].setText("")
+        self.unlock()
 
     def modify_initial(self, row):
+        if self._lock:
+            return
         config = self._config.current().config()
         spell = self._initial[row].currentText()
         if not spell:
@@ -507,13 +552,62 @@ class Rotation(QWidget):
             self._changed_trigger()
 
     def modify_default(self):
+        if self._lock:
+            return
         config = self._config.current().config()
         spell = self._default.currentText()
         config["rotation"]["continuing"]["default"] = spell
         if self._changed_trigger is not None:
             self._changed_trigger()
 
-    def modify_special(self, row, field):
+    def modify_special(self, row, field): # what a fucking mess
+        if self._lock:
+            return
+        config = self._config.current().config()
+        if field == "type":
+            spell = self._special[row]["type"].currentText()
+            if f"special{row + 1:d}" in config["rotation"]["continuing"]: # exists
+                if not spell: # removing
+                    config["rotation"]["continuing"].pop(f"special{row + 1:d}")
+                else: # modifying
+                    if config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] != spell:
+                        if spell == "cobimf":
+                            self._special[row]["param"].setEnabled(True)
+                            self._special[row]["param"].setText("0.5") # bad hard-coded value
+                        elif config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] == "cobimf":
+                            self._special[row]["param"].setEnabled(False)
+                            self._special[row]["param"].setText("")
+                            config["rotation"]["continuing"][f"special{row + 1:d}"].pop("cast_point_remain")
+                    config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] = spell
+            else:
+                specials = len([1 for key in config["rotation"]["continuing"] if "special" in key])
+                if spell and specials < config["configuration"]["num_mages"]:
+                    slots_taken = set()
+                    for key, val in config["rotation"]["continuing"].items():
+                        if "special" in key:
+                            slots_taken.add(val["slot"][0])
+                    slots_taken = list(slots_taken)
+                    num_mages = config["configuration"]["num_mages"]
+                    slots_not_taken = [m for m in range(num_mages) if m not in slots_taken]
+
+                    config["rotation"]["continuing"][f"special{row + 1:d}"] = {"value": spell}
+                    config["rotation"]["continuing"][f"special{row + 1:d}"]["slot"] = [slots_not_taken[0]] # more hard code
+                    if spell == "cobimf":
+                        config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = 0.5
+            self.fill() # this is the fix? only config was altered
+        elif field == "mage":
+            text = self._special[row]["mage"].currentText()
+            if len(text):
+                value = int(text.split("mage")[1]) - 1
+                config["rotation"]["continuing"][f"special{row + 1:d}"]["slot"] = [value]
+        elif field == "param":
+            value = self._special[row]["param"].text()
+            if value and value != ".":
+                config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = float(value)
+        if self._changed_trigger is not None:
+            self._changed_trigger()
+
+    def modify_special2(self, row, field): # what a fucking mess
         config = self._config.current().config()
         if field == "type":
             spell = self._special[row]["type"].currentText()
