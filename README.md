@@ -6,11 +6,10 @@ This application simulates a team of fire mages casting against a single boss le
 
 Here are the steps to install and run the application on Windows.
 1. Under the "Code" link above, download a ZIP file and extract it into a directory.
-2. Extract the ZIP file into a location.
-3. Download the Anaconda package: [tested version](https://repo.anaconda.com/archive/Anaconda3-2023.07-2-Windows-x86_64.exe)
-4. From the Start menu, open an Anaconda Prompt (see below)
-5. "cd" to the directory you extracted the code to in Step 1 
-6. Run the application with ```python -m src.gui.main```
+2. Download the Anaconda package: [tested version](https://repo.anaconda.com/archive/Anaconda3-2023.07-2-Windows-x86_64.exe)
+3. From the Start menu, open an Anaconda Prompt (see below)
+4. "cd" to the directory you extracted the code to in Step 1
+5. Run the application with ```python -m src.gui.main```
   
 ![](./data/pictures/anaconda_prompt.png)
 
