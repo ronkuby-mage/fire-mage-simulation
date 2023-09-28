@@ -1,0 +1,137 @@
+{
+   "stats": {
+      "spell_power": [
+         810,
+         500,
+         500,
+         500,
+         500
+      ],
+      "hit_chance": [
+         0.1,
+         0.08,
+         0.07,
+         0.08,
+         0.09
+      ],
+      "crit_chance": [
+         0.11,
+         0.06,
+         0.07,
+         0.06,
+         0.05
+      ],
+      "intellect": [
+         300,
+         318,
+         318,
+         302,
+         302
+      ]
+   },
+   "buffs": {
+      "raid": [
+         "blessing_of_kings",
+         "improved_mark",
+         "arcane_intellect"
+      ],
+      "consumes": [
+         "flask_of_supreme_power",
+         "greater_arcane_elixir",
+         "brilliant_wizard_oil",
+         "elixir_of_greater_firepower"
+      ],
+      "world": [
+         "dire_maul_tribute",
+         "rallying_cry_of_the_dragonslayer",
+         "sayges_dark_fortune_of_damage",
+         "spirit_of_zandalar"
+      ],
+      "racial": [
+         "human",
+         "gnome",
+         "gnome",
+         "human",
+         "human"
+      ],
+      "boss": ""
+   },
+   "configuration": {
+      "num_mages": 5,
+      "target": [
+         0,
+         1,
+         2,
+         3,
+         4
+      ],
+      "sapp": [
+         0
+      ],
+      "toep": [
+         1,
+         2,
+         3
+      ],
+      "zhc": [
+         2,
+         4
+      ],
+      "mqg": [],
+      "pi": [
+         0,
+         1,
+         2,
+         3,
+         4
+      ],
+      "udc": [
+         0
+      ],
+      "name": [
+         "",
+         "",
+         "",
+         ""
+      ]
+   },
+   "rotation": {
+      "initial": {
+         "common": [],
+         "other": [
+            "scorch",
+            "scorch",
+            "frostbolt",
+            "combustion",
+            "sapp",
+            "toep",
+            "zhc",
+            "fireball",
+            "pi",
+            "fireball"
+         ]
+      },
+      "continuing": {
+         "default": "fireball",
+         "special1": {
+            "slot": [
+               2
+            ],
+            "value": "cobimf",
+            "cast_point_remain": 0.5
+         }
+      }
+   },
+   "timing": {
+      "duration": {
+         "mean": 150.0,
+         "var": 15.0,
+         "clip": [
+            20.0,
+            1000.0
+         ]
+      },
+      "delay": 1.0,
+      "response": 0.05
+   }
+}
