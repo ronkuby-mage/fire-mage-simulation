@@ -13,7 +13,15 @@ Here are the steps to install and run the application on Windows.
   
 ![](./data/pictures/anaconda_prompt.png)
 
-## Basic Instructions
+## Walkthrough
+
+### Scenario Editor
+
+### Stat Weights/Distribution Run
+
+### Setting up Multiple Scenarios
+
+### Scenario Comparison Run
 
 
 ### Crit equivalency comparisons
