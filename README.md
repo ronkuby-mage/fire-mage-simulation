@@ -14,6 +14,12 @@ Here are the steps to install and run the application on Windows.
 ![](./data/pictures/anaconda_prompt.png)
 
 ## Walkthrough
+Start by selecting the Scenario editor tab on the top left.  Here is the example scenario we will work through:
+![](./data/pictures/scenario_editor.png)
+Within the **Mages** section you can changes the stats and other information for each mage.  From left to right -- The stats should be entered as from gear/enchant only for spell power, hit, and crit.  Int should be entered as base value + gear, with no buffs.  The trinket section informs the sim which active trinkets are available.  Next are indicators for the UDC set bonus and whether the mage can receive PI.  For now, only one PI can be available.  *Target* indicates whether that mage's personal DPS and their share of the ignite are included in the output.  If you want to see the expected output for only one mage on the team, check the *target* box for them only.  On the far right (for the bottom mage) are buttons that increase or decrease the number of mages.
+
+The **Rotation** section has an initial fixed set of rotation command that each mage attempts to cast when the fight start.  Abilities that are not available to a mage are not cast and do not expend any time.  For example if "mqg" is on the list but a mage doesn't have Mind Quickening Gem, when they get to that cast in the sequence it is ignored.  The *Special* section 
+
 
 ### Scenario Editor
 
