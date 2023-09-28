@@ -17,8 +17,12 @@ from .simulation import Simulation
 
 class Window(QWidget):
 
-    _DEFAULT_WIDTH = 1200
-    _DEFAULT_HEIGHT = 800
+    if os.name == "nt":
+        _DEFAULT_WIDTH = 1200
+        _DEFAULT_HEIGHT = 800
+    else:
+        _DEFAULT_WIDTH = 1536
+        _DEFAULT_HEIGHT = 1024
     _CONFIG_DIRECTORY = "./data/scenarios/"
     _CONFIG_DEFAULT = "default.json"
 
