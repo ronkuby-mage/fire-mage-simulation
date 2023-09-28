@@ -353,10 +353,14 @@ class Rotation(QWidget):
     _REAL_SPELLS = 3
     _MAX_SPECIALS = 3
     _SPECIALS = ["maintain_scorch", "scorch", "scorch_wep", "cobimf"]
-    _SPECIAL_DOC = "maintain_scorch: Cast Scorch if there are less than 5 seconds left on the debuff or it is not fully stacked\n" +\
-        "scorch: Also cast Scorch if ignite is fully stacked and there are no cooldowns going (Combustion/trinket)\n" +\
-        "scorch_wep: Cast Scorch even with remaining cooldowns\n" +\
-        "cobimf: Scorch under same conditions as scorch_wep, but if ignite has <= 2 seconds remaining cast Fire Blast"
+    _SPECIAL_DOC = "\n".join([
+        "maintain_scorch: Cast Scorch if there are less than 5 seconds left on the debuff or it is not fully stacked",
+        "scorch: Also cast Scorch if ignite is fully stacked and there are no cooldowns going (Combustion/trinket)",
+        "scorch_wep: Cast Scorch even with remaining cooldowns",
+        "cobimf: Scorch under same conditions as scorch_wep, but if ignite has <= 2 seconds remaining cast Fire Blast",
+        "  Here 'Parameter' is the response time of the caster -- even if ignite is refreshed within the response time,",
+        "  the mage will still cast Fire Blast.  If ignite is refreshed after the response time but before Fire Blast",
+        "  is cast, they will switch back to Scorch"])
 
     def __init__(self, config_list):
         super().__init__()
