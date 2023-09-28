@@ -340,7 +340,7 @@ class CompareSettings(QWidget):
         # L4
         self._time["min_time"] = self._DEFAULT_MIN
         self._time_widget["min_time"] = TimeWidget(self.modify_time, self._DEFAULT_MIN, "Minimum Time (seconds)", "min_time")
-        self._time_widget["min_time"].widget().setToolTip("Y-scale minimum is set to the minimum damage at this time.")
+        self._time_widget["min_time"].widget().setToolTip("Y-scale minimum will usually be the minimum damage at this time.")
         layout.addWidget(self._time_widget["min_time"])
 
         self._time["max_time"] = self._DEFAULT_MAX

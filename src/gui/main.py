@@ -1,14 +1,11 @@
 import sys
+from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QApplication,
-    QPushButton,
     QVBoxLayout,
-    QHBoxLayout,
     QTabWidget,
-    QCheckBox,
-    QWidget,
-    QLabel
+    QWidget
 )
 import qdarkstyle
 from .config_select import ConfigListWidget
@@ -29,6 +26,9 @@ class Window(QWidget):
         self.config_list = ConfigList(self._CONFIG_DIRECTORY, self._CONFIG_DEFAULT)
 
         self.setWindowTitle("Fire Mage Simulation")
+
+        self.setWindowIcon(QIcon("./data/icons/icon.png"))
+
         self.resize(self._DEFAULT_WIDTH, self._DEFAULT_HEIGHT)
         # Create a top-level layout
         self.toplayout = QVBoxLayout()

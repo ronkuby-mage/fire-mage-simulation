@@ -454,6 +454,7 @@ class Rotation(QWidget):
                 self._initial[idx].removeItem(empty[0])
 
         for idx, spell in enumerate(config["rotation"]["initial"]["other"]):
+            self._initial_table.setCellWidget(idx, 0, QLabel(f"{idx + 1:d}"))
             self._initial[idx].setCurrentIndex(self._SPELLS.index(spell))
 
         for jdx in range(idx, self._MAX_SPELLS):
@@ -595,64 +596,6 @@ class Rotation(QWidget):
                     if spell == "cobimf":
                         config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = 0.5
             self.fill() # this is the fix? only config was altered
-        elif field == "mage":
-            text = self._special[row]["mage"].currentText()
-            if len(text):
-                value = int(text.split("mage")[1]) - 1
-                config["rotation"]["continuing"][f"special{row + 1:d}"]["slot"] = [value]
-        elif field == "param":
-            value = self._special[row]["param"].text()
-            if value and value != ".":
-                config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = float(value)
-        if self._changed_trigger is not None:
-            self._changed_trigger()
-
-    def modify_special2(self, row, field): # what a fucking mess
-        config = self._config.current().config()
-        if field == "type":
-            spell = self._special[row]["type"].currentText()
-            if f"special{row + 1:d}" in config["rotation"]["continuing"]: # exists
-                if not spell: # removing
-                    self._special[row]["mage"].setEnabled(False)
-                    self._special[row]["mage"].clear()
-                    self._special[row]["param"].setEnabled(False)
-                    self._special[row]["param"].setText("")
-                    config["rotation"]["continuing"].pop(f"special{row + 1:d}")
-                    if row > 1:
-                        self._special[row - 1]["type"].addItem("")
-                else: # modifying
-                    if config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] != spell:
-                        if spell == "cobimf":
-                            self._special[row]["param"].setEnabled(True)
-                            self._special[row]["param"].setText("0.5") # bad hard-coded value
-                            #config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = 0.5
-                        elif config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] == "cobimf":
-                            self._special[row]["param"].setEnabled(False)
-                            self._special[row]["param"].setText("")
-                            config["rotation"]["continuing"][f"special{row + 1:d}"].pop("cast_point_remain")
-                    config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] = spell
-            else:
-                specials = len([1 for key in config["rotation"]["continuing"] if "special" in key])
-                if spell and specials < config["configuration"]["num_mages"]:
-                    slots_taken = set()
-                    for key, val in config["rotation"]["continuing"].items():
-                        if "special" in key:
-                            slots_taken.add(val["slot"][0])
-                    slots_taken = list(slots_taken)
-
-                    config["rotation"]["continuing"][f"special{row + 1:d}"] = {"value": spell}
-                    self._special[row]["mage"].setEnabled(True)
-                    num_mages = config["configuration"]["num_mages"]
-                    self._special[row]["mage"].addItems([f"mage {m + 1:d}" for m in range(num_mages) if m not in slots_taken])
-                    self._special[row]["mage"].setCurrentText(f"mage {slots_taken[0] + 1:d}")
-                    config["rotation"]["continuing"][f"special{row + 1:d}"]["slot"] = [0] # more hard code
-                    if spell == "cobimf":
-                        self._special[row]["param"].setEnabled(True)
-                        self._special[row]["param"].setText("0.5") # bad hard-coded value
-                    if row > 0:
-                        self._special[row - 1]["type"].removeItem(len(self._SPECIALS))
-                    if row + 1 < self._MAX_SPECIALS:
-                        self._special[row + 1]["type"].setEnabled(True)
         elif field == "mage":
             text = self._special[row]["mage"].currentText()
             if len(text):
