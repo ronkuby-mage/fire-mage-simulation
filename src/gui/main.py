@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (
     QTabWidget,
     QWidget
 )
+import ctypes
 import qdarkstyle
 from .config_select import ConfigListWidget
 from .scenario import Scenario
@@ -28,6 +29,8 @@ class Window(QWidget):
         self.setWindowTitle("Fire Mage Simulation")
 
         self.setWindowIcon(QIcon("./data/icons/icon.png"))
+        myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)        
 
         self.resize(self._DEFAULT_WIDTH, self._DEFAULT_HEIGHT)
         # Create a top-level layout

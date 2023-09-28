@@ -697,6 +697,7 @@ class Group(QGroupBox):
                     config["configuration"][key].remove(index)
             config["configuration"]["num_mages"] -= 1
         self.fill()
+        self.set_changed_trigger(self._changed_trigger)
 
         # send to rotation
         self._mms(stype)
