@@ -5,22 +5,15 @@ This application simulates a team of fire mages casting against a single boss le
 ### Installation
 
 Here are the steps to install and run the application on Windows.
-1. Download the Anaconda package: [tested version](https://repo.anaconda.com/archive/Anaconda3-2023.07-2-Windows-x86_64.exe)
-2. From the Start menu, run an Anaconda Prompt
+1. Under the "Code" link above, download a ZIP file and extract it into a directory.
+2. Extract the ZIP file into a location.
+3. Download the Anaconda package: [tested version](https://repo.anaconda.com/archive/Anaconda3-2023.07-2-Windows-x86_64.exe)
+4. From the Start menu, run an Anaconda Prompt
    
 ![](./data/pictures/anaconda_prompt.png)
-3. "cd" to the location 
-5. hello
-6. 
-```python
-import json
-from mechanics import get_damage
+3. "cd" to the directory you extracted the code to in Step 1 
+5. Run the application with ```python -m src.gui.main```
 
-with open("my_sim.json", "rt") as fid:
-    config = json.load(fid)
-config["sim_size"] = 50000
-values = get_damage(config)
-```
 ## Crit equivalency comparisons
 
 Here are some results from other simulations:
