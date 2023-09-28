@@ -1,3 +1,4 @@
+import os
 import sys
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
@@ -29,8 +30,9 @@ class Window(QWidget):
         self.setWindowTitle("Fire Mage Simulation")
 
         self.setWindowIcon(QIcon("./data/icons/icon.png"))
-        myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)        
+        if os.name == "nt":
+            myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)        
 
         self.resize(self._DEFAULT_WIDTH, self._DEFAULT_HEIGHT)
         # Create a top-level layout
