@@ -39,10 +39,10 @@ class ConfigListWidget(QWidget):
     def item_signal(self, stype: int):
         if not stype:
             self.layout.removeWidget(self._items[-1])
+            if self._index == len(self._items) - 1:
+                self.set_index(self._index - 1)
             self._items = self._items[:-1]
             self._config_list.pop()
-            if self._index == len(self._items):
-                self.set_index(self._index - 1)
         else:
             filename = self._items[-1].filename() + "_copy"
             self._items.append(ConfigWidget(len(self._items),
