@@ -456,6 +456,7 @@ class Rotation(QWidget):
         for idx, spell in enumerate(config["rotation"]["initial"]["other"]):
             self._initial_table.setCellWidget(idx, 0, QLabel(f"{idx + 1:d}"))
             self._initial[idx].setCurrentIndex(self._SPELLS.index(spell))
+            self._initial[idx].setEnabled(True)
 
         for jdx in range(idx, self._MAX_SPELLS):
             if jdx:
@@ -513,6 +514,9 @@ class Rotation(QWidget):
                     param_val = val["cast_point_remain"]
                     self._special[index]["param"].setText(str(param_val))
                     self._special[index]["param"].setEnabled(True)
+                else:
+                    self._special[index]["param"].setText("")
+                    self._special[index]["param"].setEnabled(False)
                 specials += 1
         if specials:
             self._special[specials - 1]["type"].addItem("")
@@ -573,11 +577,8 @@ class Rotation(QWidget):
                 else: # modifying
                     if config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] != spell:
                         if spell == "cobimf":
-                            self._special[row]["param"].setEnabled(True)
-                            self._special[row]["param"].setText("0.5") # bad hard-coded value
+                            config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = 0.5
                         elif config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] == "cobimf":
-                            self._special[row]["param"].setEnabled(False)
-                            self._special[row]["param"].setText("")
                             config["rotation"]["continuing"][f"special{row + 1:d}"].pop("cast_point_remain")
                     config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] = spell
             else:
