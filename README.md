@@ -5,7 +5,7 @@ This application simulates a team of fire mages casting against a single boss le
 ### Installation
 
 Here are the steps to install and run the application on Windows.
-1. Under the "Code" link above, download a ZIP file
+1. Under the green "Code" link above, select "download ZIP"
 2. Extract the ZIP file into a directory such as "C:\sims\"
 3. Download and install the Anaconda package: [tested windows version](https://repo.anaconda.com/archive/Anaconda3-2023.07-2-Windows-x86_64.exe)
 4. From the Start menu, open an Anaconda Prompt (see below)
