@@ -719,7 +719,9 @@ class Mage(QWidget):
 
     _STATS = ["sp", "hit %", "crit %", "int"]
     _STATS_MAP = {"sp": "spell_power", "hit %": "hit_chance", "crit %": "crit_chance", "int": "intellect"}
-    _STAT_TYPES = ["int", "float", "float", "int"]
+    _STAT_TYPES = ["int", "percent", "percent", "int"]
+    _STAT_DOC = "\n". join(["Specified spell power, crit, and hit are gear/enchant only and do not include buffs",
+                            "or talents (10% in the hit field is cap).  Int is base value + gear."])
     _BOOLEANS = ["target"]
     _BUTTONS = ["sapp", "toep", "zhc", "mqg", "udc", "pi"]
     _BUTTON_ICONS = ["inv_trinket_naxxramas06.jpg",
@@ -746,15 +748,16 @@ class Mage(QWidget):
         layout.addWidget(QLabel(f"Mage {index + 1:d}"))
 
         self._stats = {}
-        for stat, val in zip(self._STATS, self._STAT_TYPES):
+        for stat in self._STATS:
             label = QLabel(f"{stat:s}")
             label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             layout.addWidget(label)
             self._stats[stat] = QLineEdit()
             self._stats[stat].setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self._stats[stat].textChanged.connect(lambda state, x=stat: self.modify_stat(x))
-            validator = QIntValidator() if val == "int" else QDoubleValidator()
-            validator.setBottom(0.0 if val == "float" else 0)
+            self._stats[stat].setToolTip(self._STAT_DOC)
+            validator = QIntValidator()
+            validator.setBottom(0)
             self._stats[stat].setValidator(validator)
             self._stats[stat].setMaximumWidth(40)
             layout.addWidget(self._stats[stat])
@@ -801,10 +804,10 @@ class Mage(QWidget):
 
     def fill(self):
         config = self._config.current().config()
-        for key in self._stats:
+        for key, ctype in zip(self._stats, self._STAT_TYPES):
             value = config["stats"][self._STATS_MAP[key]][self._index]
-            if "%" in key:
-                sval = f"{100*value:.1f}"
+            if ctype == "percent":
+                sval = f"{100*value:.0f}"
             else:
                 sval = str(value)
             self._stats[key].setText(sval)
@@ -831,11 +834,10 @@ class Mage(QWidget):
         config = self._config.current().config()
         stype = self._STAT_TYPES[self._STATS.index(name)]
         sval = self._stats[name].text()
-        if not sval or sval == ".":
+        if not sval:
             return
-        elif stype == "float":
-            factor = 0.01 if "%" in name else 1.0
-            value = factor*float(sval)
+        elif stype == "percent":
+            value = 0.01*float(sval)
         else:
             value = int(sval)
         config["stats"][self._STATS_MAP[name]][self._index] = value
