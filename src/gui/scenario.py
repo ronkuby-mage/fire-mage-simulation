@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import (
     QTableWidget,
     QComboBox,
     QCheckBox,
-    QLineEdit,
     QWidget,
     QStackedWidget,
     QLabel,
@@ -20,6 +19,7 @@ from copy import deepcopy
 from .icon_edit import get_pixmap
 from .character import Character
 from ..sim.constants import Constant
+from .utils.guard_lineedit import GuardLineEdit
 
 class Scenario(QStackedWidget):
 
@@ -55,9 +55,9 @@ class Scenario(QStackedWidget):
     def update(self):
         temp_ct = self._changed_trigger
         self.set_changed_trigger(None)
-        self._group.fill()
-        self._buffs.fill()
-        self._rotation.fill()
+        self._group.fill(top=True)
+        self._buffs.fill(top=True)
+        self._rotation.fill(top=True)
         self.set_changed_trigger(temp_ct)
 
     def set_changed_trigger(self, changed_trigger):
@@ -139,10 +139,7 @@ class Buffs(QGroupBox):
         self._buffs["dragonling"].setIconSize(QSize(25, 25))
         misc_layout.addWidget(self._buffs["dragonling"], 1, 0)
         misc_layout.addWidget(QLabel(f"Dragonling | Stack Time"), 1, 1)
-        self._buffs["dragonling_time"] = QLineEdit()
-        validator = QDoubleValidator()
-        validator.setBottom(0.0)
-        self._buffs["dragonling_time"].setValidator(validator)
+        self._buffs["dragonling_time"] = GuardLineEdit("float", 1000.0)
         self._buffs["dragonling_time"].textChanged.connect(self.time_dragon)
         misc_layout.addWidget(self._buffs["dragonling_time"], 1, 2)
 
@@ -160,10 +157,7 @@ class Buffs(QGroupBox):
             misc_layout.addWidget(nightfall, index + 2, 0)
             self._buffs["nightfall"].append(nightfall)
             misc_layout.addWidget(QLabel(f"Swing Timer {index + 1:d}"), index + 2, 1)
-            swing = QLineEdit()
-            validator = QDoubleValidator()
-            validator.setBottom(0.0)
-            swing.setValidator(validator)
+            swing = GuardLineEdit("float", 100.0)
             swing.textChanged.connect(lambda state, x=index: self.timer_nightfall(x))
             misc_layout.addWidget(swing, index + 2, 2)
             self._buffs["nightfall_timer"].append(swing)
@@ -198,7 +192,7 @@ class Buffs(QGroupBox):
 
         self.setLayout(layout)
 
-    def fill(self):
+    def fill(self, top=False):
         config = self._config.current().config()
         self._buffs["boss"].setCurrentIndex(self._BOSSES.index(config["buffs"]["boss"]))
         clear_dragonling = False
@@ -209,6 +203,8 @@ class Buffs(QGroupBox):
                 icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=False))
                 self._buffs["dragonling"].setIcon(icon)
                 self._buffs["dragonling_time"].setText(str(config["buffs"]["proc"]["dragonling"]))
+                if top:
+                    self._buffs["dragonling_time"].set_text(str(config["buffs"]["proc"]["dragonling"]))
             else:
                 clear_dragonling = True
             if "nightfall" in config["buffs"]["proc"]:
@@ -218,6 +214,8 @@ class Buffs(QGroupBox):
                     self._buffs["nightfall"][index].setIcon(icon)
                     self._buffs["nightfall"][index].setChecked(True)
                     self._buffs["nightfall_timer"][index].setText(str(val))
+                    if top:
+                        self._buffs["nightfall_timer"][index].set_text(str(val))
                     self._buffs["nightfall_timer"][index].setEnabled(False)
                 self._buffs["nightfall_timer"][index].setEnabled(True)
                 for index2 in range(index + 1, self._MAX_NIGHTFALL):
@@ -225,6 +223,8 @@ class Buffs(QGroupBox):
                     icon.addPixmap(get_pixmap(self._NIGHTFALL_ICON_FN, fade=True))
                     self._buffs["nightfall"][index2].setIcon(icon)
                     self._buffs["nightfall_timer"][index2].setText("")
+                    if top:
+                        self._buffs["nightfall_timer"][index2].set_text("")
                     enabled = index2 == index + 1
                     self._buffs["nightfall_timer"][index2].setEnabled(enabled)
             else:
@@ -237,6 +237,8 @@ class Buffs(QGroupBox):
             icon.addPixmap(get_pixmap(self._DRAGONLING_ICON_FN, fade=True))
             self._buffs["dragonling"].setIcon(icon)
             self._buffs["dragonling_time"].setText("")
+            if top:
+                self._buffs["dragonling_time"].set_text("")
         if clear_nightfall:
             for index in range(self._MAX_NIGHTFALL):
                 icon = QIcon()
@@ -245,6 +247,8 @@ class Buffs(QGroupBox):
                 enabled = True if not index else False
                 self._buffs["nightfall_timer"][index].setEnabled(enabled)
                 self._buffs["nightfall_timer"][index].setText("")
+                if top:
+                    self._buffs["nightfall_timer"][index].set_text("")
 
         for btype in self._BUFFS:
             for vals in self._BUFFS[btype]:
@@ -424,11 +428,8 @@ class Rotation(QWidget):
             this_special["mage"] = mage
             table.setCellWidget(1, 1, mage)
 
-            param = QLineEdit()
+            param = GuardLineEdit("float", 4.0, required=True)
             param.textChanged.connect(lambda state, x=idx: self.modify_special(x, "param"))
-            validator = QDoubleValidator()
-            validator.setBottom(0.0)
-            param.setValidator(validator)
             this_special["param"] = param
             table.setCellWidget(2, 1, param)
             
@@ -448,7 +449,7 @@ class Rotation(QWidget):
     def unlock(self):
         self._lock = False
 
-    def fill(self):
+    def fill(self, top=False):
         config = self._config.current().config()
         self.lock()
 
@@ -517,9 +518,13 @@ class Rotation(QWidget):
                 if stype == "cobimf":
                     param_val = val["cast_point_remain"]
                     self._special[index]["param"].setText(str(param_val))
+                    if top:
+                        self._special[index]["param"].set_text(str(param_val))
                     self._special[index]["param"].setEnabled(True)
                 else:
                     self._special[index]["param"].setText("")
+                    if top:
+                        self._special[sidx]["param"].set_text("")
                     self._special[index]["param"].setEnabled(False)
                 specials += 1
         if specials:
@@ -533,6 +538,8 @@ class Rotation(QWidget):
             self._special[sidx]["mage"].clear()
             self._special[sidx]["param"].setEnabled(False)
             self._special[sidx]["param"].setText("")
+            if top:
+                self._special[sidx]["param"].set_text("")
         self.unlock()
 
     def modify_initial(self, row):
@@ -572,6 +579,7 @@ class Rotation(QWidget):
     def modify_special(self, row, field): # what a fucking mess
         if self._lock:
             return
+        set_top = False
         config = self._config.current().config()
         if field == "type":
             spell = self._special[row]["type"].currentText()
@@ -582,6 +590,7 @@ class Rotation(QWidget):
                     if config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] != spell:
                         if spell == "cobimf":
                             config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = 0.5
+                            set_top = True
                         elif config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] == "cobimf":
                             config["rotation"]["continuing"][f"special{row + 1:d}"].pop("cast_point_remain")
                     config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] = spell
@@ -600,7 +609,8 @@ class Rotation(QWidget):
                     config["rotation"]["continuing"][f"special{row + 1:d}"]["slot"] = [slots_not_taken[0]] # more hard code
                     if spell == "cobimf":
                         config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = 0.5
-            self.fill() # this is the fix? only config was altered
+                        set_top = True
+            self.fill(top=set_top) # this is the fix? only config was altered
         elif field == "mage":
             text = self._special[row]["mage"].currentText()
             if len(text):
@@ -624,7 +634,7 @@ class Rotation(QWidget):
                 slot = val["slot"][0]
                 if slot == num_mages:
                     config["rotation"]["continuing"][key]["slot"] = [slot - 1]
-        self.fill()
+        self.fill(top=True)
 
 class Group(QGroupBox):
 
@@ -649,7 +659,7 @@ class Group(QGroupBox):
         self.setLayout(self.layout)
         self._mms = mod_mages_signal
 
-    def fill(self):
+    def fill(self, top=False):
         config = self._config.current().config()
         # best way to clear the group
         self._mages = []
@@ -662,7 +672,7 @@ class Group(QGroupBox):
             mage = Mage(self._config, mage_number, self.mod_mages)
             self._mages.append(mage)
             self.layout.addWidget(mage)
-            mage.fill()
+            mage.fill(top=top)
         for index in range(0, config["configuration"]["num_mages"] - 1):
             self._mages[index].set_resize(False, False)
         remove = False if config["configuration"]["num_mages"] == 1 else True
@@ -701,7 +711,7 @@ class Group(QGroupBox):
                 if index in config["configuration"][key]:
                     config["configuration"][key].remove(index)
             config["configuration"]["num_mages"] -= 1
-        self.fill()
+        self.fill(top=True)
         self.set_changed_trigger(self._changed_trigger)
 
         # send to rotation
@@ -718,6 +728,7 @@ class Group(QGroupBox):
 class Mage(QWidget):
 
     _STATS = ["sp", "hit %", "crit %", "int"]
+    _STAT_MAX = [2000, 100, 100, 1000]
     _STATS_MAP = {"sp": "spell_power", "hit %": "hit_chance", "crit %": "crit_chance", "int": "intellect"}
     _STAT_TYPES = ["int", "percent", "percent", "int"]
     _STAT_DOC = "\n". join(["Specified spell power, crit, and hit are gear/enchant only and do not include buffs",
@@ -748,17 +759,14 @@ class Mage(QWidget):
         layout.addWidget(QLabel(f"Mage {index + 1:d}"))
 
         self._stats = {}
-        for stat in self._STATS:
+        for stat, max_val in zip(self._STATS, self._STAT_MAX):
             label = QLabel(f"{stat:s}")
             label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             layout.addWidget(label)
-            self._stats[stat] = QLineEdit()
+            self._stats[stat] = GuardLineEdit("int", max_val, required=True)
             self._stats[stat].setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self._stats[stat].textChanged.connect(lambda state, x=stat: self.modify_stat(x))
             self._stats[stat].setToolTip(self._STAT_DOC)
-            validator = QIntValidator()
-            validator.setBottom(0)
-            self._stats[stat].setValidator(validator)
             self._stats[stat].setMaximumWidth(40)
             layout.addWidget(self._stats[stat])
 
@@ -802,7 +810,7 @@ class Mage(QWidget):
 
         self.setLayout(layout)
 
-    def fill(self):
+    def fill(self, top=False):
         config = self._config.current().config()
         for key, ctype in zip(self._stats, self._STAT_TYPES):
             value = config["stats"][self._STATS_MAP[key]][self._index]
@@ -811,6 +819,8 @@ class Mage(QWidget):
             else:
                 sval = str(value)
             self._stats[key].setText(sval)
+            if top:
+                self._stats[key].set_text(sval)
 
         for key in self._buttons:
             state = 1 if self._index in config["configuration"][key] else 0
