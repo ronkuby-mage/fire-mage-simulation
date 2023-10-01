@@ -17,14 +17,11 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QFrame
 )
-from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize
-from ..sim.config import ConfigList, Config
-from typing import Callable
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-from .icon_edit import numpy_to_qt_pixmap
+from ..utils.icon_edit import numpy_to_qt_pixmap
 from skimage import io
 
 class StatOutput(QWidget):

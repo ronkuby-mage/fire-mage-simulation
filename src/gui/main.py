@@ -11,9 +11,9 @@ from PyQt5.QtWidgets import (
 import ctypes
 import qdarkstyle
 from .config_select import ConfigListWidget
-from .scenario import Scenario
+from .scenario_editor.scenario import Scenario
 from ..sim.config import ConfigList
-from .simulation import Simulation
+from .simulation_interface.simulation import Simulation
 
 class Window(QWidget):
 
