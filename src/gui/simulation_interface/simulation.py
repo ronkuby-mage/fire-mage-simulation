@@ -18,11 +18,11 @@ from PyQt5.QtWidgets import (
     QStatusBar,
     QFrame
 )
-from PyQt5.QtGui import QIntValidator, QDoubleValidator, QIcon, QPixmap
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, QSize
 from .settings import StatSettings, CompareSettings
 from .output import StatOutput, CompareOutput
-from .icon_edit import numpy_to_qt_pixmap
+from ..utils.icon_edit import numpy_to_qt_pixmap
 
 class Progress(QLabel):
 

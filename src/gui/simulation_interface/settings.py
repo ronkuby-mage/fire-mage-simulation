@@ -17,14 +17,13 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QFrame
 )
-from PyQt5.QtGui import QIntValidator, QDoubleValidator, QIcon, QPixmap
 from PyQt5.QtCore import QThreadPool, Qt
 from copy import deepcopy
-from ..sim.mechanics import get_damage
-from ..sim.config import ConfigList
-from .utils.guard_lineedit import GuardLineEdit
+from ...sim.mechanics import get_damage
+from ...sim.config import ConfigList
+from ..utils.guard_lineedit import GuardLineEdit
 from typing import Callable
-from .worker import Worker
+from ..utils.worker import Worker
 
 class NumberOfSamples(QWidget):
 
