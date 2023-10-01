@@ -22,6 +22,7 @@ from PyQt5.QtCore import QThreadPool, Qt
 from copy import deepcopy
 from ..sim.mechanics import get_damage
 from ..sim.config import ConfigList
+from .utils.guard_lineedit import GuardLineEdit
 from typing import Callable
 from .worker import Worker
 
@@ -34,12 +35,11 @@ class NumberOfSamples(QWidget):
         layout.addStretch()
         layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout.addWidget(QLabel("Number of Samples:"))
-        self._number_of_samples = QLineEdit(str(default_value))
+        self._number_of_samples = GuardLineEdit("int", 2500000, min_val=10, required=True)
+        self._number_of_samples.setText(str(default_value))
+        self._number_of_samples.set_text(str(default_value))
         self._number_of_samples.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
         self._number_of_samples.setMaximumWidth(75)
-        validator = QIntValidator()
-        validator.setBottom(0)
-        self._number_of_samples.setValidator(validator)
         self._number_of_samples.textChanged.connect(edit_func)
         layout.addWidget(self._number_of_samples)
         self.setLayout(layout)
@@ -49,7 +49,7 @@ class NumberOfSamples(QWidget):
 
 class TimeWidget(QWidget):
 
-    def __init__(self, edit_func, default_value, message, key):
+    def __init__(self, edit_func, default_value, message, key, max_val):
         super().__init__()
         
         layout = QHBoxLayout()
@@ -57,12 +57,11 @@ class TimeWidget(QWidget):
         layout.addStretch()
         layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout.addWidget(QLabel(message))
-        self._etime = QLineEdit(str(default_value))
+        self._etime = GuardLineEdit("float", max_val, required=True)
+        self._etime.setText(str(default_value))
+        self._etime.set_text(str(default_value))
         self._etime.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
         self._etime.setMaximumWidth(75)
-        validator = QDoubleValidator()
-        validator.setBottom(0)
-        self._etime.setValidator(validator)
         self._etime.textChanged.connect(lambda: edit_func(key))
         layout.addWidget(self._etime)
         self.setLayout(layout)
@@ -172,7 +171,7 @@ class StatSettings(QWidget):
 
         # L4
         self._time["duration"] = self._DEFAULT_TIME
-        self._time_widget["duration"] = TimeWidget(self.modify_time, self._DEFAULT_TIME, "Encounter Time (seconds):", "duration")
+        self._time_widget["duration"] = TimeWidget(self.modify_time, self._DEFAULT_TIME, "Encounter Time (seconds):", "duration", 1200.0)
         layout.addWidget(self._time_widget["duration"])
 
         # L5
@@ -181,10 +180,10 @@ class StatSettings(QWidget):
         time_layout.setContentsMargins(0, 0, 0, 0)
         time_layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self._time["delay"] = self._INITIAL_DELAY
-        self._time_widget["delay"] = TimeWidget(self.modify_time, self._INITIAL_DELAY, "Initial Delay", "delay")
+        self._time_widget["delay"] = TimeWidget(self.modify_time, self._INITIAL_DELAY, "Initial Delay", "delay", 30.0)
         time_layout.addWidget(self._time_widget["delay"])
         self._time["response"] = self._RECAST_DELAY
-        self._time_widget["response"] = TimeWidget(self.modify_time, self._RECAST_DELAY, "Recast Delay", "response")
+        self._time_widget["response"] = TimeWidget(self.modify_time, self._RECAST_DELAY, "Recast Delay", "response", 10.0)
         time_layout.addWidget(self._time_widget["response"])
         time_row.setLayout(time_layout)
         layout.addWidget(time_row)
@@ -339,21 +338,21 @@ class CompareSettings(QWidget):
 
         # L4
         self._time["min_time"] = self._DEFAULT_MIN
-        self._time_widget["min_time"] = TimeWidget(self.modify_time, self._DEFAULT_MIN, "Minimum Time (seconds)", "min_time")
+        self._time_widget["min_time"] = TimeWidget(self.modify_time, self._DEFAULT_MIN, "Minimum Time (seconds)", "min_time", 600.0)
         self._time_widget["min_time"].widget().setToolTip("Y-scale minimum will usually be the minimum damage at this time.")
         layout.addWidget(self._time_widget["min_time"])
 
         self._time["max_time"] = self._DEFAULT_MAX
-        self._time_widget["max_time"] = TimeWidget(self.modify_time, self._DEFAULT_MAX, "Maximum Time (seconds)", "max_time")
+        self._time_widget["max_time"] = TimeWidget(self.modify_time, self._DEFAULT_MAX, "Maximum Time (seconds)", "max_time", 1200.0)
         layout.addWidget(self._time_widget["max_time"])
 
         # L5
         self._time["delay"] = self._INITIAL_DELAY
-        self._time_widget["delay"] = TimeWidget(self.modify_time, self._INITIAL_DELAY, "Initial Delay (seconds)", "delay")
+        self._time_widget["delay"] = TimeWidget(self.modify_time, self._INITIAL_DELAY, "Initial Delay (seconds)", "delay", 30.0)
         layout.addWidget(self._time_widget["delay"])
 
         self._time["response"] = self._RECAST_DELAY
-        self._time_widget["response"] = TimeWidget(self.modify_time, self._RECAST_DELAY, "Recast Delay (seconds)", "response")
+        self._time_widget["response"] = TimeWidget(self.modify_time, self._RECAST_DELAY, "Recast Delay (seconds)", "response", 10.0)
         layout.addWidget(self._time_widget["response"])
 
         #row = QWidget()

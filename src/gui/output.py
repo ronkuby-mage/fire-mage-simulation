@@ -217,7 +217,7 @@ class CompareOutput(QWidget):
             plt.ylabel('Damage per mage')
             plt.grid()
             plt.xlim(cmin, cmax)
-            plt.ylim(ymin, ymax)
+            plt.ylim(ymin, ymax + 0.02*(ymax - ymin))
             plt.legend()
             plt.savefig(tmp_filename)
             data = io.imread(tmp_filename)
