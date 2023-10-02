@@ -191,7 +191,7 @@ class Rotation(QWidget):
                 else:
                     if top:
                         self._special[index]["param"].setText("")
-                        self._special[sidx]["param"].set_text("")
+                        self._special[index]["param"].set_text("")
                     self._special[index]["param"].setEnabled(False)
                 specials += 1
         if specials:
