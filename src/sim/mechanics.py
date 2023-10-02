@@ -191,10 +191,6 @@ class Encounter():
                 gcrit_clean = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_cleaner)[0]]
                 gnot_crit_clean = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & np.logical_not(the_cleaner))[0]]
 
-                if not self._all:
-                    lcrit_play = np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_player)[0]
-                    gcrit_play = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_player)[0]]
-
                 lcl_icrits = np.where(ignite_array)[0]
                 gbl_icrits = sph[lcl_icrits]
                 inext_hit = next_hit[lcl_icrits]
@@ -247,10 +243,21 @@ class Encounter():
                 boss['ignite_count'][gbl_icrits] = np.minimum(boss['ignite_count'][gbl_icrits] + 1, C._IGNITE_STACK)
 
                 # add crit to damage
-                self._damage[gbl_icrits] += C._ICRIT_DAMAGE*spell_damage[lcl_icrits]
+                self._damage[gbl_icrits] -= spell_damage[lcl_icrits]
+                self._damage[gnot_crit_clean] += spell_damage[lnot_crit_clean]*(1.0 + C._ICRIT_DAMAGE)*C._CRIT_BUFF
+                self._damage[gcrit_clean] += spell_damage[lcrit_clean]*(1.0 + C._ICRIT_DAMAGE)*C._CRIT_BUFF_C
                 if not self._all:
+                    lcrit_play = np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_player)[0]
+                    gcrit_play = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_player)[0]]
+
+                    lcrit_play_notclean = np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_player & np.logical_not(the_cleaner))[0]
+                    gcrit_play_notclean = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_player & np.logical_not(the_cleaner))[0]]
+                    lcrit_play_clean = np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_player & the_cleaner)[0]
+                    gcrit_play_clean = sph[np.where(crit_array & C._IS_FIRE[spell_type].astype(bool) & the_player & the_cleaner)[0]]
+
                     self._player[gcrit_play] -= spell_damage[lcrit_play]
-                    self._player[gcrit_play] += spell_damage[lcrit_play]*(1.0 + C._ICRIT_DAMAGE)*C._CRIT_BUFF_C
+                    self._player[gcrit_play_notclean] += spell_damage[lcrit_play_notclean]*(1.0 + C._ICRIT_DAMAGE)*C._CRIT_BUFF
+                    self._player[gcrit_play_clean] += spell_damage[lcrit_play_clean]*(1.0 + C._ICRIT_DAMAGE)*C._CRIT_BUFF_C
                
                 self._crit[gbl_icrits] += (1.0 + C._ICRIT_DAMAGE)*spell_damage[lcl_icrits]
 
@@ -262,10 +269,8 @@ class Encounter():
                 player['comb_left'][gbl_icrits, inext_hit] = np.maximum(player['comb_left'][gbl_icrits, inext_hit] - 1, 0)
 
                 # normal crit
-                # bug here?: not recorded in self._player fixed?
                 lcl_crits = np.where(crit_array & np.logical_not(C._IS_FIRE[spell_type]))[0]
                 self._damage[sph[lcl_crits]] += C._CRIT_DAMAGE*spell_damage[lcl_crits]
-
                 if not self._all:
                     lcrit_play_nf = np.where(crit_array & np.logical_not(C._IS_FIRE[spell_type].astype(bool)) & the_player)[0]
                     gcrit_play_nf = sph[np.where(crit_array & np.logical_not(C._IS_FIRE[spell_type].astype(bool)) & the_player)[0]]
@@ -501,10 +506,14 @@ class Encounter():
                 else:
                     for sidx, stime in enumerate(self._arrays['global']['running_time']):
                         self._arrays['global']['total_damage'][sidx].append((stime, self._player[sidx], self._ignite[sidx]))
+                for sidx, stime in enumerate(self._arrays['global']['running_time']):
+                    self._arrays['global']['ignite'][sidx].append((stime, self._player[sidx], self._ignite[sidx]))
             progress = 100*self._arrays['global']['running_time'].mean()/self._arrays['global']['duration'].mean()
             update_progress.emit((self._run_params["id"], progress))
             if not still_going.size:
                 break
+
+        target_fraction = len(self._config["target"])/self._arrays['player']['cast_number'].shape[1]
         if not over_time:
             if C._LOG_SIM >= 0:
                 print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C._LOG_SIM]))
@@ -516,8 +525,8 @@ class Encounter():
             if self._all:
                 mage_damage = (self._arrays['global']['total_damage'] + self._arrays['global']['ignite'])/self._arrays['global']['duration']
             else:
-                mage_damage = self._arrays['global']['total_damage']/self._arrays['global']['duration']
-                mage_damage += self._arrays['global']['ignite']*len(self._config["target"])/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration']
+                mage_damage = self._arrays['global']['player']/self._arrays['global']['duration']
+                mage_damage += self._arrays['global']['ignite']*target_fraction/self._arrays['global']['duration']
 
             smage = np.sort(mage_damage)
     
@@ -531,21 +540,27 @@ class Encounter():
             cutoff[cutoff < 0.0] = 0.0
             
             total_dam = np.zeros((len(dur_dist), sim_size))
+            ignite_dam = np.zeros((len(dur_dist), sim_size))
             for sidx in range(sim_size):
                 cuts = cutoff[:, sidx]
                 ptime = 0.0
                 total_damage = 0.0
+                total_ignite = 0.0
                 for ctime, damage, ignite in self._arrays['global']['total_damage'][sidx]:
                     if ptime > 0.0:
                         for didx, cut in enumerate(cuts):
                             if ctime > cut and ptime <= cut:
                                 total_dam[didx, sidx] = total_damage/cut
+                                ignite_dam[didx, sidx] = total_ignite/cut
                     total_damage += damage
+                    total_ignite += ignite
                     ptime = ctime
                 total_dam[ctime <= cuts, sidx] = total_damage/ctime
+                ignite_dam[ctime <= cuts, sidx] = total_ignite/ctime
             total_dam = total_dam.mean(axis=1)
+            ignite_dam = ignite_dam.mean(axis=1)
             
-            return self._run_params["id"], total_dam
+            return self._run_params["id"], total_dam + target_fraction*ignite_dam
 
 def get_damage(params, run_params, progress_callback=None):
     if constants._LOG_SIM >= 0:
