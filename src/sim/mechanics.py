@@ -506,8 +506,6 @@ class Encounter():
                 else:
                     for sidx, stime in enumerate(self._arrays['global']['running_time']):
                         self._arrays['global']['total_damage'][sidx].append((stime, self._player[sidx], self._ignite[sidx]))
-                for sidx, stime in enumerate(self._arrays['global']['running_time']):
-                    self._arrays['global']['ignite'][sidx].append((stime, self._player[sidx], self._ignite[sidx]))
             progress = 100*self._arrays['global']['running_time'].mean()/self._arrays['global']['duration'].mean()
             update_progress.emit((self._run_params["id"], progress))
             if not still_going.size:
