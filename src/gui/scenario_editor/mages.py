@@ -35,7 +35,7 @@ class Group(QGroupBox):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self._mages = []
         for idx in range(self._MAX_MAGES):
-            mage = Mage(config_list, idx, self.mod_mages)
+            mage = Mage(config_list, idx, self.mod_mages, self.mod_target)
             self._mages.append(mage)
             self.layout.addWidget(mage)
         self.setLayout(self.layout)
@@ -51,7 +51,7 @@ class Group(QGroupBox):
                 child.widget().deleteLater()
         
         for mage_number in range(config["configuration"]["num_mages"]):
-            mage = Mage(self._config, mage_number, self.mod_mages)
+            mage = Mage(self._config, mage_number, self.mod_mages, self.mod_target)
             self._mages.append(mage)
             self.layout.addWidget(mage)
             mage.fill(top=top)
@@ -81,7 +81,7 @@ class Group(QGroupBox):
                     config["configuration"][key].append(index)
             config["configuration"]["num_mages"] += 1
 
-            mage = Mage(self._config, index, self.mod_mages)
+            mage = Mage(self._config, index, self.mod_mages, self.mod_target)
             self._mages.append(mage)
             self.layout.addWidget(mage)
         else:
@@ -95,6 +95,7 @@ class Group(QGroupBox):
             config["configuration"]["num_mages"] -= 1
         self.fill(top=True)
         self.set_changed_trigger(self._changed_trigger)
+        self.mod_target()
 
         # send to rotation
         self._mms(stype)
@@ -106,6 +107,16 @@ class Group(QGroupBox):
 
     def settings_refresh(self, refresh):
         self._settings_refresh = refresh
+
+    def mod_target(self):
+        config = self._config.current().config()
+        if len(self._mages) < config["configuration"]["num_mages"]:
+            return # still building
+        to_enable = set(range(config["configuration"]["num_mages"]))
+        if len(config["configuration"]["target"]) == 1:
+            to_enable.remove(config["configuration"]["target"][0])
+        for index in range(config["configuration"]["num_mages"]):
+            self._mages[index].set_target_enabled(index in to_enable)
 
 class Mage(QWidget):
 
@@ -131,11 +142,12 @@ class Mage(QWidget):
                        "Power Infusion"]
     _RACIALS = ["human", "undead", "gnome"]
 
-    def __init__(self, config_list, index, mod_mages):
+    def __init__(self, config_list, index: int, mod_mages, mod_target):
         super().__init__()
         self._changed_trigger = None
         self._config = config_list
         self._index = index
+        self._mod_target = mod_target
         layout = QHBoxLayout()
         layout.setContentsMargins(3, 5, 3, 5)
         layout.addWidget(QLabel(f"Mage {index + 1:d}"))
@@ -164,7 +176,6 @@ class Mage(QWidget):
             self._buttons[button].setIconSize(QSize(25, 25))
             self._buttons[button].clicked.connect(lambda state, x=button: self.modify_button(x))
             layout.addWidget(self._buttons[button])
-
 
         self._booleans = {}
         for boolean in self._BOOLEANS:
@@ -263,6 +274,11 @@ class Mage(QWidget):
         config["configuration"][name] = list(atm)
         if self._changed_trigger is not None:
             self._changed_trigger()
+        if name == "target":
+            self._mod_target()
+    
+    def set_target_enabled(self, enabled: bool):
+        self._booleans["target"].setEnabled(enabled)
 
     def modify_racial(self):
         config = self._config.current().config()

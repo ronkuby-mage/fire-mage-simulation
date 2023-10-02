@@ -227,7 +227,7 @@ class ArrayGenerator():
                 'total_damage': [[] for dummy in range(sim_size)] if dur_dist else np.zeros(sim_size),
                 'running_time': np.zeros(sim_size),
                 'decision': np.zeros(sim_size).astype(bool),
-                'ignite': np.zeros(sim_size),
+                'ignite': [[] for dummy in range(sim_size)] if dur_dist else np.zeros(sim_size),
                 'crit': np.zeros(sim_size),
                 'player': np.zeros(sim_size)},
             'boss': {
