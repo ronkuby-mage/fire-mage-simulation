@@ -532,32 +532,39 @@ class Encounter():
         else:
             sim_size = len(self._arrays['global']['total_damage'])
             dur_dist = self._run_params["dur_dist"]
-            cutoff = self._var*np.random.randn(len(dur_dist), sim_size)
+            # variablity depends on length (5%).  This smooths out curves
+            cutoff = 0.05*dur_dist.reshape(dur_dist.size, 1)*np.random.randn(len(dur_dist), sim_size) 
             for didx, dur in enumerate(dur_dist):
                 cutoff[didx, :] += dur
             cutoff[cutoff < 0.0] = 0.0
-            
-            total_dam = np.zeros((len(dur_dist), sim_size))
-            ignite_dam = np.zeros((len(dur_dist), sim_size))
+
+            max_ind = np.array([len(arr) for arr in self._arrays['global']['total_damage']]).astype(np.int32) - 1
+            max_length = max(max_ind) + 1
+            ctime = np.inf*np.ones((max_length, sim_size))
+            damage = np.zeros((max_length, sim_size))
+            ignite = np.zeros((max_length, sim_size))
+
             for sidx in range(sim_size):
-                cuts = cutoff[:, sidx]
-                ptime = 0.0
-                total_damage = 0.0
-                total_ignite = 0.0
-                for ctime, damage, ignite in self._arrays['global']['total_damage'][sidx]:
-                    if ptime > 0.0:
-                        for didx, cut in enumerate(cuts):
-                            if ctime > cut and ptime <= cut:
-                                total_dam[didx, sidx] = total_damage/cut
-                                ignite_dam[didx, sidx] = total_ignite/cut
-                    total_damage += damage
-                    total_ignite += ignite
-                    ptime = ctime
-                total_dam[ctime <= cuts, sidx] = total_damage/ctime
-                ignite_dam[ctime <= cuts, sidx] = total_ignite/ctime
-            total_dam = total_dam.mean(axis=1)
-            ignite_dam = ignite_dam.mean(axis=1)
-            
+                cur_array = self._arrays['global']['total_damage'][sidx]
+                cur_length = len(cur_array)
+                ctime[:cur_length, sidx] = np.array([arr[0] for arr in cur_array])
+                damage[:cur_length, sidx] = np.array([arr[1] for arr in cur_array])
+                ignite[:cur_length, sidx] = np.array([arr[2] for arr in cur_array])
+
+            damage = np.cumsum(damage, axis=0)
+            ignite = np.cumsum(ignite, axis=0)
+
+            total_damage = []
+            total_ignite = []
+            for cidx in range(cutoff.shape[0]):
+                up_to = np.argmax(ctime > cutoff[cidx, :], axis=0).squeeze()
+                up_to[np.logical_not(up_to)] = max_ind[np.logical_not(up_to)]
+                total_cut = ctime[up_to, np.arange(sim_size)]
+                total_damage.append((damage[up_to, np.arange(sim_size)]/total_cut).mean())
+                total_ignite.append((ignite[up_to, np.arange(sim_size)]/total_cut).mean())
+            total_dam = np.array(total_damage)
+            ignite_dam = np.array(total_ignite)
+
             return self._run_params["id"], total_dam + target_fraction*ignite_dam
 
 def get_damage(params, run_params, progress_callback=None):
