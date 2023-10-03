@@ -113,7 +113,7 @@ class StatSettings(QWidget):
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         ep_layout.addWidget(label)
         self._ep["crit"] = QCheckBox()
-        self._ep["crit"].setChecked(False)
+        self._ep["crit"].setChecked(True)
         self._ep["crit"].clicked.connect(lambda: self.modify_ep("crit"))
         ep_layout.addWidget(self._ep["crit"])
         ep_layout.addStretch()
@@ -121,7 +121,7 @@ class StatSettings(QWidget):
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         ep_layout.addWidget(label)
         self._ep["hit"] = QCheckBox()
-        self._ep["hit"].setChecked(False)
+        self._ep["hit"].setChecked(True)
         self._ep["hit"].clicked.connect(lambda: self.modify_ep("hit"))
         ep_layout.addWidget(self._ep["hit"])
         ep_layout.addStretch()
@@ -188,9 +188,19 @@ class StatSettings(QWidget):
         layout.addWidget(time_row)
 
         # L6
+        line = QWidget()
+        linelay = QHBoxLayout()
+        linelay.setContentsMargins(0, 0, 0, 0)
+        linelay.addWidget(QLabel("Log Sample Sim"))
+        self._log = QCheckBox()
+        self._log.setChecked(False)
+        linelay.addWidget(self._log)
+        linelay.addStretch()
         self._samples = self._DEFAULT_SAMPLES
         self._samples_widget = NumberOfSamples(self.modify_samples, self._DEFAULT_SAMPLES)
-        layout.addWidget(self._samples_widget)
+        linelay.addWidget(self._samples_widget)
+        line.setLayout(linelay)
+        layout.addWidget(line)
 
         self.setLayout(layout)
 
@@ -281,6 +291,8 @@ class StatSettings(QWidget):
             iparam = deepcopy(run_parameters)
             iparam["id"] = run_type
             if run_type == "sp":
+                if self._log.isChecked():
+                    iparam["log_sim"] = np.random.randint(self._samples)
                 for mod in to_mod:
                     iconfig["stats"]["spell_power"][mod] += 15
             elif run_type == "crit":

@@ -3,8 +3,8 @@ import numpy as np
 _LOG_SIM = -1 # set to -1 for no log
 
 class Constant():
-    
-    def __init__(self, double_dip, sim_size=1000):
+
+    def __init__(self, double_dip, sim_size=1000, log_sim=_LOG_SIM):
        
         self._FIREBALL_RANK = 12
         self._FROSTBOLT_TALENTED = False
@@ -180,7 +180,7 @@ class Constant():
         
         ## debugging
         self._LOG_SPELL = ['scorch    ', 'pyroblast ', 'fireball  ', 'fire blast', 'frostbolt ', 'gcd       ', 'combustion',  'sapp      ', 'toep      ', 'zhc       ', 'mqg       ', 'power inf ']
-        self._LOG_SIM = _LOG_SIM
+        self.log_sim = log_sim
         
         self._RES_AMOUNT = [1.0, 0.75, 0.5, 0.25]
         self._RES_THRESH = [0.0, 0.8303, 0.9415, 0.9905]

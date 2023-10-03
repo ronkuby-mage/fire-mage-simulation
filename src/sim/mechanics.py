@@ -47,11 +47,11 @@ class Encounter():
             add_time = np.min(player['cast_timer'][cst, :], axis=1)
             self._subtime(cst, add_time)
 
-            if C._LOG_SIM >= 0:
-                if C._LOG_SIM in cst:
+            if C.log_sim >= 0:
+                if C.log_sim in cst:
                     message = '         ({:6.2f}): player {:d} finished casting {:s}'
-                    sub_index = cst.tolist().index( C._LOG_SIM)
-                    message = message.format(self._arrays['global']['running_time'][C._LOG_SIM],
+                    sub_index = cst.tolist().index( C.log_sim)
+                    message = message.format(self._arrays['global']['running_time'][C.log_sim],
                                              next_hit[sub_index] + 1,
                                              C._LOG_SPELL[player['cast_type'][cst[sub_index], next_hit[sub_index]]])
                     print(message)
@@ -119,13 +119,13 @@ class Encounter():
             # reset timer
             player['spell_timer'][spl, lnext_hit] = C._LONG_TIME
 
-            if C._LOG_SIM >= 0:
-                if C._LOG_SIM in spl:
+            if C.log_sim >= 0:
+                if C.log_sim in spl:
                     message = ' ({:6.2f}): player {:d} {:s} landed '
-                    sub_index = spl.tolist().index( C._LOG_SIM)
-                    message = message.format(self._arrays['global']['running_time'][C._LOG_SIM],
+                    sub_index = spl.tolist().index( C.log_sim)
+                    message = message.format(self._arrays['global']['running_time'][C.log_sim],
                                              lnext_hit[sub_index] + 1,
-                                             C._LOG_SPELL[player['spell_type'][C._LOG_SIM, lnext_hit[sub_index]]])
+                                             C._LOG_SPELL[player['spell_type'][C.log_sim, lnext_hit[sub_index]]])
                     message2 = 'misses         '
 
             spell_hits = np.where(np.random.rand(spell_lands.size) < player['hit_chance'][spl, lnext_hit])[0]
@@ -276,9 +276,9 @@ class Encounter():
                     gcrit_play_nf = sph[np.where(crit_array & np.logical_not(C._IS_FIRE[spell_type].astype(bool)) & the_player)[0]]
                     self._player[gcrit_play_nf] += C._CRIT_DAMAGE*spell_damage[lcrit_play_nf]
 
-                if C._LOG_SIM >= 0:
-                    if C._LOG_SIM in sph:
-                        sub_index = sph.tolist().index(C._LOG_SIM)
+                if C.log_sim >= 0:
+                    if C.log_sim in sph:
+                        sub_index = sph.tolist().index(C.log_sim)
                         if  sub_index in lcl_crits:
                             message2 = 'crits for {:5.0f} '.format((1.0 + C._CRIT_DAMAGE)*spell_damage[sub_index])
                         elif sub_index in lcl_icrits:
@@ -301,28 +301,28 @@ class Encounter():
                 fire = np.where(C._IS_FIRE[spell_type])[0]
                 player['comb_stack'][sph[fire], next_hit[fire]] += 1
 
-            if C._LOG_SIM >= 0:
-                if C._LOG_SIM in spl:
-                    sub_index = spl.tolist().index(C._LOG_SIM)
-                    dam_done = ' {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM] + self._damage[C._LOG_SIM])
+            if C.log_sim >= 0:
+                if C.log_sim in spl:
+                    sub_index = spl.tolist().index(C.log_sim)
+                    dam_done = ' {:7.0f}'.format(self._arrays['global']['total_damage'][C.log_sim] + self._damage[C.log_sim])
                     message = message + message2
                     buffs = player['buff_timer']
-                    is_sapp = 'sap' if buffs[C._BUFF_SAPP][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
-                    is_toep = 'toep' if buffs[C._BUFF_TOEP][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
-                    is_zhc = 'zhc' if buffs[C._BUFF_ZHC][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
-                    is_mqg = 'mqg' if buffs[C._BUFF_MQG][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '   '
-                    is_pi =  'pi' if buffs[C._BUFF_POWER_INFUSION][C._LOG_SIM, lnext_hit[sub_index]] > 0.0 else '  '
+                    is_sapp = 'sap' if buffs[C._BUFF_SAPP][C.log_sim, lnext_hit[sub_index]] > 0.0 else '   '
+                    is_toep = 'toep' if buffs[C._BUFF_TOEP][C.log_sim, lnext_hit[sub_index]] > 0.0 else '   '
+                    is_zhc = 'zhc' if buffs[C._BUFF_ZHC][C.log_sim, lnext_hit[sub_index]] > 0.0 else '   '
+                    is_mqg = 'mqg' if buffs[C._BUFF_MQG][C.log_sim, lnext_hit[sub_index]] > 0.0 else '   '
+                    is_pi =  'pi' if buffs[C._BUFF_POWER_INFUSION][C.log_sim, lnext_hit[sub_index]] > 0.0 else '  '
                     status = ' ic {:d} it {:4.2f} in {:s} id {:5.0f} sc {:d} st {:5.2f} cs {:2d} cl {:d} {:s} {:s} {:s} {:s} {:s}'
-                    ival = boss['tick_timer'][C._LOG_SIM]
+                    ival = boss['tick_timer'][C.log_sim]
                     istat = '{:4.2f}'.format(ival) if ival > 0.0 and ival <= 2.0 else ' off'
-                    status = status.format(boss['ignite_count'][C._LOG_SIM],
-                                           max([boss['ignite_timer'][C._LOG_SIM], 0.0]),
+                    status = status.format(boss['ignite_count'][C.log_sim],
+                                           max([boss['ignite_timer'][C.log_sim], 0.0]),
                                            istat,
-                                           boss['ignite_value'][C._LOG_SIM],
-                                           boss['scorch_count'][C._LOG_SIM],
-                                           max([boss['scorch_timer'][C._LOG_SIM], 0.0]),
-                                           player['comb_stack'][C._LOG_SIM, lnext_hit[sub_index]],
-                                           player['comb_left'][C._LOG_SIM, lnext_hit[sub_index]],
+                                           boss['ignite_value'][C.log_sim],
+                                           boss['scorch_count'][C.log_sim],
+                                           max([boss['scorch_timer'][C.log_sim], 0.0]),
+                                           player['comb_stack'][C.log_sim, lnext_hit[sub_index]],
+                                           player['comb_left'][C.log_sim, lnext_hit[sub_index]],
                                            is_sapp,
                                            is_toep,
                                            is_zhc,
@@ -368,13 +368,13 @@ class Encounter():
 
             #self._damage[no_expire] += multiplier*boss['ignite_value'][no_expire]
             self._ignite[no_expire] += multiplier*boss['ignite_value'][no_expire]
-            if C._LOG_SIM >= 0:
-                if C._LOG_SIM in no_expire:
-                    sub_index = no_expire.tolist().index(C._LOG_SIM)
+            if C.log_sim >= 0:
+                if C.log_sim in no_expire:
+                    sub_index = no_expire.tolist().index(C.log_sim)
                     message = ' {:7.0f} ({:6.2f}): ignite ticked   {:4.0f} damage done'
-                    print(message.format(self._arrays['global']['total_damage'][C._LOG_SIM] + self._damage[C._LOG_SIM],
-                                         self._arrays['global']['running_time'][C._LOG_SIM],
-                                         multiplier[sub_index]*boss['ignite_value'][C._LOG_SIM]))
+                    print(message.format(self._arrays['global']['total_damage'][C.log_sim] + self._damage[C.log_sim],
+                                         self._arrays['global']['running_time'][C.log_sim],
+                                         multiplier[sub_index]*boss['ignite_value'][C.log_sim]))
 
     def _do_proc(self, still_going, proc_array):
         C = self._C
@@ -448,11 +448,11 @@ class Encounter():
     
         player['gcd'][still_going[on_gcd], next_hit[on_gcd]] = np.maximum(0.0, C._GLOBAL_COOLDOWN + react_time[on_gcd] - player['cast_timer'][still_going[on_gcd], next_hit[on_gcd]])
 
-        if C._LOG_SIM >= 0:
-            if C._LOG_SIM in still_going:
+        if C.log_sim >= 0:
+            if C.log_sim in still_going:
                 message = '         ({:6.2f}): player {:d} started  casting {:s}'
-                sub_index = still_going.tolist().index(C._LOG_SIM)
-                message = message.format(self._arrays['global']['running_time'][C._LOG_SIM] + react_time[sub_index],
+                sub_index = still_going.tolist().index(C.log_sim)
+                message = message.format(self._arrays['global']['running_time'][C.log_sim] + react_time[sub_index],
                                          next_hit[sub_index] + 1,
                                          C._LOG_SPELL[player['cast_type'][still_going[sub_index], next_hit[sub_index]]])
                 print(message)
@@ -461,7 +461,10 @@ class Encounter():
     def run(self, update_progress):
         double_dip = (1.0 + 0.1*float("sayges_dark_fortune_of_damage" in self._world_buffs))
         double_dip *= (1.0 + 1.9*float(self._boss_buffs == "thaddius"))
-        C = constants.Constant(double_dip)
+        if "log_sim" in self._run_params:
+            C = constants.Constant(double_dip, log_sim=self._run_params["log_sim"])
+        else:
+            C = constants.Constant(double_dip)
         self._C = C
 
         over_time = True if self._run_params["type"] == "over_time" else False
@@ -480,7 +483,7 @@ class Encounter():
         next_hit = np.argmin(self._arrays['player']['cast_timer'], axis=1)
         self._arrays['player']['cast_number'][np.arange(self._arrays['player']['cast_timer'].shape[0]), next_hit] += 1
 
-        if C._LOG_SIM >= 0:
+        if C.log_sim >= 0:
             constants.log_message()
         still_going = np.arange(self._arrays['global']['running_time'].size)
         while True:
@@ -512,14 +515,12 @@ class Encounter():
                 break
 
         target_fraction = len(self._config["target"])/self._arrays['player']['cast_number'].shape[1]
-        if not over_time:
-            if C._LOG_SIM >= 0:
-                print('total log damage = {:7.0f}'.format(self._arrays['global']['total_damage'][C._LOG_SIM]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C._LOG_SIM]))
-                print('average damage = {:9.1f}'.format(self._arrays['global']['total_damage'].mean()))
-                print('std damage = {:7.1f}'.format(self._arrays['global']['total_damage'].std()))
-                print('crit damage = {:9.1f}'.format(self._arrays['global']['crit'].mean()))
-                print('ignite damage = {:9.1f}'.format(self._arrays['global']['ignite'].mean()))
-    
+        if not over_time: # no summary for comparison mode
+            if C.log_sim >= 0:
+                print('total non-ignite damage per mage:  {:7.1f}'.format(self._arrays['global']['total_damage'][C.log_sim]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C.log_sim]))
+                if not self._all:
+                    print('target non-ignite damage per mage: {:7.1f}'.format(self._arrays['global']['player'][C.log_sim]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C.log_sim]))
+                print('ignite damage per mage:            {:7.1f}'.format(self._arrays['global']['ignite'][C.log_sim]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C.log_sim]))
             if self._all:
                 mage_damage = (self._arrays['global']['total_damage'] + self._arrays['global']['ignite'])/self._arrays['global']['duration']
             else:
@@ -568,8 +569,8 @@ class Encounter():
             return self._run_params["id"], total_dam + target_fraction*ignite_dam
 
 def get_damage(params, run_params, progress_callback=None):
-    if constants._LOG_SIM >= 0:
-        print(params)
+    if "log_sim" in run_params:
+        print("PARAMTER LIST:\n", params, f"\nLOGGING SIM #{run_params['log_sim'] + 1:d}")
     array_generator = constants.ArrayGenerator(params)
     encounter = Encounter(array_generator,
                           params['rotation'],
