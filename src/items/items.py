@@ -9,7 +9,9 @@ class ItemInfo():
     def __init__(self, item, prev):
         self._enchant = None
         self._item = item
+        self._new = False
         if item not in prev:
+            self._new = True
             self._name = None
             self._armor = 0
             self._spd = 0
@@ -134,7 +136,11 @@ class ItemInfo():
     @property
     def item(self):
         return self._item
-    
+
+    @property
+    def is_new(self):
+        return self._new
+
 
 class CharInfo():
     
@@ -270,3 +276,6 @@ class CharInfo():
     def name(self):
         return self._name
 
+    @property
+    def is_new(self):
+        return any([item.is_new for item in self._items])

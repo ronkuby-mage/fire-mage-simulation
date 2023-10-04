@@ -517,10 +517,10 @@ class Encounter():
         target_fraction = len(self._config["target"])/self._arrays['player']['cast_number'].shape[1]
         if not over_time: # no summary for comparison mode
             if C.log_sim >= 0:
-                print('total non-ignite damage per mage:  {:7.1f}'.format(self._arrays['global']['total_damage'][C.log_sim]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C.log_sim]))
+                print('total non-ignite dps per mage:  {:7.1f}'.format(self._arrays['global']['total_damage'][C.log_sim]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C.log_sim]))
                 if not self._all:
-                    print('target non-ignite damage per mage: {:7.1f}'.format(self._arrays['global']['player'][C.log_sim]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C.log_sim]))
-                print('ignite damage per mage:            {:7.1f}'.format(self._arrays['global']['ignite'][C.log_sim]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C.log_sim]))
+                    print('target non-ignite dps per mage: {:7.1f}'.format(self._arrays['global']['player'][C.log_sim]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C.log_sim]))
+                print('ignite dps per mage:            {:7.1f}'.format(self._arrays['global']['ignite'][C.log_sim]/self._arrays['player']['cast_number'].shape[1]/self._arrays['global']['duration'][C.log_sim]))
             if self._all:
                 mage_damage = (self._arrays['global']['total_damage'] + self._arrays['global']['ignite'])/self._arrays['global']['duration']
             else:

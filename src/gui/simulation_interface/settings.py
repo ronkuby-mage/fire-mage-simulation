@@ -291,8 +291,6 @@ class StatSettings(QWidget):
             iparam = deepcopy(run_parameters)
             iparam["id"] = run_type
             if run_type == "sp":
-                if self._log.isChecked():
-                    iparam["log_sim"] = np.random.randint(self._samples)
                 for mod in to_mod:
                     iconfig["stats"]["spell_power"][mod] += 15
             elif run_type == "crit":
@@ -301,6 +299,9 @@ class StatSettings(QWidget):
             elif run_type == "hit":
                 for mod in to_mod:
                     iconfig["stats"]["hit_chance"][mod] -= 0.015
+            else:
+                if self._log.isChecked():
+                    iparam["log_sim"] = np.random.randint(self._samples)
 
             worker = Worker(get_damage, iconfig, iparam) # Any other args, kwargs are passed to the run function
             worker.signals.result.connect(handle_output)

@@ -1,10 +1,10 @@
 {
    "stats": {
       "spell_power": [
-         843,
-         843,
-         843,
-         818
+         810,
+         810,
+         810,
+         785
       ],
       "hit_chance": [
          0.1,
@@ -13,16 +13,16 @@
          0.1
       ],
       "crit_chance": [
-         0.15,
-         0.15,
-         0.15,
-         0.21
+         0.11,
+         0.11,
+         0.11,
+         0.15
       ],
       "intellect": [
          300,
          300,
          300,
-         302
+         316
       ]
    },
    "buffs": {
@@ -51,7 +51,27 @@
          "human",
          "human"
       ],
-      "boss": ""
+      "boss": "",
+      "auras": {
+         "mage_atiesh": [
+            2,
+            2,
+            2,
+            3
+         ],
+         "lock_atiesh": [
+            1,
+            1,
+            1,
+            1
+         ],
+         "boomkin": [
+            0,
+            0,
+            0,
+            0
+         ]
+      }
    },
    "configuration": {
       "num_mages": 4,
@@ -82,10 +102,10 @@
          2
       ],
       "name": [
-         "",
-         "",
-         "",
-         ""
+         "undead-lf-bis-udc",
+         "undead-lf-bis-udc",
+         "undead-lf-bis-udc",
+         "undead-lf-bis-no-udc-no-atiesh"
       ]
    },
    "rotation": {

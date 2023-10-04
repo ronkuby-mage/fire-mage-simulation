@@ -271,6 +271,7 @@ class ArrayGenerator():
         arrays["player"]["spell_power"] += 60*("blessed_wizard_oil" in self._params["buffs"]["consumes"])
         arrays["player"]["spell_power"] += 36*("brilliant_wizard_oil" in self._params["buffs"]["consumes"])
         arrays["player"]["spell_power"] += 23*("very_berry_cream" in self._params["buffs"]["consumes"])
+        arrays["player"]["spell_power"] += 33*np.array(self._params["buffs"]["auras"]["lock_atiesh"])
         
         intellect = np.tile(np.array(self._params["stats"]["intellect"], dtype=np.float32)[None, :], (sim_size, 1))
         intellect += 31.0*float("arcane_intellect" in self._params["buffs"]["raid"])
@@ -292,15 +293,17 @@ class ArrayGenerator():
         arrays["player"]["crit_chance"] += 0.03*float("dire_maul_tribute" in self._params["buffs"]["world"])
         arrays["player"]["crit_chance"] += intellect/5950
         arrays["player"]["crit_chance"] += 0.60*float(self._params["buffs"]["boss"] == "loatheb")
+        arrays["player"]["crit_chance"] += 0.02*np.array(self._params["buffs"]["auras"]["mage_atiesh"])
+        arrays["player"]["crit_chance"] += 0.03*np.array(self._params["buffs"]["auras"]["boomkin"])
         arrays["player"]["crit_chance"] = np.minimum(1.00, arrays["player"]["crit_chance"])
         
         arrays["player"]["hit_chance"] = 0.89 + np.tile(np.array(self._params["stats"]["hit_chance"])[None, :], (sim_size, 1))
         arrays["player"]["hit_chance"] = np.minimum(0.99, arrays["player"]["hit_chance"])
         
-        if False:
-            for index in self._params["configuration"]["target"]:
-                print(f'Spell Power = {arrays["player"]["spell_power"][0][index]:.0f}  Crit Chance = {100*arrays["player"]["crit_chance"][0][index]:.2f}  Int = {intellect[0][index]:.1f}')
-            dwplwd()
+        if C.log_sim >= 0:
+            print("Effective State Values:")
+            for index in range(self._params["configuration"]["num_mages"]):
+                print(f'  Mage {index + 1:d}: Spell Power = {arrays["player"]["spell_power"][0][index]:.0f}  Crit Chance = {100*arrays["player"]["crit_chance"][0][index]:.2f}  Int = {intellect[0][index]:.1f}')
         
         for key, val in C._BUFF_LOOKUP.items():
             for index in self._params["configuration"][key]:
