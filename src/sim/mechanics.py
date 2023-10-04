@@ -570,7 +570,7 @@ class Encounter():
 
 def get_damage(params, run_params, progress_callback=None):
     if "log_sim" in run_params:
-        print("PARAMTER LIST:\n", params, f"\nLOGGING SIM #{run_params['log_sim'] + 1:d}")
+        print("PARAMETER LIST:\n", params, f"\nLOGGING SIM #{run_params['log_sim'] + 1:d}")
     array_generator = constants.ArrayGenerator(params)
     encounter = Encounter(array_generator,
                           params['rotation'],
