@@ -193,21 +193,15 @@ class Mage(QWidget):
         self._buttons = {}
         for button, icon_fn, tool_tip in zip(self._BUTTONS, self._BUTTON_ICONS, self._BUTTON_TOOLTIP):
             self._buttons[button] = QPushButton(self)
-            self._buttons[button].setStyleSheet("QPushButton { background-color: transparent; border: 0px }")
+            style = "QPushButton { background-color: transparent; border: 0px;} "
+            style += "QPushButton:checked:disabled{background-color: #FFFFFF;}"
+            self._buttons[button].setStyleSheet(style)
             self._buttons[button].setCheckable(True)
             self._buttons[button].setToolTip(tool_tip)
             icon = QIcon()
             icon.addPixmap(get_pixmap(icon_fn))
             self._buttons[button].setIcon(icon)
             self._buttons[button].setIconSize(QSize(25, 25))
-
-
-            #style = "QPushButton:disabled{background-color: #000000;} "
-            style = "QPushButton:checked:disabled{background-color: #FFFFFF;}"
-            #style += "QPushButton:checked{font-size: 18px; color: rgb(255, 255, 255);}"
-            self._buttons[button].setStyleSheet(style)
-
-
             self._buttons[button].clicked.connect(lambda state, x=button: self.modify_button(x))
             layout.addWidget(self._buttons[button])
 
