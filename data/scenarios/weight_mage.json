@@ -54,7 +54,30 @@
          "human",
          "human"
       ],
-      "boss": ""
+      "boss": "",
+      "auras": {
+         "mage_atiesh": [
+            0,
+            1,
+            1,
+            1,
+            1
+         ],
+         "lock_atiesh": [
+            0,
+            0,
+            0,
+            0,
+            0
+         ],
+         "boomkin": [
+            0,
+            0,
+            0,
+            0,
+            0
+         ]
+      }
    },
    "configuration": {
       "num_mages": 5,
@@ -79,16 +102,13 @@
       ],
       "mqg": [],
       "pi": [
-         0,
-         1,
-         2,
-         3,
-         4
+         0
       ],
       "udc": [
          0
       ],
       "name": [
+         "",
          "",
          "",
          "",
@@ -117,8 +137,7 @@
             "slot": [
                2
             ],
-            "value": "cobimf",
-            "cast_point_remain": 0.5
+            "value": "maintain_scorch"
          }
       }
    },

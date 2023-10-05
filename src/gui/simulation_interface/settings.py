@@ -188,9 +188,19 @@ class StatSettings(QWidget):
         layout.addWidget(time_row)
 
         # L6
+        line = QWidget()
+        linelay = QHBoxLayout()
+        linelay.setContentsMargins(0, 0, 0, 0)
+        linelay.addWidget(QLabel("Log Sample Sim"))
+        self._log = QCheckBox()
+        self._log.setChecked(False)
+        linelay.addWidget(self._log)
+        linelay.addStretch()
         self._samples = self._DEFAULT_SAMPLES
         self._samples_widget = NumberOfSamples(self.modify_samples, self._DEFAULT_SAMPLES)
-        layout.addWidget(self._samples_widget)
+        linelay.addWidget(self._samples_widget)
+        line.setLayout(linelay)
+        layout.addWidget(line)
 
         self.setLayout(layout)
 
@@ -289,6 +299,9 @@ class StatSettings(QWidget):
             elif run_type == "hit":
                 for mod in to_mod:
                     iconfig["stats"]["hit_chance"][mod] -= 0.015
+            else:
+                if self._log.isChecked():
+                    iparam["log_sim"] = np.random.randint(self._samples)
 
             worker = Worker(get_damage, iconfig, iparam) # Any other args, kwargs are passed to the run function
             worker.signals.result.connect(handle_output)

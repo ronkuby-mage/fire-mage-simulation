@@ -1,0 +1,233 @@
+{
+    "name": "BIS no UDC",
+    "phase": 6,
+    "links": {
+        "set": "https://sixtyupgrades.com/set/wScp34LkVJrrz3YrJrh9AX",
+        "talents": "https://sixtyupgrades.com/talents/mage/0Ab3F"
+    },
+    "character": {
+        "name": "Ronkuby",
+        "level": 60,
+        "gameClass": "MAGE",
+        "race": "HUMAN",
+        "faction": "ALLIANCE"
+    },
+    "items": [
+        {
+            "name": "Frostfire Circlet",
+            "id": 22498,
+            "enchant": {
+                "name": "Presence of Sight",
+                "id": 2588,
+                "itemId": 19787
+            },
+            "slot": "HEAD"
+        },
+        {
+            "name": "Amulet of Vek'nilash",
+            "id": 21608,
+            "slot": "NECK"
+        },
+        {
+            "name": "Rime Covered Mantle",
+            "id": 22983,
+            "enchant": {
+                "name": "Power of the Scourge",
+                "id": 2721,
+                "itemId": 23545
+            },
+            "slot": "SHOULDERS"
+        },
+        {
+            "name": "Frostfire Robe",
+            "id": 22496,
+            "enchant": {
+                "name": "Enchant Chest - Greater Stats",
+                "id": 1891,
+                "spellId": 20025
+            },
+            "slot": "CHEST"
+        },
+        {
+            "name": "Eyestalk Waist Cord",
+            "id": 22730,
+            "slot": "WAIST"
+        },
+        {
+            "name": "Leggings of Polarity",
+            "id": 23070,
+            "enchant": {
+                "name": "Presence of Sight",
+                "id": 2588,
+                "itemId": 19787
+            },
+            "slot": "LEGS"
+        },
+        {
+            "name": "Frostfire Sandals",
+            "id": 22500,
+            "enchant": {
+                "name": "Enchant Boots - Minor Speed",
+                "id": 911,
+                "spellId": 13890
+            },
+            "slot": "FEET"
+        },
+        {
+            "name": "Rockfury Bracers",
+            "id": 21186,
+            "enchant": {
+                "name": "Enchant Bracer - Greater Intellect",
+                "id": 1883,
+                "spellId": 20008
+            },
+            "slot": "WRISTS"
+        },
+        {
+            "name": "Dark Storm Gauntlets",
+            "id": 21585,
+            "enchant": {
+                "name": "Enchant Gloves - Fire Power",
+                "id": 2616,
+                "spellId": 25078
+            },
+            "slot": "HANDS"
+        },
+        {
+            "name": "Ring of the Fallen God",
+            "id": 21709,
+            "slot": "FINGER_1"
+        },
+        {
+            "name": "Ring of the Eternal Flame",
+            "id": 23237,
+            "slot": "FINGER_2"
+        },
+        {
+            "name": "Mind Quickening Gem",
+            "id": 19339,
+            "slot": "TRINKET_1"
+        },
+        {
+            "name": "Mark of the Champion",
+            "id": 23207,
+            "slot": "TRINKET_2"
+        },
+        {
+            "name": "Cloak of the Necropolis",
+            "id": 23050,
+            "enchant": {
+                "name": "Enchant Cloak - Subtlety",
+                "id": 2621,
+                "spellId": 25084
+            },
+            "slot": "BACK"
+        },
+        {
+            "name": "Atiesh, Greatstaff of the Guardian",
+            "id": 22589,
+            "enchant": {
+                "name": "Enchant  Weapon - Spell Power",
+                "id": 2504,
+                "spellId": 22749
+            },
+            "slot": "MAIN_HAND"
+        },
+        {
+            "name": "Doomfinger",
+            "id": 22821,
+            "slot": "RANGED"
+        }
+    ],
+    "wishlist": [
+        {
+            "name": "Band of Forced Concentration",
+            "id": 19403,
+            "type": "ARMOR"
+        },
+        {
+            "name": "Bracers of Arcane Accuracy",
+            "id": 19374,
+            "type": "ARMOR"
+        },
+        {
+            "name": "Neltharion's Tear",
+            "id": 19379,
+            "type": "ARMOR"
+        }
+    ],
+    "consumables": [],
+    "buffs": [],
+    "talents": [
+        {
+            "name": "Arcane Subtlety",
+            "id": 74,
+            "rank": 2,
+            "spellId": 12592
+        },
+        {
+            "name": "Arcane Concentration",
+            "id": 75,
+            "rank": 5,
+            "spellId": 12577
+        },
+        {
+            "name": "Arcane Focus",
+            "id": 76,
+            "rank": 3,
+            "spellId": 12840
+        }
+    ],
+    "points": [
+        {
+            "name": "Frenzy (6 mages) WB",
+            "stats": {
+                "spellDamage": 1,
+                "fireDamage": 1,
+                "spellCrit": 9.6,
+                "intellect": 0.2
+            }
+        },
+        {
+            "name": "Frenzy (6 mages) no WB",
+            "stats": {
+                "spellDamage": 1,
+                "fireDamage": 1,
+                "spellCrit": 12,
+                "intellect": 0.33
+            }
+        }
+    ],
+    "stats": {
+        "agility": 39,
+        "arcaneDamage": 635,
+        "armor": 1025,
+        "attackPower": 58,
+        "crit": 5.41,
+        "defense": 300,
+        "dodge": 5.41,
+        "fireDamage": 689,
+        "frostDamage": 635,
+        "healing": 635,
+        "health": 3530,
+        "holyDamage": 635,
+        "intellect": 318,
+        "mainHandSpeed": 2.9,
+        "mana": 5703,
+        "natureDamage": 635,
+        "parry": 5,
+        "rangedSpeed": 1.5,
+        "shadowDamage": 635,
+        "spellCrit": 20.54,
+        "spellDamage": 635,
+        "spellHit": 10,
+        "spellPen": 23,
+        "spirit": 172,
+        "stamina": 234,
+        "strength": 34
+    },
+    "exportOptions": {
+        "buffs": true,
+        "talents": true
+    }
+}

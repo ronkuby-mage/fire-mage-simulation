@@ -1,4 +1,6 @@
+import os
 import json
+import pickle
 from PyQt5.QtWidgets import (
     QPushButton,
     QGridLayout,
@@ -9,6 +11,7 @@ from PyQt5.QtWidgets import (
     QCheckBox,
     QWidget,
     QStackedWidget,
+    QFileDialog,
     QLabel,
     QHeaderView,
     QGroupBox
@@ -17,6 +20,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, QSize
 from ..utils.icon_edit import get_pixmap
 from ..utils.guard_lineedit import GuardLineEdit
+from ...items.items import CharInfo
 
 class Group(QGroupBox):
 
@@ -43,7 +47,9 @@ class Group(QGroupBox):
 
     def fill(self, top=False):
         config = self._config.current().config()
+
         # best way to clear the group
+        #chars_info = [mage._char_info for mage in self._mages]
         self._mages = []
         while self.layout.count():
             child = self.layout.takeAt(0)
@@ -52,6 +58,7 @@ class Group(QGroupBox):
         
         for mage_number in range(config["configuration"]["num_mages"]):
             mage = Mage(self._config, mage_number, self.mod_mages, self.mod_target)
+            #mage._char_info = chars_info[mage_number]
             self._mages.append(mage)
             self.layout.addWidget(mage)
             mage.fill(top=top)
@@ -69,29 +76,37 @@ class Group(QGroupBox):
 
     def mod_mages(self, stype: int):
         config = self._config.current().config()
-
         # modify group
         if stype:
             for stat in config["stats"]:
                 config["stats"][stat].append(config["stats"][stat][-1])
             config["buffs"]["racial"].append(config["buffs"]["racial"][-1])
+            for aura in config["buffs"]["auras"]:
+                config["buffs"]["auras"][aura].append(config["buffs"]["auras"][aura][-1])
             index = config["configuration"]["num_mages"]
             for key in self._CONFIG_KEYS:
                 if index - 1 in config["configuration"][key]:
                     config["configuration"][key].append(index)
+            config["configuration"]["name"].append(config["configuration"]["name"][index - 1])
             config["configuration"]["num_mages"] += 1
 
             mage = Mage(self._config, index, self.mod_mages, self.mod_target)
+            #mage._char_info = self._mages[index - 1]._char_info
             self._mages.append(mage)
             self.layout.addWidget(mage)
         else:
             for stat in config["stats"]:
                 config["stats"][stat] = config["stats"][stat][:-1]
             config["buffs"]["racial"] = config["buffs"]["racial"][:-1]
+            for aura in config["buffs"]["auras"]:
+                config["buffs"]["auras"][aura] = config["buffs"]["auras"][aura][:-1]
             index = config["configuration"]["num_mages"] - 1
             for key in self._CONFIG_KEYS:
                 if index in config["configuration"][key]:
                     config["configuration"][key].remove(index)
+            if not config["configuration"]["target"]:
+                config["configuration"]["target"].append(index - 1)
+            config["configuration"]["name"].pop()
             config["configuration"]["num_mages"] -= 1
         self.fill(top=True)
         self.set_changed_trigger(self._changed_trigger)
@@ -128,6 +143,7 @@ class Mage(QWidget):
                             "or talents (10% in the hit field is cap).  Int is base value + gear."])
     _BOOLEANS = ["target"]
     _BUTTONS = ["sapp", "toep", "zhc", "mqg", "udc", "pi"]
+    _TRINKETS = 4
     _BUTTON_ICONS = ["inv_trinket_naxxramas06.jpg",
                      "inv_misc_stonetablet_11.jpg", 
                      "inv_jewelry_necklace_13.jpg",
@@ -141,6 +157,12 @@ class Mage(QWidget):
                        "Regalia of Undead Cleansing",
                        "Power Infusion"]
     _RACIALS = ["human", "undead", "gnome"]
+    _AURAS = ["mage_atiesh", "lock_atiesh", "boomkin"]
+    _AURA_ICONS = ["classicon_mage.jpg", "classicon_warlock.jpg", "spell_nature_starfall.jpg"]
+    _AURA_TOOLTIP = ["Mage Atiesh Aura Count", "Warlock Atiesh Aura Count", "Boomkin Aura Count"]
+    _AURA_MAX = [4, 4, 1]
+    _SAVEFILE = "./data/items.dat"
+    _CHAR_DIRECTORY = "./data/characters/"
 
     def __init__(self, config_list, index: int, mod_mages, mod_target):
         super().__init__()
@@ -148,9 +170,22 @@ class Mage(QWidget):
         self._config = config_list
         self._index = index
         self._mod_target = mod_target
+
+        # character import variables
+        if os.path.exists(self._SAVEFILE):
+            with open(self._SAVEFILE, "rb") as fid:
+                self._saved = pickle.load(fid)
+        else:
+            self._saved = {}
         layout = QHBoxLayout()
         layout.setContentsMargins(3, 5, 3, 5)
-        layout.addWidget(QLabel(f"Mage {index + 1:d}"))
+        layout.setSpacing(2)
+        self._load_mage = QPushButton()
+        self._load_mage.setCheckable(True)
+        self._load_mage.setMinimumWidth(150)
+        self._load_mage.clicked.connect(self.character)
+        self._load_mage.setText(f"Mage {index + 1:d}")
+        layout.addWidget(self._load_mage)
 
         self._stats = {}
         for stat, max_val in zip(self._STATS, self._STAT_MAX):
@@ -161,19 +196,21 @@ class Mage(QWidget):
             self._stats[stat].setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self._stats[stat].textChanged.connect(lambda state, x=stat: self.modify_stat(x))
             self._stats[stat].setToolTip(self._STAT_DOC)
-            self._stats[stat].setMaximumWidth(40)
+            self._stats[stat].setMaximumWidth(35)
             layout.addWidget(self._stats[stat])
 
         self._buttons = {}
         for button, icon_fn, tool_tip in zip(self._BUTTONS, self._BUTTON_ICONS, self._BUTTON_TOOLTIP):
             self._buttons[button] = QPushButton(self)
-            self._buttons[button].setStyleSheet("QPushButton { background-color: transparent; border: 0px }")
+            style = "QPushButton { background-color: transparent; border: 0px;} "
+            style += "QPushButton:checked:disabled{background-color: #FFFFFF;}"
+            self._buttons[button].setStyleSheet(style)
             self._buttons[button].setCheckable(True)
             self._buttons[button].setToolTip(tool_tip)
             icon = QIcon()
             icon.addPixmap(get_pixmap(icon_fn))
             self._buttons[button].setIcon(icon)
-            self._buttons[button].setIconSize(QSize(25, 25))
+            self._buttons[button].setIconSize(QSize(22, 22))
             self._buttons[button].clicked.connect(lambda state, x=button: self.modify_button(x))
             layout.addWidget(self._buttons[button])
 
@@ -182,13 +219,34 @@ class Mage(QWidget):
             layout.addWidget(QLabel(f"{boolean:s}"))
             self._booleans[boolean] = QCheckBox()
             self._booleans[boolean].stateChanged.connect(lambda state, x=boolean: self.modify_boolean(x))
+            style = 'QCheckBox::indicator:checked:disabled { image: url(":/qss_icons/dark/rc/checkbox_checked.png");}'
+            self._booleans[boolean].setStyleSheet(style)
             layout.addWidget(self._booleans[boolean])
 
-        layout.addWidget(QLabel(f"racial"))
         self._racial = QComboBox()
         self._racial.addItems(self._RACIALS)
         self._racial.currentIndexChanged.connect(self.modify_racial)
         layout.addWidget(self._racial)
+
+        self._aura = {}
+        for name, icon_fn, tool_tip in zip(self._AURAS, self._AURA_ICONS, self._AURA_TOOLTIP):
+            aura = QPushButton(self)
+            style = "QPushButton { background-color: transparent; border: 0px;}"
+            aura.setStyleSheet(style)
+            aura.setToolTip(tool_tip)
+            icon = QIcon()
+            icon.addPixmap(get_pixmap(icon_fn, fade=False))
+            aura.setIcon(icon)
+            aura.setIconSize(QSize(22, 22))
+            aura.clicked.connect(lambda state, x=name: self.modify_aura(x))
+            layout.addWidget(aura)
+            self._aura[name] = QLabel("0")
+            style = "QLabel { background-color: #000000; border: 2px;}"
+            self._aura[name].setStyleSheet(style)
+            self._aura[name].setToolTip(tool_tip)
+            self._aura[name].setMaximumWidth(10)
+            self._aura[name].setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            layout.addWidget(self._aura[name])
 
         self._add_button = QPushButton("+", self)
         self._del_button = QPushButton("X", self)
@@ -205,6 +263,14 @@ class Mage(QWidget):
 
     def fill(self, top=False):
         config = self._config.current().config()
+        if config["configuration"]["name"][self._index]:
+            self.fill_char()
+            self._load_mage.setChecked(True)
+            self.enable_stats(False)
+        else:
+            self._load_mage.setChecked(False)
+            self.enable_stats(True)
+
         for key, ctype in zip(self._stats, self._STAT_TYPES):
             value = config["stats"][self._STATS_MAP[key]][self._index]
             if ctype == "percent":
@@ -227,7 +293,75 @@ class Mage(QWidget):
             state = 1 if self._index in config["configuration"][key] else 0
             self._booleans[key].setChecked(state)
 
+        for key, counter in self._aura.items():
+            counter.setText(f"{config['buffs']['auras'][key][self._index]:d}")
+
         self._racial.setCurrentIndex(self._RACIALS.index(config["buffs"]["racial"][self._index]))
+
+    def fill_char(self):
+        config = self._config.current().config()
+        name = config["configuration"]["name"][self._index]
+        filename = os.path.join(self._CHAR_DIRECTORY, f"{name:s}.json")
+        char_info = CharInfo(filename, name, self._saved)
+        if char_info.is_new:
+            with open(self._SAVEFILE, "wb") as fid:
+                pickle.dump(self._saved, fid)
+        self._load_mage.setText(name)
+
+        values = [char_info.spd,
+                  0.01*char_info.hit,
+                  0.01*char_info.crt,
+                  char_info.intellect]                
+        for stat, value in zip(self._STATS_MAP.values(), values):
+            config["stats"][stat][self._index] = value
+
+        for tidx in range(self._TRINKETS):
+            name = self._BUTTONS[tidx]
+            atm = set(config["configuration"][name])
+            if name in char_info.act:
+                atm.add(self._index)
+            else:
+                atm.discard(self._index)
+            config["configuration"][name] = list(atm)
+
+        atm = set(config["configuration"]["udc"])
+        if char_info.is_udc:
+            atm.add(self._index)
+        else:
+            atm.discard(self._index)
+            config["configuration"]["udc"] = list(atm)
+
+    def enable_stats(self, enabled):
+        for stat in self._STATS:
+            self._stats[stat].setEnabled(enabled)
+
+        for tidx in range(self._TRINKETS + 1):
+            name = self._BUTTONS[tidx]
+            self._buttons[name].setEnabled(enabled)
+
+    def character(self):
+        config = self._config.current().config()
+        if self._load_mage.isChecked():
+            filename, filter = QFileDialog.getOpenFileName(parent=self,
+                                                   caption="Open SixtyUpgrades Character Export",
+                                                   directory=self._CHAR_DIRECTORY,
+                                                   filter="*.json")
+            if filename is not None and os.path.isfile(filename):
+                head, tail = os.path.split(filename)
+                name, ext = os.path.splitext(tail)
+                config["configuration"]["name"][self._index] = name
+                self.fill()
+            else:
+                self._load_mage.setChecked(False)
+        else:
+            self._load_mage.setText(f"Mage {self._index + 1:d}")
+            config["configuration"]["name"][self._index] = ""
+
+            for stat in self._STATS:
+                self._stats[stat].setEnabled(True)
+            for tidx in range(self._TRINKETS + 1):
+                name = self._BUTTONS[tidx]
+                self._buttons[name].setEnabled(True)
 
     def set_resize(self, add: bool, remove: bool):
         self._add_button.setEnabled(add)
@@ -284,6 +418,16 @@ class Mage(QWidget):
         config = self._config.current().config()
         racial = self._racial.currentText()
         config["buffs"]["racial"][self._index] = racial
+        if self._changed_trigger is not None:
+            self._changed_trigger()
+
+    def modify_aura(self, name):
+        config = self._config.current().config()
+        aura_index = self._AURAS.index(name)
+        config["buffs"]["auras"][name][self._index] += 1
+        if config["buffs"]["auras"][name][self._index] > self._AURA_MAX[aura_index]:
+            config["buffs"]["auras"][name][self._index] = 0
+        self.fill()
         if self._changed_trigger is not None:
             self._changed_trigger()
 
