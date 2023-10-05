@@ -257,9 +257,9 @@ class Rotation(QWidget):
                     if config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] != spell:
                         if spell == "cobimf":
                             config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = 0.5
-                            set_top = True
                         elif config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] == "cobimf":
                             config["rotation"]["continuing"][f"special{row + 1:d}"].pop("cast_point_remain")
+                        set_top = True
                     config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] = spell
             else:
                 specials = len([1 for key in config["rotation"]["continuing"] if "special" in key])
