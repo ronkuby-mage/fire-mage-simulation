@@ -182,7 +182,7 @@ class Mage(QWidget):
         layout.setSpacing(2)
         self._load_mage = QPushButton()
         self._load_mage.setCheckable(True)
-        self._load_mage.setMinimumWidth(150)
+        self._load_mage.setFixedWidth(140)
         self._load_mage.clicked.connect(self.character)
         self._load_mage.setText(f"Mage {index + 1:d}")
         layout.addWidget(self._load_mage)
@@ -244,7 +244,8 @@ class Mage(QWidget):
             style = "QLabel { background-color: #000000; border: 2px;}"
             self._aura[name].setStyleSheet(style)
             self._aura[name].setToolTip(tool_tip)
-            self._aura[name].setMaximumWidth(10)
+            #self._aura[name].setMaximumWidth(13)
+            self._aura[name].setFixedWidth(13)
             self._aura[name].setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             layout.addWidget(self._aura[name])
 
@@ -281,20 +282,28 @@ class Mage(QWidget):
             if top:
                 self._stats[key].set_text(sval)
 
-        for key in self._buttons:
+        trink_count = sum([int(self._index in config["configuration"][self._BUTTONS[index]]) for index in range(self._TRINKETS)])
+        for index, key in enumerate(self._buttons):
             state = 1 if self._index in config["configuration"][key] else 0
             self._buttons[key].setChecked(state)
             icon_fn = self._BUTTON_ICONS[self._BUTTONS.index(key)]
             icon = QIcon()
-            icon.addPixmap(get_pixmap(icon_fn, fade=not state))
+            highlight= state and (trink_count > 2) and (index < self._TRINKETS)
+            icon.addPixmap(get_pixmap(icon_fn, fade=not state, highlight=highlight))
             self._buttons[key].setIcon(icon)
 
         for key in self._booleans:
             state = 1 if self._index in config["configuration"][key] else 0
             self._booleans[key].setChecked(state)
 
+        aura_count = sum([config['buffs']['auras'][key][self._index] for key in self._aura])
         for key, counter in self._aura.items():
-            counter.setText(f"{config['buffs']['auras'][key][self._index]:d}")
+            value = config['buffs']['auras'][key][self._index]
+            counter.setText(f"{value:d}")
+            if aura_count > 4 and value:
+                counter.setStyleSheet("border: 1px solid rgb(255, 0, 0); ")
+            else:
+                counter.setStyleSheet("border: 0px;")
 
         self._racial.setCurrentIndex(self._RACIALS.index(config["buffs"]["racial"][self._index]))
 
@@ -384,16 +393,13 @@ class Mage(QWidget):
     def modify_button(self, name):
         config = self._config.current().config()
         state = self._buttons[name].isChecked()
-        icon_fn = self._BUTTON_ICONS[self._BUTTONS.index(name)]
-        icon = QIcon()
-        icon.addPixmap(get_pixmap(icon_fn, fade=not state))
-        self._buttons[name].setIcon(icon)
         atm = set(config["configuration"][name])
         if state:
             atm.add(self._index)
         elif self._index in atm:
             atm.remove(self._index)
         config["configuration"][name] = list(atm)
+        self.fill()
         if self._changed_trigger is not None:
             self._changed_trigger()
 
