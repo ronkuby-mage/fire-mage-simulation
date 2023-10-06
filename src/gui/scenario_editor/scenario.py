@@ -29,6 +29,7 @@ class Scenario(QStackedWidget):
         self._buffs = Buffs(config_list)
         self._rotation = Rotation(config_list)
 
+
         self._character = Character()
 
         scen = QWidget()
@@ -39,6 +40,7 @@ class Scenario(QStackedWidget):
         layout2.addWidget(self._group)
         layout2.addWidget(self._buffs)
         gbs.setLayout(layout2)
+        gbs.setFixedWidth(950)
         
         layout1.addWidget(gbs)
         layout1.addWidget(self._rotation)
