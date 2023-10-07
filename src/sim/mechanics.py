@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 from . import constants
 from .decisions import Decider
 
@@ -568,7 +569,22 @@ class Encounter():
 
             return self._run_params["id"], total_dam + target_fraction*ignite_dam
 
+def fix_rotation(rotation):
+    if "have_pi" in rotation["initial"]:
+        if len(rotation["initial"]["have_pi"]) < len(rotation["initial"]["other"]):
+            diff = len(rotation["initial"]["other"]) - len(rotation["initial"]["have_pi"])
+            rotation["initial"]["have_pi"] += [deepcopy(rotation["continuing"]["default"]) for dd in range(diff)]
+        elif len(rotation["initial"]["have_pi"]) > len(rotation["initial"]["other"]):
+            diff = len(rotation["initial"]["have_pi"]) - len(rotation["initial"]["other"])
+            rotation["initial"]["other"] += [deepcopy(rotation["continuing"]["default"]) for dd in range(diff)]
+        for idx, spell in enumerate(rotation["initial"]["other"]):
+            if spell == "FROSTBOLT":
+                rotation["initial"]["other"][idx] = "frostbolt_to_stack"
+
+    return rotation
+
 def get_damage(params, run_params, progress_callback=None):
+    params['rotation'] = fix_rotation(deepcopy(params['rotation']))
     if "log_sim" in run_params:
         print("PARAMETER LIST:\n", params, f"\nLOGGING SIM #{run_params['log_sim'] + 1:d}")
     array_generator = constants.ArrayGenerator(params)
