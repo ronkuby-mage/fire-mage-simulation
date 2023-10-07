@@ -288,7 +288,7 @@ class Mage(QWidget):
             self._buttons[key].setChecked(state)
             icon_fn = self._BUTTON_ICONS[self._BUTTONS.index(key)]
             icon = QIcon()
-            highlight= state and (trink_count > 2) and (index < self._TRINKETS)
+            highlight = state and (trink_count > 2) and (index < self._TRINKETS)
             icon.addPixmap(get_pixmap(icon_fn, fade=not state, highlight=highlight))
             self._buttons[key].setIcon(icon)
 
@@ -338,7 +338,7 @@ class Mage(QWidget):
             atm.add(self._index)
         else:
             atm.discard(self._index)
-            config["configuration"]["udc"] = list(atm)
+        config["configuration"]["udc"] = list(atm)
 
     def enable_stats(self, enabled):
         for stat in self._STATS:
