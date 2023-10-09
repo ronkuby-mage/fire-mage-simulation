@@ -172,6 +172,7 @@ class Rotation(QWidget):
                 index = int(key.split("special")[1]) - 1
                 stype = val["value"]
                 self._special[index]["type"].setCurrentIndex(self._SPECIALS.index(stype))
+                self._special[index]["type"].setEnabled(True)
                 if resort:
                     slot = specials
                 else:
@@ -196,7 +197,6 @@ class Rotation(QWidget):
                 specials += 1
         if specials:
             self._special[specials - 1]["type"].addItem("")
-
         for sidx in range(specials, self._MAX_SPECIALS):
             self._special[sidx]["type"].addItem("")
             self._special[sidx]["type"].setCurrentText("")

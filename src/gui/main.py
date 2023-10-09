@@ -33,7 +33,7 @@ class Window(QWidget):
 
         self.setWindowTitle("Fire Mage Simulation")
 
-        self.setWindowIcon(QIcon("./data/icons/icon.png"))
+        self.setWindowIcon(QIcon("./data/icons/icon2.png"))
         if os.name == "nt":
             myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)        
