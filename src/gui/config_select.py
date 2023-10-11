@@ -109,6 +109,7 @@ class ConfigWidget(QWidget):
   
         self._filename = QLineEdit()
         self._filename.textChanged.connect(self.modify)
+        self._filename.returnPressed.connect(self._load)
         self._filename.setMaximumWidth(250)
         self._filename.setMinimumWidth(200)
         self._filename.setMaxLength(26)
