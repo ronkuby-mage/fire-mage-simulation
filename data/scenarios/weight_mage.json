@@ -123,10 +123,17 @@
             "scorch",
             "frostbolt",
             "combustion",
-            "sapp",
-            "toep",
+            "frostbolt",
+            "frostbolt",
             "zhc",
-            "fireball",
+            "toep",
+            "fireball"
+         ],
+         "have_pi": [
+            "scorch",
+            "sapp",
+            "combustion",
+            "pyroblast",
             "pi",
             "fireball"
          ]
