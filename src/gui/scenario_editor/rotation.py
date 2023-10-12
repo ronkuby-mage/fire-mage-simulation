@@ -1,7 +1,7 @@
 import json
 from PyQt5.QtWidgets import (
     QPushButton,
-    QGridLayout,
+    QTabWidget,
     QVBoxLayout,
     QHBoxLayout,
     QTableWidget,
@@ -32,6 +32,10 @@ class Rotation(QWidget):
         "  Here 'Parameter' is the response time of the caster -- even if ignite is refreshed within the response time,",
         "  the mage will still cast Fire Blast.  If ignite is refreshed after the response time but before Fire Blast",
         "  is cast, they will switch back to Scorch"])
+    _FROSTBOLT_DOC = "FROSTBOLT = Cast Frostbolt until a full ignite stack is reached"
+    _INITIAL_NAME = ["other", "have_pi"]
+    _INITIAL_NONSPLIT = ["Initial", ""]
+    _INITIAL_SPLIT = ["No PI", "PI"]
 
     def __init__(self, config_list):
         super().__init__()
@@ -39,26 +43,45 @@ class Rotation(QWidget):
         self._config = config_list
         self._lock = False
         layout = QVBoxLayout()
+        layout.setContentsMargins(3, 5, 3, 5)
+        layout.setSpacing(0)
 
         # initial rotation
-        layout.addWidget(QLabel("Rotation"))
-        table = QTableWidget(self._MAX_SPELLS, 2, self)
-        table.horizontalHeader().hide()
-        table.verticalHeader().hide()
-        self._initial = []
-        for row in range(table.rowCount()):
-            table.setCellWidget(row, 0, QLabel(f"{row + 1:d}"))
-            combo = QComboBox()
-            combo.addItems(self._SPELLS)
-            combo.currentIndexChanged.connect(lambda state, x=row: self.modify_initial(x))
-            self._initial.append(combo)
-            table.setCellWidget(row, 1, combo)
-        header = table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        layout.addWidget(table, stretch=4)
-        self._initial_table = table
+        ann_row = QWidget()
+        ann_layout = QHBoxLayout()
+        ann_layout.addWidget(QLabel("Rotation"))
+        ann_layout.addStretch()
+        ann_layout.addWidget(QLabel("Split by PI"))
+        self._split = QCheckBox()
+        self._split.setChecked(False)
+        self._split.stateChanged.connect(self.modify_split)
+        ann_layout.addWidget(self._split)
+        ann_row.setLayout(ann_layout)
+        layout.addWidget(ann_row)
+        
+        self._tabs = QTabWidget()
+        self._initial_table = {}
+        self._initial = {}
+        for open_type in self._INITIAL_NAME:
+            table = QTableWidget(self._MAX_SPELLS, 2, self)
+            table.setFixedHeight(302)
+            table.horizontalHeader().hide()
+            table.verticalHeader().hide()
+            self._initial[open_type] = []
+            for row in range(table.rowCount()):
+                table.setCellWidget(row, 0, QLabel(f"{row + 1:d}"))
+                combo = QComboBox()
+                combo.addItems(self._SPELLS)
+                combo.currentIndexChanged.connect(lambda state, x=open_type, y=row: self.modify_initial(x, y))
+                self._initial[open_type].append(combo)
+                table.setCellWidget(row, 1, combo)
+            header = table.horizontalHeader()
+            header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+            header.setSectionResizeMode(1, QHeaderView.Stretch)
+            table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
+            self._tabs.addTab(table, open_type)
+            self._initial_table[open_type] = table
+        layout.addWidget(self._tabs, stretch=12)
 
         # default
         default = QWidget()
@@ -77,12 +100,13 @@ class Rotation(QWidget):
         for idx in range(self._MAX_SPECIALS):
             this_special = {}
             table = QTableWidget(3, 2, self)
-            table.setToolTip(self._SPECIAL_DOC)
+            table.setToolTip(self._SPECIAL_DOC)            
             table.horizontalHeader().hide()
             table.verticalHeader().hide()
             table.setCellWidget(0, 0, (QLabel(f"Special {idx + 1:d}")))
             table.setCellWidget(1, 0, (QLabel(f"Apply to")))
             table.setCellWidget(2, 0, (QLabel(f"Parameter")))
+            table.setFixedHeight(82)
 
             combo = QComboBox()
             combo.addItems(self._SPECIALS)
@@ -120,24 +144,47 @@ class Rotation(QWidget):
         config = self._config.current().config()
         self.lock()
 
-        for idx in range(self._MAX_SPELLS):
-            empty = [jdx for jdx in range(self._initial[idx].count()) if self._initial[idx].itemText(jdx) == ""]
-            if len(empty):
-                self._initial[idx].removeItem(empty[0])
+        if "have_pi" in config["rotation"]["initial"]:
+            self._tabs.setTabEnabled(1, True)
+            self._split.setChecked(True)
+            for index, tab_name in enumerate(self._INITIAL_SPLIT):
+                self._tabs.setTabText(index, tab_name)
+            self._initial_table["other"].setToolTip(self._FROSTBOLT_DOC)
+        else:
+            self._tabs.setTabEnabled(1, False)
+            self._split.setChecked(False)
+            for index, tab_name in enumerate(self._INITIAL_NONSPLIT):
+                self._tabs.setTabText(index, tab_name)
 
-        for idx, spell in enumerate(config["rotation"]["initial"]["other"]):
-            self._initial_table.setCellWidget(idx, 0, QLabel(f"{idx + 1:d}"))
-            self._initial[idx].setCurrentIndex(self._SPELLS.index(spell))
-            self._initial[idx].setEnabled(True)
+        for name in self._INITIAL_NAME:
+            # remove empty entry
+            for idx in range(self._MAX_SPELLS):
+                empty = [jdx for jdx in range(self._initial[name][idx].count()) if self._initial[name][idx].itemText(jdx) == ""]
+                if len(empty):
+                    self._initial[name][idx].removeItem(empty[0])
+                frost_stack = [jdx for jdx in range(self._initial[name][idx].count()) if self._initial[name][idx].itemText(jdx) == "FROSTBOLT"]
+                if len(frost_stack):
+                    self._initial[name][idx].removeItem(frost_stack[0])
 
-        for jdx in range(idx, self._MAX_SPELLS):
-            if jdx:
-                self._initial[jdx].addItem("")
-            if jdx != idx:
-                self._initial_table.setCellWidget(jdx, 0, QLabel(f""))
-                self._initial[jdx].setCurrentText("")
-                if jdx != idx + 1:
-                    self._initial[jdx].setEnabled(False)
+            if name in config["rotation"]["initial"]:
+                for idx, spell in enumerate(config["rotation"]["initial"][name]):
+                    if name == "other" and self._split.isChecked():
+                        fb_ind = self._initial[name][idx].count()
+                        self._initial[name][idx].addItem("FROSTBOLT")
+                    self._initial_table[name].setCellWidget(idx, 0, QLabel(f"{idx + 1:d}"))
+                    index = fb_ind if spell == "FROSTBOLT" else self._SPELLS.index(spell)
+                    self._initial[name][idx].setCurrentIndex(index)
+                    self._initial[name][idx].setEnabled(True)
+
+            for jdx in range(idx, self._MAX_SPELLS):
+                if jdx:
+                    self._initial[name][jdx].addItem("")
+                if jdx != idx:
+                    self._initial_table[name].setCellWidget(jdx, 0, QLabel(f""))
+                    self._initial[name][jdx].setCurrentText("")
+                    self._initial[name][jdx].setEnabled(jdx == idx + 1)
+                    if name == "other" and self._split.isChecked():
+                        self._initial[name][jdx].addItem("FROSTBOLT")
         
         spell = config["rotation"]["continuing"]["default"]
         self._default.setCurrentIndex(self._SPELLS.index(spell))
@@ -209,28 +256,31 @@ class Rotation(QWidget):
                 self._special[sidx]["param"].set_text("")
         self.unlock()
 
-    def modify_initial(self, row):
+    def modify_split(self):
         if self._lock:
             return
         config = self._config.current().config()
-        spell = self._initial[row].currentText()
-        if not spell:
-            if row < len(config["rotation"]["initial"]["other"]):
-                config["rotation"]["initial"]["other"].pop()
-                self._initial_table.setCellWidget(row, 0, QLabel(f""))
-                if row > 1:
-                    self._initial[row - 1].addItem("")
-                if row < self._MAX_SPELLS - 1:
-                    self._initial[row + 1].setEnabled(False)
-        elif row >= len(config["rotation"]["initial"]["other"]):
-            config["rotation"]["initial"]["other"].append(spell)
-            self._initial_table.setCellWidget(row, 0, QLabel(f"{row + 1:d}"))
-            if row > 1:
-                self._initial[row - 1].removeItem(len(self._SPELLS))
-            if row < self._MAX_SPELLS - 1:
-                self._initial[row + 1].setEnabled(True)
+        if self._split.isChecked():
+            config["rotation"]["initial"][self._INITIAL_NAME[1]] = ["scorch"]
         else:
-            config["rotation"]["initial"]["other"][row] = spell
+            config["rotation"]["initial"].pop(self._INITIAL_NAME[1])
+        self.fill()
+        if self._changed_trigger is not None:
+            self._changed_trigger()
+
+    def modify_initial(self, tab_name, row):
+        if self._lock:
+            return
+        config = self._config.current().config()
+        spell = self._initial[tab_name][row].currentText()
+        if not spell:
+            if row < len(config["rotation"]["initial"][tab_name]):
+                config["rotation"]["initial"]["other"].pop()
+        elif row >= len(config["rotation"]["initial"][tab_name]):
+            config["rotation"]["initial"][tab_name].append(spell)
+        else:
+            config["rotation"]["initial"][tab_name][row] = spell
+        self.fill()
         if self._changed_trigger is not None:
             self._changed_trigger()
 

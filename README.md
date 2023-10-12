@@ -34,18 +34,18 @@ In the bottom right scenario selection panel, type in "weight_mage" for Scenario
 ![](./data/pictures/stats_distribution.png)
 
 Lety's play around with a few of the scenario and simulation settings.
-* Go back to the Scenario tab and change the "Special 1" rotation to "cobimf" for mage 3.
-* Rerun the Stat weights.  You should see a slight increase in DPS.
+* Switch back to the Scenario tab.  Notice that for the weight_mage scenario, there are two tabs under rotation: "No PI" and "PI".  Mages that have PI will follow the PI rotation, and those that don't will follow the "No PI" rotation.  The purpose of having two rotations is to increase the chances of a PI buffed mage initiating the ignite by frost buffering the non-PI mages.
+* Change the "Special 1" rotation to "cobimf" for mage 3.  Rerun the Stat weights.  You should see a slight increase in DPS.
 * In the **Simualtion Settings** panel, deselect "Vary All Mages" and then click on all the numbers except 1.  This looks at the effect of changing only the stats for Mage 1 to calculate the stat weights.  So the **DPS** output should not be affected, but **Crit** and **Hit** will be.  You should see the crit valuation go up a few SP points.  Crit is more important for the well geared Mage 1 than it is for the team aggregate.
 * Return to the Scenario tab and deselect *target* for all mages but Mage 1.  Rerun the simulation and you should see much higher DPS values.
 
 ### Setting up Multiple Scenarios
-The scenario selection panel is on the bottom right of the application.  Here you can load/save scenarios and add/remove multiple scenarios.  The selection button on the left indicates which scenario is shown and edited in the scenario editor as well as the scenario that is run for stat weight/distribution type simulations.
+The scenario selection panel is on the bottom right of the application.  Here you can load, save, add, and remove multiple scenarios.  The selection button on the left indicates which scenario is shown and edited in the scenario editor as well as the scenario that is run for stat weight/distribution type simulations.
 
 ![](./data/pictures/scenario_selection.png)
 
 ### Scenario Comparison Run
-A Scenario Comparison Run plots all scenarios in the selection panel as a function of encounter time.
+A Scenario Comparison Run plots all scenarios in the selection panel as a function of encounter time.  In the comparison plot below, BiS three mage teams with different trinkets and rotations are compared in encounters from 30s to 90s.  Each trinket+rotation combination is the top DPS for an interval.  The scenarios shown are based on the "undead-lf-bis-no-udc" character with only trinkets changed.  Both the character and the scenarios shown are included in this package.
 
 ![](./data/pictures/scenario_comparison.png)
 

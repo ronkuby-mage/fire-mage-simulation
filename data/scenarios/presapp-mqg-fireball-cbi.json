@@ -1,32 +1,24 @@
 {
    "stats": {
       "spell_power": [
-         810,
-         500,
-         500,
-         500,
-         500
+         727,
+         727,
+         727
       ],
       "hit_chance": [
          0.1,
-         0.08,
-         0.07,
-         0.08,
-         0.09
+         0.1,
+         0.1
       ],
       "crit_chance": [
-         0.11,
-         0.06,
-         0.07,
-         0.06,
-         0.05
+         0.19,
+         0.19,
+         0.19
       ],
       "intellect": [
-         300,
          318,
          318,
-         302,
-         302
+         318
       ]
    },
    "buffs": {
@@ -36,6 +28,7 @@
          "arcane_intellect"
       ],
       "consumes": [
+         "very_berry_cream",
          "flask_of_supreme_power",
          "greater_arcane_elixir",
          "brilliant_wizard_oil",
@@ -43,14 +36,13 @@
       ],
       "world": [
          "dire_maul_tribute",
+         "songflower_serenade",
          "rallying_cry_of_the_dragonslayer",
          "sayges_dark_fortune_of_damage",
          "spirit_of_zandalar"
       ],
       "racial": [
          "human",
-         "gnome",
-         "gnome",
          "human",
          "human"
       ],
@@ -58,14 +50,10 @@
       "auras": {
          "mage_atiesh": [
             0,
-            1,
-            1,
-            1,
-            1
+            0,
+            0
          ],
          "lock_atiesh": [
-            0,
-            0,
             0,
             0,
             0
@@ -73,42 +61,36 @@
          "boomkin": [
             0,
             0,
-            0,
-            0,
             0
          ]
       }
    },
    "configuration": {
-      "num_mages": 5,
+      "num_mages": 3,
       "target": [
          0,
          1,
-         2,
-         3,
-         4
+         2
       ],
       "sapp": [
-         0
-      ],
-      "toep": [
+         0,
          1,
-         2,
-         3
+         2
       ],
-      "zhc": [
-         2,
-         4
+      "toep": [],
+      "zhc": [],
+      "mqg": [
+         0,
+         1,
+         2
       ],
-      "mqg": [],
       "pi": [
-         0
+         0,
+         1,
+         2
       ],
-      "udc": [
-         0
-      ],
+      "udc": [],
       "name": [
-         "",
          "",
          "",
          "",
@@ -119,23 +101,14 @@
       "initial": {
          "common": [],
          "other": [
-            "scorch",
-            "scorch",
-            "frostbolt",
-            "combustion",
-            "frostbolt",
-            "frostbolt",
-            "zhc",
-            "toep",
-            "fireball"
-         ],
-         "have_pi": [
-            "scorch",
             "sapp",
+            "scorch",
+            "scorch",
             "combustion",
-            "pyroblast",
+            "gcd",
+            "fireball",
             "pi",
-            "fireball"
+            "mqg"
          ]
       },
       "continuing": {
@@ -144,7 +117,8 @@
             "slot": [
                2
             ],
-            "value": "maintain_scorch"
+            "value": "cobimf",
+            "cast_point_remain": 0.5
          }
       }
    },
