@@ -418,8 +418,8 @@ class CompareSettings(QWidget):
             etimes = np.array([ave - 2.0, ave + 2])
         else:
             cmin = 15*((cmin - 10)//15)
-            etimes = np.arange(cmin, cmax + 20, 5, dtype=np.int32)
-            etimes = etimes[np.where(np.logical_or(np.logical_not(np.mod(etimes, 15)), etimes < 90))[0]].astype(float)
+            etimes = np.arange(cmin, cmax + 20, 1, dtype=np.int32)
+            etimes = etimes[np.where(np.logical_or(np.logical_not(np.mod(etimes, 5)), etimes < 90))[0]].astype(float)
 
         self._output(num_mages, self._time["min_time"], self._time["max_time"], etimes) # calls "prepare_output" in output Class
 

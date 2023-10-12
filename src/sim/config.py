@@ -57,6 +57,7 @@ class Config(object):
         self._filename = self._add_ext(filename)
         with open(os.path.join(self._directory, self._filename), "rt") as fid:
             self._config = json.load(fid)
+        self._fill_back_compatibility()
 
     def _add_ext(self, filename):
         base, ext = os.path.splitext(filename)
@@ -68,4 +69,10 @@ class Config(object):
     def config(self):
         return self._config
         
-        
+    def _fill_back_compatibility(self):
+        if "auras" not in self._config:
+            self._config["buffs"]["auras"] = {
+                "mage_atiesh": [0 for dummy in range(self._config["configuration"]["num_mages"])],
+                "lock_atiesh": [0 for dummy in range(self._config["configuration"]["num_mages"])],
+                "boomkin": [0 for dummy in range(self._config["configuration"]["num_mages"])]
+            }
