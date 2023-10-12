@@ -40,12 +40,12 @@ Lety's play around with a few of the scenario and simulation settings.
 * Return to the Scenario tab and deselect *target* for all mages but Mage 1.  Rerun the simulation and you should see much higher DPS values.
 
 ### Setting up Multiple Scenarios
-The scenario selection panel is on the bottom right of the application.  Here you can load/save scenarios and add/remove multiple scenarios.  The selection button on the left indicates which scenario is shown and edited in the scenario editor as well as the scenario that is run for stat weight/distribution type simulations.
+The scenario selection panel is on the bottom right of the application.  Here you can load, save, add, and remove multiple scenarios.  The selection button on the left indicates which scenario is shown and edited in the scenario editor as well as the scenario that is run for stat weight/distribution type simulations.
 
 ![](./data/pictures/scenario_selection.png)
 
 ### Scenario Comparison Run
-A Scenario Comparison Run plots all scenarios in the selection panel as a function of encounter time.
+A Scenario Comparison Run plots all scenarios in the selection panel as a function of encounter time.  In the comparison plot below, BiS three mage teams with different trinkets and rotations are compared in encounters from 30s to 90s.  Each trinket+rotation combination is the top DPS for an interval.  The scenarios shown are based on the "undead-lf-bis-no-udc" character with only trinkets changed.  Both the character and the scenarios shown are included in this package.
 
 ![](./data/pictures/scenario_comparison.png)
 
