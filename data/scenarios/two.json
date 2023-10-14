@@ -1,24 +1,20 @@
 {
    "stats": {
       "spell_power": [
-         814,
-         814,
-         814
+         786,
+         786
       ],
       "hit_chance": [
-         0.1,
          0.1,
          0.1
       ],
       "crit_chance": [
-         0.15,
-         0.15,
-         0.15
+         0.17,
+         0.17
       ],
       "intellect": [
-         318,
-         318,
-         318
+         314,
+         314
       ]
    },
    "buffs": {
@@ -32,7 +28,9 @@
          "flask_of_supreme_power",
          "greater_arcane_elixir",
          "brilliant_wizard_oil",
-         "elixir_of_greater_firepower"
+         "elixir_of_greater_firepower",
+         "stormwind_gift_of_friendship",
+         "runn_tum_tuber_surprise"
       ],
       "world": [
          "dire_maul_tribute",
@@ -42,55 +40,46 @@
          "spirit_of_zandalar"
       ],
       "racial": [
-         "human",
-         "human",
-         "human"
+         "gnome",
+         "gnome"
       ],
       "boss": "",
       "auras": {
          "mage_atiesh": [
             2,
-            2,
             2
          ],
          "lock_atiesh": [
             1,
-            1,
             1
          ],
          "boomkin": [
-            0,
             0,
             0
          ]
       }
    },
    "configuration": {
-      "num_mages": 3,
+      "num_mages": 2,
       "target": [
          0,
-         1,
-         2
+         1
       ],
       "sapp": [
          0,
-         1,
-         2
+         1
       ],
       "toep": [],
       "zhc": [],
       "mqg": [],
       "pi": [
          0,
-         1,
-         2
+         1
       ],
       "udc": [],
       "name": [
-         "",
-         "",
-         "",
-         ""
+         "two_mages",
+         "two_mages"
       ]
    },
    "rotation": {
@@ -101,17 +90,16 @@
             "scorch",
             "sapp",
             "combustion",
-            "gcd",
-            "fireball",
+            "pyroblast",
             "pi",
-            "mqg"
+            "fireball"
          ]
       },
       "continuing": {
          "default": "fireball",
          "special1": {
             "slot": [
-               2
+               0
             ],
             "value": "cobimf",
             "cast_point_remain": 0.5
@@ -119,7 +107,7 @@
          "special2": {
             "value": "scorch_wep",
             "slot": [
-               0
+               1
             ]
          }
       }

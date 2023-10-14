@@ -70,7 +70,7 @@ class Config(object):
         return self._config
         
     def _fill_back_compatibility(self):
-        if "auras" not in self._config:
+        if "auras" not in self._config["buffs"]:
             self._config["buffs"]["auras"] = {
                 "mage_atiesh": [0 for dummy in range(self._config["configuration"]["num_mages"])],
                 "lock_atiesh": [0 for dummy in range(self._config["configuration"]["num_mages"])],

@@ -49,14 +49,14 @@
       "boss": "",
       "auras": {
          "mage_atiesh": [
-            0,
-            0,
-            0
+            2,
+            2,
+            2
          ],
          "lock_atiesh": [
-            0,
-            0,
-            0
+            1,
+            1,
+            1
          ],
          "boomkin": [
             0,
@@ -121,17 +121,5 @@
             "cast_point_remain": 0.5
          }
       }
-   },
-   "timing": {
-      "duration": {
-         "mean": 150.0,
-         "var": 15.0,
-         "clip": [
-            20.0,
-            1000.0
-         ]
-      },
-      "delay": 1.0,
-      "response": 0.05
    }
 }

@@ -131,17 +131,5 @@
             "cast_point_remain": 0.5
          }
       }
-   },
-   "timing": {
-      "duration": {
-         "mean": 150.0,
-         "var": 15.0,
-         "clip": [
-            20.0,
-            1000.0
-         ]
-      },
-      "delay": 1.0,
-      "response": 0.05
    }
 }
