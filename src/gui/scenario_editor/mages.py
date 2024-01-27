@@ -323,6 +323,7 @@ class Mage(QWidget):
                   char_info.intellect]                
         for stat, value in zip(self._STATS_MAP.values(), values):
             config["stats"][stat][self._index] = value
+        config["buffs"]["racial"][self._index] = char_info.race.lower()
 
         for tidx in range(self._TRINKETS):
             name = self._BUTTONS[tidx]

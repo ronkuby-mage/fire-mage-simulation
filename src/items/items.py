@@ -141,6 +141,10 @@ class ItemInfo():
     def is_new(self):
         return self._new
 
+    @property
+    def name(self):
+        return self._name
+
 
 class CharInfo():
     
