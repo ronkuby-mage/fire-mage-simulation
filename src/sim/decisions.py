@@ -183,7 +183,7 @@ class Decider():
                                   (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK)
                     need_scorch &= (arrays['player']['spell_type'][still_going[special], next_hit[special]] != C._CAST_SCORCH)|\
                                    (arrays['boss']['scorch_count'][still_going[special]] < C._SCORCH_STACK - 1)
-                    if self._rotation['continuing'][key]['value'] in ['maintain_scorch', 'scorch', 'scorch_wep', 'cobimf']:
+                    if self._rotation['continuing'][key]['value'] in ['maintain_scorch', 'scorch', 'scorch_wep', 'cobimf', 'cd_imf']:
     
                         # first check if scorch is about to expire
                         scorch = np.where(need_scorch)[0]
@@ -206,7 +206,7 @@ class Decider():
     
                         # then check want scorch
                         avail = np.where(np.logical_not(used_buff))[0]
-                        if self._rotation['continuing'][key]['value'] in ['scorch', 'scorch_wep', 'cobimf']:
+                        if self._rotation['continuing'][key]['value'] in ['scorch', 'scorch_wep', 'cobimf', 'cd_imf']:
                             # scorch if ignite is active, and full stack
                             want_scorch = (arrays['boss']['ignite_timer'][still_going[special[no_scorch_yet[avail]]]] > 0.0) &\
                                           (arrays['boss']['ignite_count'][still_going[special[no_scorch_yet[avail]]]] == C._IGNITE_STACK)
@@ -224,7 +224,7 @@ class Decider():
                             #             next_hit[special[no_scorch_yet[avail[to_scorch]]]]]//1.5) % 5 
                             decisions[special[no_scorch_yet[avail[to_scorch]]]] = C._CAST_SCORCH
                             #decisions[special[no_scorch_yet[avail[to_scorch[np.where(ssc == 0)]]]]] = C._CAST_FIRE_BLAST
-                            if self._rotation['continuing'][key]['value'] == 'cobimf':
+                            if self._rotation['continuing'][key]['value'] in ['cobimf', 'cd_imf']:
                                 short_cut = special[no_scorch_yet[avail[to_scorch]]]
                                 react_time = self._rotation['continuing'][key]['cast_point_remain']
                                 run_low = C._DECISION_POINT - react_time 
