@@ -23,15 +23,17 @@ class Rotation(QWidget):
     _MAX_SPELLS = 12
     _REAL_SPELLS = 3
     _MAX_SPECIALS = 3
-    _SPECIALS = ["maintain_scorch", "scorch", "scorch_wep", "cobimf"]
+    _SPECIALS = ["maintain_scorch", "scorch", "scorch_wep", "cobimf", "cd_imf"]
     _SPECIAL_DOC = "\n".join([
         "maintain_scorch: Cast Scorch if there are less than 5 seconds left on the debuff or it is not fully stacked",
-        "scorch: Also cast Scorch if ignite is fully stacked and there are no cooldowns going (Combustion/trinket)",
+        "scorch: Also cast Scorch if ignite is fully stacked and no cooldowns (Combustion/PI/trinket) are active or available",
         "scorch_wep: Cast Scorch even with remaining cooldowns",
         "cobimf: Scorch under same conditions as scorch_wep, but if ignite has <= 2 seconds remaining cast Fire Blast",
         "  Here 'Parameter' is the response time of the caster -- even if ignite is refreshed within the response time,",
         "  the mage will still cast Fire Blast.  If ignite is refreshed after the response time but before Fire Blast",
-        "  is cast, they will switch back to Scorch"])
+        "  is cast, they will switch back to Scorch",
+        "cd_imf: A hybrid of cobimf and scorch, best for one of four mages to adopt.  Scorch under same conditions as 'scorch',",
+        "  (Fireball during cooldowns), but follow the cobimf Fire Blast rule during scorch spam."])
     _FROSTBOLT_DOC = "FROSTBOLT = Cast Frostbolt until a full ignite stack is reached"
     _INITIAL_NAME = ["other", "have_pi"]
     _INITIAL_NONSPLIT = ["Initial", ""]
@@ -230,7 +232,7 @@ class Rotation(QWidget):
                 self._special[index]["mage"].addItems([f"mage {m + 1:d}" for m in range(num_mages) if m not in tst])
                 self._special[index]["mage"].setCurrentText(f"mage {slot + 1:d}")
                 self._special[index]["mage"].setEnabled(True)
-                if stype == "cobimf":
+                if stype in ["cobimf", "cd_imf"]:
                     if top:
                         param_val = val["cast_point_remain"]
                         self._special[index]["param"].setText(str(param_val))
@@ -305,9 +307,9 @@ class Rotation(QWidget):
                     config["rotation"]["continuing"].pop(f"special{row + 1:d}")
                 else: # modifying
                     if config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] != spell:
-                        if spell == "cobimf":
+                        if spell in ["cobimf", "cd_imf"]:
                             config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = 0.5
-                        elif config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] == "cobimf":
+                        elif config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] in ["cobimf", "cd_imf"]:
                             config["rotation"]["continuing"][f"special{row + 1:d}"].pop("cast_point_remain")
                         set_top = True
                     config["rotation"]["continuing"][f"special{row + 1:d}"]["value"] = spell
@@ -324,7 +326,7 @@ class Rotation(QWidget):
 
                     config["rotation"]["continuing"][f"special{row + 1:d}"] = {"value": spell}
                     config["rotation"]["continuing"][f"special{row + 1:d}"]["slot"] = [slots_not_taken[0]] # more hard code
-                    if spell == "cobimf":
+                    if spell in ["cobimf", "cd_imf"]:
                         config["rotation"]["continuing"][f"special{row + 1:d}"]["cast_point_remain"] = 0.5
                         set_top = True
         elif field == "mage":

@@ -29,7 +29,8 @@ class StatOutput(QWidget):
     _OUTPUT_SIZE = 780
     _HIST_BINS = 512
     _EDGE_CHOP = (50, 20, 85, 75)
-    _DPS_TYPES_ROW = ["Mean", "Min", "Max", "Median"]
+    _DPS_TYPES_ROW = ["Mean", "Min", "Max", "Median", "90%"]
+    _EP_TYPES_BOX = ["SP per Crit %", "SP per Hit %"]
     _EP_TYPES = ["crit", "hit"]
     _EP_METRICS = ["Mean", "90%"]
 
@@ -67,8 +68,21 @@ class StatOutput(QWidget):
         self._ep = {}
         ep_row = QWidget()
         ep_layout = QHBoxLayout()
-        for ep_type in self._EP_TYPES:
-            frame = QGroupBox(ep_type.capitalize())
+        frame = QGroupBox("DPS per SP")
+        frame_layout = QHBoxLayout()
+        frame_layout.setContentsMargins(5, 0, 5, 0)
+        frame_layout.setSpacing(0)
+        frame_layout.setAlignment(Qt.AlignCenter)
+        self._ep["SP"] = QLabel("")
+        self._ep["SP"].setStyleSheet(style)          
+        frame_layout.addWidget(self._ep["SP"])
+        frame.setLayout(frame_layout)
+        ep_layout.addWidget(frame)
+        frame.setVisible(False)
+        self._frames.append(frame)
+
+        for ep_type, ep_box in zip(self._EP_TYPES, self._EP_TYPES_BOX):
+            frame = QGroupBox(ep_box)
             frame_layout = QHBoxLayout()
             frame_layout.setContentsMargins(5, 0, 5, 0)
             frame_layout.setSpacing(0)
@@ -98,6 +112,7 @@ class StatOutput(QWidget):
         self._received = {}
         for value in self._DPS_TYPES_ROW:
             self._dps[value].setText("")
+        self._ep["SP"].setText("")
         for ep_type in self._EP_TYPES:
             for metric in self._EP_METRICS:
                 value = "_".join([ep_type, metric])
@@ -133,8 +148,17 @@ class StatOutput(QWidget):
             self._dps["Min"].setText(f"Min: {value:.0f}")
             value = output.max()
             self._dps["Max"].setText(f"Max: {value:.0f}")
-            value = output[int(len(output)/2)]
+            value = output[int(len(output)/2 + 0.5)]
             self._dps["Median"].setText(f"Median: {value:.0f}")
+            value = output[int(0.9*len(output) + 0.5)]
+            self._dps["90%"].setText(f"90%: {value:.0f}")
+
+        if all([run_id2 in self._received for run_id2 in ["dps", "sp"]]):
+            value_0 = self._received["dps"].mean()
+            value_sp = self._received["sp"].mean()
+            metric = (value_sp - value_0)/15.0
+            self._ep["SP"].setText(f"Mean: {metric:.2f}")
+
         for run_id3 in ["crit", "hit"]:
             if all([run_id2 in self._received for run_id2 in ["dps", "sp", run_id3]]):
                 for metric in self._EP_METRICS:
