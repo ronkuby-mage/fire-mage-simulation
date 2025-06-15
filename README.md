@@ -10,7 +10,9 @@ Here are the steps to install and run the application on Windows.
 3. Download and install the Anaconda package: [tested windows version](https://repo.anaconda.com/archive/Anaconda3-2023.07-2-Windows-x86_64.exe)
 4. From the Start menu, open an Anaconda Prompt (see below)
 5. Go to the directory you extracted the code to in Step 2 using the "cd" command.  For the above example, ```cd \sims\fire-mage-simulation```
-6. Run the application with ```python -m src.gui.main```
+6. Create a conda environment with the python dependencies we use ```conda env create -f environment.yml```
+7. To activate the environment run ```conda activate firemage```
+8. Run the application with ```python -m src.gui.main```
   
 ![](./data/pictures/anaconda_prompt.png)
 

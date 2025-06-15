@@ -1,0 +1,12 @@
+name: firemage
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy=1.24.4
+  - scikit-image=0.21.0
+  - pyqt=5
+  - qdarkstyle=3.2.3
+  - requests=2.32.4
+  - matplotlib=3.10.3
