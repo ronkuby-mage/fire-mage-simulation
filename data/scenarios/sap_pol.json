@@ -1,0 +1,114 @@
+{
+   "stats": {
+      "spell_power": [
+         774,
+         770,
+         770
+      ],
+      "hit_chance": [
+         0.1,
+         0.1,
+         0.1
+      ],
+      "crit_chance": [
+         0.15,
+         0.11,
+         0.11
+      ],
+      "intellect": [
+         318,
+         300,
+         300
+      ]
+   },
+   "buffs": {
+      "raid": [
+         "blessing_of_kings",
+         "improved_mark",
+         "arcane_intellect"
+      ],
+      "consumes": [
+         "very_berry_cream",
+         "flask_of_supreme_power",
+         "greater_arcane_elixir",
+         "brilliant_wizard_oil",
+         "elixir_of_greater_firepower"
+      ],
+      "world": [
+         "dire_maul_tribute",
+         "songflower_serenade",
+         "rallying_cry_of_the_dragonslayer",
+         "sayges_dark_fortune_of_damage",
+         "spirit_of_zandalar"
+      ],
+      "racial": [
+         "human",
+         "human",
+         "human"
+      ],
+      "boss": "thaddius",
+      "auras": {
+         "mage_atiesh": [
+            2,
+            2,
+            2
+         ],
+         "lock_atiesh": [
+            1,
+            1,
+            1
+         ],
+         "boomkin": [
+            0,
+            0,
+            0
+         ]
+      }
+   },
+   "configuration": {
+      "num_mages": 3,
+      "target": [
+         0,
+         1,
+         2
+      ],
+      "sapp": [],
+      "toep": [],
+      "zhc": [],
+      "mqg": [
+         0,
+         1,
+         2
+      ],
+      "pi": [
+         0,
+         1,
+         2
+      ],
+      "udc": [
+         1,
+         2
+      ],
+      "name": [
+         "",
+         "",
+         ""
+      ]
+   },
+   "rotation": {
+      "initial": {
+         "common": [],
+         "other": [
+            "pi",
+            "combustion",
+            "scorch",
+            "scorch",
+            "mqg",
+            "fireball"
+         ]
+      },
+      "continuing": {
+         "default": "fireball"
+      }
+   }
+}

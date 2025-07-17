@@ -535,8 +535,9 @@ class Encounter():
             sim_size = len(self._arrays['global']['total_damage'])
             dur_dist = self._run_params["dur_dist"]
             # variablity depends on length (5%).  This smooths out curves
-            cutoff = 0.05*dur_dist.reshape(dur_dist.size, 1)*np.random.randn(len(dur_dist), sim_size) 
-            cutoff += np.repeat(dur_dist.reshape(dur_dist.size, 1), sim_size, axis=1)
+            local_dur_dist = dur_dist.reshape(dur_dist.size, 1)
+            cutoff = 0.05*local_dur_dist*np.random.randn(local_dur_dist.size, sim_size) 
+            cutoff += np.repeat(local_dur_dist, sim_size, axis=1)
             cutoff = np.maximum(cutoff, 0.01)
 
             max_ind = np.array([len(arr) for arr in self._arrays['global']['total_damage']]).astype(np.int32) - 1
@@ -558,15 +559,15 @@ class Encounter():
             total_damage = []
             total_ignite = []
             for cidx in range(cutoff.shape[0]):
-                up_to = np.argmax(ctime > cutoff[cidx, :], axis=0).squeeze()
+                local_ct = cutoff[cidx, :]
+                up_to = np.argmax(ctime > local_ct, axis=0).squeeze()
                 up_to[np.logical_not(up_to)] = max_ind[np.logical_not(up_to)]
-                total_cut = ctime[up_to - 1, np.arange(sim_size)]
-                #total_damage.append((damage[up_to, np.arange(sim_size)]/total_cut).mean())
-                #total_ignite.append((ignite[up_to, np.arange(sim_size)]/total_cut).mean())
-                total_damage.append((damage[up_to - 1, np.arange(sim_size)]/cutoff[cidx, :]).mean())
-                total_ignite.append((ignite[up_to - 1, np.arange(sim_size)]/cutoff[cidx, :]).mean())
+                total_damage.append((damage[up_to - 1, np.arange(sim_size)]/local_ct).mean())
+                total_ignite.append((ignite[up_to - 1, np.arange(sim_size)]/local_ct).mean())
             total_dam = np.array(total_damage)
             ignite_dam = np.array(total_ignite)
+
+
 
             return self._run_params["id"], total_dam + target_fraction*ignite_dam
 
