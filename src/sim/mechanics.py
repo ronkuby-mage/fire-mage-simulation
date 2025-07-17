@@ -510,7 +510,7 @@ class Encounter():
                 else:
                     for sidx, stime in enumerate(self._arrays['global']['running_time']):
                         self._arrays['global']['total_damage'][sidx].append((stime, self._player[sidx], self._ignite[sidx]))
-            progress = 100*self._arrays['global']['running_time'].mean()/self._arrays['global']['duration'].mean()
+            progress = np.minimum(100*self._arrays['global']['running_time'].mean()/self._arrays['global']['duration'].mean(), 100.0)
             update_progress.emit((self._run_params["id"], progress))
             if not still_going.size:
                 break
@@ -536,9 +536,8 @@ class Encounter():
             dur_dist = self._run_params["dur_dist"]
             # variablity depends on length (5%).  This smooths out curves
             cutoff = 0.05*dur_dist.reshape(dur_dist.size, 1)*np.random.randn(len(dur_dist), sim_size) 
-            for didx, dur in enumerate(dur_dist):
-                cutoff[didx, :] += dur
-            cutoff[cutoff < 0.0] = 0.0
+            cutoff += np.repeat(dur_dist.reshape(dur_dist.size, 1), sim_size, axis=1)
+            cutoff = np.maximum(cutoff, 0.01)
 
             max_ind = np.array([len(arr) for arr in self._arrays['global']['total_damage']]).astype(np.int32) - 1
             max_length = max(max_ind) + 1
@@ -561,9 +560,11 @@ class Encounter():
             for cidx in range(cutoff.shape[0]):
                 up_to = np.argmax(ctime > cutoff[cidx, :], axis=0).squeeze()
                 up_to[np.logical_not(up_to)] = max_ind[np.logical_not(up_to)]
-                total_cut = ctime[up_to, np.arange(sim_size)]
-                total_damage.append((damage[up_to, np.arange(sim_size)]/total_cut).mean())
-                total_ignite.append((ignite[up_to, np.arange(sim_size)]/total_cut).mean())
+                total_cut = ctime[up_to - 1, np.arange(sim_size)]
+                #total_damage.append((damage[up_to, np.arange(sim_size)]/total_cut).mean())
+                #total_ignite.append((ignite[up_to, np.arange(sim_size)]/total_cut).mean())
+                total_damage.append((damage[up_to - 1, np.arange(sim_size)]/cutoff[cidx, :]).mean())
+                total_ignite.append((ignite[up_to - 1, np.arange(sim_size)]/cutoff[cidx, :]).mean())
             total_dam = np.array(total_damage)
             ignite_dam = np.array(total_ignite)
 

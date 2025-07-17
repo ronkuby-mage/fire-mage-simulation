@@ -72,7 +72,7 @@ class StatSettings(QWidget):
     _INITIAL_DELAY = 1.0
     _RECAST_DELAY = 0.05
     _DEFAULT_TIME = 70.0
-    _DEFAULT_VAR = 0.05
+    _DEFAULT_VAR = 0.00
     _DEFAULT_SAMPLES = 100000
     _MAX_MAGES = 9 # repeat from scenario
 
@@ -367,14 +367,6 @@ class CompareSettings(QWidget):
         self._time_widget["response"] = TimeWidget(self.modify_time, self._RECAST_DELAY, "Recast Delay (seconds)", "response", 10.0)
         layout.addWidget(self._time_widget["response"])
 
-        #row = QWidget()
-        #row_layout = QHBoxLayout()
-        #row_layout.setContentsMargins(0, 0, 0, 0)
-        #row_layout.addStretch()
-        #row_layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        #row_layout.addWidget(QLabel("Adaptive Sample Number"))
-        #self._adaptive = QLineEdit()
-
         # L6
         self._samples = self._DEFAULT_SAMPLES
         self._samples_widget = NumberOfSamples(self.modify_samples, self._DEFAULT_SAMPLES)
@@ -428,7 +420,7 @@ class CompareSettings(QWidget):
             config['timing'] = {
                 "duration": {
                     "mean": self._time["max_time"] + 15.0,
-                    "var": 3.0,
+                    "var": 0.0,
                     "clip": [3.0, 10000.0]},
                 "delay": self._time["delay"],
                 "response": self._time["response"]}
