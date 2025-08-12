@@ -1,6 +1,6 @@
 // in src/main.rs
 use std::collections::HashMap;
-use simulation::constants::{Action, ConstantsConfig, Buff};
+use simulation::constants::{Action, ConstantsConfig, Buff, ConsumeBuff, RaidBuff, WorldBuff};
 use simulation::decisions::{Decider, ScriptedDecider};
 use simulation::orchestration::{run_many_with, Configuration, SimParams, Stats, Buffs, Timing};
 
@@ -15,16 +15,32 @@ fn main() {
         intellect: vec![300.0; num_mages],
     };
 
+    let mut consumes = HashMap::new();
+    consumes.insert(ConsumeBuff::GreaterArcaneElixir, vec![0,1,2]);
+    consumes.insert(ConsumeBuff::ElixirOfGreaterFirepower, vec![0,1,2]);
+    consumes.insert(ConsumeBuff::FlaskOfSupremePower, vec![]);
+    consumes.insert(ConsumeBuff::BlessedWizardOil, vec![]);
+    consumes.insert(ConsumeBuff::BrilliantWizardOil, vec![]);
+    consumes.insert(ConsumeBuff::VeryBerryCream, vec![]);
+    consumes.insert(ConsumeBuff::StormwindGiftOfFriendship, vec![]);
+    consumes.insert(ConsumeBuff::InfallibleMind, vec![]);
+    consumes.insert(ConsumeBuff::RunnTumTuberSurprise, vec![]);
+
+    let mut raid = HashMap::new();
+    raid.insert(RaidBuff::ArcaneIntellect, (0..num_mages).collect());
+    raid.insert(RaidBuff::ImprovedMark, vec![]);
+    raid.insert(RaidBuff::BlessingOfKings, vec![]);
+
+    let mut world = HashMap::new();
+    world.insert(WorldBuff::RallyingCryOfTheDragonslayer, (0..num_mages).collect());
+    world.insert(WorldBuff::SongflowerSerenade, vec![]);
+    world.insert(WorldBuff::DireMaulTribute, vec![]);
+    world.insert(WorldBuff::SpiritOfZandalar, vec![]);
+    world.insert(WorldBuff::SaygesDarkFortuneOfDamage, (0..num_mages).collect());
+
     // Buffs/consumes (trimmed set — mirrors a subset of ArrayGenerator adjustments)
     let buffs = Buffs {
-        consumes: vec![
-            "greater_arcane_elixir",
-            "elixir_of_greater_firepower",
-            // "flask_of_supreme_power",
-            // "brilliant_wizard_oil",
-        ],
-        raid: vec!["arcane_intellect", "improved_mark"],
-        world: vec!["rallying_cry_of_the_dragonslayer"],
+        consumes, raid, world,
         boss: "",
         auras_mage_atiesh: vec![0.0; num_mages],
         auras_lock_atiesh: vec![0.0; num_mages],
@@ -84,7 +100,7 @@ fn main() {
     );
 
     let sims = 50000;
-    let seed = 42;
+    let seed = 9;
     let results = run_many_with::<ScriptedDecider, _>(&params, make_decider, sims, seed);
 
 

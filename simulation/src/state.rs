@@ -51,6 +51,7 @@ impl Default for Boss {
     }
 }
 
+// dynamic values
 #[derive(Debug, Clone)]
 pub struct MageLane {
     pub cast_type: Action,
@@ -71,6 +72,7 @@ pub struct MageLane {
     pub crit_chance: f64,
     pub spell_power: f64,
     pub cast_number: i32,
+    
 }
 
 impl Default for MageLane {
@@ -98,13 +100,15 @@ impl Default for MageLane {
     }
 }
 
+// stat values
 #[derive(Debug, Clone, Default)]
 pub struct PlayerMeta {
+    pub dmf_slots: Vec<usize>,
     pub cleaner_slots: Vec<usize>,
     pub pi_slots: Vec<usize>,
     pub target_slots: Vec<usize>,
     pub nightfall_period: Vec<f64>,
-    pub double_dip: f64,
+    pub vulnerability: f64,
 }
 
 #[derive(Debug, Clone)]
@@ -346,6 +350,7 @@ impl State {
         let targeted_all = self.meta.target_slots.len() == lanes_len;
         let is_cleaner = self.meta.cleaner_slots.iter().any(|&i| i == lane);
         let is_target = targeted_all || self.meta.target_slots.iter().any(|&i| i == lane);
+        let is_dmf = self.meta.dmf_slots.iter().any(|&i| i == lane);
 
         let dragonling_active = (self.global.running_time >= self.boss.dragonling_start) && (self.global.running_time < self.boss.dragonling_start + C::DRAGONLING_DURATION);
         let mut buff_damage = if dragonling_active { C::DRAGONLING_BUFF } else { 0.0 };
@@ -364,7 +369,8 @@ impl State {
         if k.is_fire[spell_type] && self.boss.scorch_timer > 0.0 { spell_damage *= 1.0 + C::SCORCH_MULTIPLIER*(self.boss.scorch_count as f64); }
         if l.buff_timer[Buff::PowerInfusion as usize] > 0.0 { spell_damage *= 1.0 + C::POWER_INFUSION; }
         if self.boss.spell_vulnerability > 0.0 { spell_damage *= 1.0 + C::NIGHTFALL_VULN; }
-        spell_damage *= self.meta.double_dip; // DMF + Thaddius
+        if is_dmf { spell_damage *= 1.0 + C::DMF_BUFF; }
+        spell_damage *= self.meta.vulnerability; // Thaddius
         if is_cleaner { spell_damage *= 1.0 + C::UDC_MOD }
 
         // add to total
@@ -391,8 +397,9 @@ impl State {
                 if self.boss.ignite_count == 0 {
                     self.boss.tick_timer = C::IGNITE_TICK;
                     let pi_mult = if l.buff_timer[Buff::PowerInfusion as usize] > 0.0 { 1.0 + C::POWER_INFUSION } else { 1.0 };
+                    let dmf_mult = if is_dmf {1.0 + C::DMF_BUFF} else { 1.0 };
                     // snap shot value
-                    self.boss.ignite_multiplier = if is_cleaner { 1.0 + C::UDC_MOD } else { 1.0 } * pi_mult * self.meta.double_dip;
+                    self.boss.ignite_multiplier = if is_cleaner { 1.0 + C::UDC_MOD } else { 1.0 } * pi_mult * dmf_mult * self.meta.vulnerability;
                 }
                 if self.boss.ignite_count < C::IGNITE_STACK {
                     let crit_mult = 1.0 + k.icrit_damage; // 1.5

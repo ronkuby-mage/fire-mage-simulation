@@ -6,18 +6,24 @@ use rand_pcg::Pcg64Mcg;
 use rand_distr::{Normal, Distribution};
 use std::collections::HashMap;
 
-use crate::constants::{Buff, Constants, ConstantsConfig};
+use crate::constants::{Buff, Constants, ConstantsConfig, ConsumeBuff, RaidBuff, WorldBuff};
 use crate::state::{State};
 use crate::decisions::Decider;
 
 // ---- Parameters mirrored from Python inputs (trimmed first pass) ----
 #[derive(Debug, Clone)]
 pub struct Stats { pub spell_power: Vec<f64>, pub crit_chance: Vec<f64>, pub hit_chance: Vec<f64>, pub intellect: Vec<f64> }
+
+fn has_idx<K: Eq + std::hash::Hash>(map: &std::collections::HashMap<K, Vec<usize>>, key: K, idx: usize) -> bool {
+    map.get(&key).map(|v| v.contains(&idx)).unwrap_or(false)
+}
+
 #[derive(Debug, Clone)]
 pub struct Buffs {
-    pub consumes: Vec<&'static str>,
-    pub raid: Vec<&'static str>,
-    pub world: Vec<&'static str>,
+    // NEW: per-mage buff assignment by index
+    pub consumes: HashMap<ConsumeBuff, Vec<usize>>,
+    pub raid:     HashMap<RaidBuff,     Vec<usize>>,
+    pub world:    HashMap<WorldBuff,    Vec<usize>>,
     pub boss: &'static str,
     pub auras_mage_atiesh: Vec<f64>,
     pub auras_lock_atiesh: Vec<f64>,
@@ -83,18 +89,21 @@ fn first_action_offsets<R: Rng + ?Sized>(num_mages: usize, initial_delay: f64, r
 }
 
 fn apply_buffs(stats: &mut Stats, buffs: &Buffs) {
-    // 1) Intellect pipeline (mirror Python ordering)
+ 
+    // 1) Intellect pipeline 
     for i in 0..stats.intellect.len() {
         let mut intel = stats.intellect[i];
+
         // flat adds
-        if buffs.raid.contains(&"arcane_intellect") { intel += 31.0; }
-        if buffs.raid.contains(&"improved_mark") { intel += 1.35 * 12.0; }
-        if buffs.consumes.contains(&"stormwind_gift_of_friendship") { intel += 30.0; }
-        if buffs.consumes.contains(&"infallible_mind") { intel += 25.0; }
-        if buffs.consumes.contains(&"runn_tum_tuber_surprise") { intel += 10.0; }
+        if has_idx(&buffs.raid, RaidBuff::ArcaneIntellect, i) { intel += 31.0; }
+        if has_idx(&buffs.raid, RaidBuff::ImprovedMark, i) { intel += 1.35 * 12.0; }
+        if has_idx(&buffs.consumes, ConsumeBuff::StormwindGiftOfFriendship, i) { intel += 30.0; }
+        if has_idx(&buffs.consumes, ConsumeBuff::InfallibleMind, i) { intel += 25.0; }
+        if has_idx(&buffs.consumes, ConsumeBuff::RunnTumTuberSurprise, i) { intel += 10.0; }
+
         // multiplicative
-        let kings = if buffs.raid.contains(&"blessing_of_kings") { 1.10 } else { 1.0 };
-        let soz   = if buffs.world.contains(&"spirit_of_zandalar") { 1.15 } else { 1.0 };
+        let kings = if has_idx(&buffs.raid, RaidBuff::BlessingOfKings, i) { 1.10 } else { 1.0 };
+        let soz   = if has_idx(&buffs.world, WorldBuff::SpiritOfZandalar, i) { 1.15 } else { 1.0 };
         let racial = if buffs.racial.get(i).map(|&r| r == "gnome").unwrap_or(false) { 1.05 } else { 1.0 };
         intel = intel * kings * soz * racial;
         stats.intellect[i] = intel;
@@ -102,22 +111,23 @@ fn apply_buffs(stats: &mut Stats, buffs: &Buffs) {
 
     // 2) Spell power buffs
     for (i, sp) in stats.spell_power.iter_mut().enumerate() {
-        if buffs.consumes.contains(&"greater_arcane_elixir") { *sp += 35.0; }
-        if buffs.consumes.contains(&"elixir_of_greater_firepower") { *sp += 40.0; }
-        if buffs.consumes.contains(&"flask_of_supreme_power") { *sp += 150.0; }
-        if buffs.consumes.contains(&"blessed_wizard_oil") { *sp += 60.0; }
-        if buffs.consumes.contains(&"brilliant_wizard_oil") { *sp += 36.0; }
-        if buffs.consumes.contains(&"very_berry_cream") { *sp += 23.0; }
+
+        if has_idx(&buffs.consumes, ConsumeBuff::GreaterArcaneElixir, i) { *sp += 35.0; }
+        if has_idx(&buffs.consumes, ConsumeBuff::ElixirOfGreaterFirepower, i) { *sp += 40.0; }
+        if has_idx(&buffs.consumes, ConsumeBuff::FlaskOfSupremePower, i) { *sp += 150.0; }
+        if has_idx(&buffs.consumes, ConsumeBuff::BlessedWizardOil, i) { *sp += 60.0; }
+        if has_idx(&buffs.consumes, ConsumeBuff::BrilliantWizardOil, i) { *sp += 36.0; }
+        if has_idx(&buffs.consumes, ConsumeBuff::VeryBerryCream, i) { *sp += 23.0; }
         *sp += 33.0 * buffs.auras_lock_atiesh.get(i).copied().unwrap_or(0.0);
     }
 
     // 3) Crit chance buffs (uses UPDATED intellect)
     for (i, cc) in stats.crit_chance.iter_mut().enumerate() {
-        *cc += 0.062; // base + talents per Python comment
-        if buffs.consumes.contains(&"brilliant_wizard_oil") { *cc += 0.01; }
-        if buffs.world.contains(&"rallying_cry_of_the_dragonslayer") { *cc += 0.10; }
-        if buffs.world.contains(&"songflower_serenade") { *cc += 0.05; }
-        if buffs.world.contains(&"dire_maul_tribute") { *cc += 0.03; }
+        *cc += 0.062; // base + talents 
+        if has_idx(&buffs.consumes, ConsumeBuff::BlessedWizardOil, i) { *cc += 0.01; }
+        if has_idx(&buffs.world, WorldBuff::RallyingCryOfTheDragonslayer, i) { *cc += 0.10; }
+        if has_idx(&buffs.world, WorldBuff::SongflowerSerenade, i) { *cc += 0.05; }
+        if has_idx(&buffs.world, WorldBuff::DireMaulTribute, i) { *cc += 0.03; }
         *cc += stats.intellect[i] / 5950.0; // intellect → crit
         *cc += 0.60 * (buffs.boss == "loatheb") as i32 as f64;
         *cc += 0.02 * buffs.auras_mage_atiesh.get(i).copied().unwrap_or(0.0);
@@ -139,9 +149,8 @@ fn init_state<R: Rng + ?Sized>(p: &SimParams, rng: &mut R, idx: u64) -> State {
 
     st.meta.cleaner_slots = p.config.udc.clone();
     st.meta.target_slots = p.config.target.clone();
-    let dmf_dip: f64 = if p.buffs.world.contains(&"sayges_dark_fortune_of_damage") { 1.0 + C::DMF_BUFF } else { 1.0 };
-    let thaddius_dip: f64 = if p.buffs.boss.contains(&"thaddius") { 1.0 + C::THADDIUS_BUFF } else { 1.0 };
-    st.meta.double_dip = dmf_dip * thaddius_dip;
+    st.meta.dmf_slots = p.buffs.world.get(&WorldBuff::SaygesDarkFortuneOfDamage).unwrap().clone().to_vec();
+    st.meta.vulnerability = if p.buffs.boss.contains(&"thaddius") { 1.0 + C::THADDIUS_BUFF } else { 1.0 };
     st.meta.nightfall_period = p.config.nightfall.clone();
     st.boss.nightfall = p.config.nightfall.clone(); // start the swing timers
     st.boss.dragonling_start = p.config.dragonling;

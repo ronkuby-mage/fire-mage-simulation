@@ -62,6 +62,36 @@ impl fmt::Display for Action {
     }
 }
 
+// constants.rs
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+pub enum ConsumeBuff {
+    GreaterArcaneElixir,
+    ElixirOfGreaterFirepower,
+    FlaskOfSupremePower,
+    BlessedWizardOil,
+    BrilliantWizardOil,
+    VeryBerryCream,
+    StormwindGiftOfFriendship,
+    InfallibleMind,
+    RunnTumTuberSurprise,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+pub enum RaidBuff {
+    ArcaneIntellect,
+    ImprovedMark,
+    BlessingOfKings,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+pub enum WorldBuff {
+    RallyingCryOfTheDragonslayer,
+    SongflowerSerenade,
+    DireMaulTribute,
+    SpiritOfZandalar,
+    SaygesDarkFortuneOfDamage,
+}
+
 impl Action {
     #[inline]
     pub fn is_instant(self) -> bool { matches!(self, Action::Combustion | Action::Sapp | Action::Toep | Action::Zhc | Action::Mqg | Action::PowerInfusion | Action::Gcd) }
