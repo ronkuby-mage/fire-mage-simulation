@@ -4,6 +4,7 @@ use rand::SeedableRng;
 use rand::Rng; // bring trait into scope
 use rand_pcg::Pcg64Mcg;
 use rand_distr::{Normal, Distribution};
+use std::collections::HashMap;
 
 use crate::constants::{Buff, Constants, ConstantsConfig};
 use crate::state::{State};
@@ -25,8 +26,35 @@ pub struct Buffs {
 }
 #[derive(Debug, Clone)]
 pub struct Timing { pub duration_mean: f64, pub duration_sigma: f64, pub initial_delay: f64, pub recast_delay: f64 }
+
 #[derive(Debug, Clone)]
-pub struct Configuration { pub num_mages: usize, pub udc: Vec<usize>, pub pi: Vec<usize>, pub target: Vec<usize> }
+pub struct Configuration {
+    pub num_mages: usize,
+    pub target: Vec<usize>,
+    pub buff_assignments: HashMap<Buff, Vec<usize>>,
+    pub udc: Vec<usize>,
+    pub nightfall: Vec<f64>,
+    pub dragonling: f64,
+}
+impl Configuration {
+    pub fn new() -> Self {
+        let mut buff_assignments = HashMap::new();
+        buff_assignments.insert(Buff::Sapp, vec![]);
+        buff_assignments.insert(Buff::Toep, vec![]);
+        buff_assignments.insert(Buff::Zhc, vec![]);
+        buff_assignments.insert(Buff::Mqg, vec![]);
+        buff_assignments.insert(Buff::PowerInfusion, vec![]);
+
+        Self {
+            num_mages: 0,
+            target: vec![],
+            buff_assignments,
+            udc: vec![],
+            nightfall: vec![],
+            dragonling: f64::INFINITY,
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct SimParams {
@@ -101,18 +129,22 @@ fn apply_buffs(stats: &mut Stats, buffs: &Buffs) {
     for hc in &mut stats.hit_chance { *hc = (*hc + 0.89).min(0.99); }
 }
 
-fn init_state<R: Rng + ?Sized>(p: &SimParams, rng: &mut R) -> State {
+fn init_state<R: Rng + ?Sized>(p: &SimParams, rng: &mut R, idx: u64) -> State {
     use crate::constants as C;
 
     let num = p.config.num_mages;
     let mut st = State::new(sample_duration(&p.timing, rng), num);
+
+    st.log = idx == 0 && C::LOG;
+
     st.meta.cleaner_slots = p.config.udc.clone();
-    st.meta.pi_slots = p.config.pi.clone();
     st.meta.target_slots = p.config.target.clone();
-    st.meta.nightfall_period = vec![5.0; num];
     let dmf_dip: f64 = if p.buffs.world.contains(&"sayges_dark_fortune_of_damage") { 1.0 + C::DMF_BUFF } else { 1.0 };
     let thaddius_dip: f64 = if p.buffs.boss.contains(&"thaddius") { 1.0 + C::THADDIUS_BUFF } else { 1.0 };
     st.meta.double_dip = dmf_dip * thaddius_dip;
+    st.meta.nightfall_period = p.config.nightfall.clone();
+    st.boss.nightfall = p.config.nightfall.clone(); // start the swing timers
+    st.boss.dragonling_start = p.config.dragonling;
 
     // Per-lane stats
     let offsets = first_action_offsets(num, p.timing.initial_delay, rng);
@@ -128,11 +160,64 @@ fn init_state<R: Rng + ?Sized>(p: &SimParams, rng: &mut R) -> State {
         // Others could come from config similarly
     }
 
+    for lane_idx in 0..st.lanes.len() {
+        for (buff, indices) in &p.config.buff_assignments {
+            if indices.contains(&lane_idx) {
+                if let Some(lane) = st.lanes.get_mut(lane_idx) {
+                    lane.buff_cooldown[*buff as usize] = 0.0;
+                }
+            }
+        }
+    }
+
     st
 }
 
-pub fn run_single<D: Decider>(params: &SimParams, decider: &mut D, seed: u64) -> SimResult {
-    let mut rng = Pcg64Mcg::seed_from_u64(seed);
+/// Print SP / Hit / Crit / Int for each mage, plus which buffs are currently ready (cooldown <= 0).
+/// Call this right after `init_state(...)` inside `run_single`.
+pub fn display_party_stats(st: &State, intellect: Option<&[f64]>) {
+    // If you add/remove buffs, update this list to match Buff order/variants.
+    let known_buffs: &[(Buff, &str)] = &[
+        (Buff::Sapp, "sapp"),
+        (Buff::Toep, "toep"),
+        (Buff::Zhc,  "zhc"),
+        (Buff::Mqg,  "mqg"),
+        (Buff::PowerInfusion, "pi"),
+    ];
+
+    println!("\n=== Player Stats ===");
+    for (i, lane) in st.lanes.iter().enumerate() {
+        // gather ready buffs
+        let mut ready: Vec<&str> = Vec::new();
+        for (b, label) in known_buffs {
+            let idx = *b as usize;
+            if lane.buff_cooldown.get(idx).map(|&cd| cd <= 0.0).unwrap_or(false) {
+                ready.push(*label);
+            }
+        }
+        let ready_str = if ready.is_empty() { "-".to_string() } else { ready.join(",") };
+
+        // intellect if provided; otherwise show "-"
+        let int_str = intellect
+            .and_then(|ints| ints.get(i).copied())
+            .map(|v| format!("{:.0}", v))
+            .unwrap_or_else(|| "-".to_string());
+
+        println!(
+            "Mage {:>2}: SP={:>4.0}  Hit={:>5.2}%  Crit={:>5.2}%  Int={}  Ready=[{}]",
+            i,
+            lane.spell_power,
+            100.0 * lane.hit_chance,
+            100.0 * lane.crit_chance,
+            int_str,
+            ready_str
+        );
+    }
+}
+
+
+pub fn run_single<D: Decider>(params: &SimParams, decider: &mut D, seed: u64, idx: u64) -> SimResult {
+    let mut rng = Pcg64Mcg::seed_from_u64(seed + idx);
 
     // Build constants and bake stats
     let k = Constants::new(&params.consts_cfg);
@@ -141,7 +226,12 @@ pub fn run_single<D: Decider>(params: &SimParams, decider: &mut D, seed: u64) ->
     apply_buffs(&mut baked_params.stats, &params.buffs);
 
     // Init state
-    let mut st = init_state(&baked_params, &mut rng);
+    let mut st = init_state(&baked_params, &mut rng, idx);
+
+    if st.log {
+        // show effective stats & ready buffs
+        display_party_stats(&st, Some(&baked_params.stats.intellect));
+    }
 
     while st.in_progress() {
         
@@ -160,6 +250,10 @@ pub fn run_single<D: Decider>(params: &SimParams, decider: &mut D, seed: u64) ->
 
     // Aggregate DPS
     let dur = st.global.duration.max(1e-9);
+    if st.log {
+        println!("Logged sim:");
+        println!("  total damage: {:.1} duration {:.1}", st.totals.total_damage + st.totals.ignite_damage, dur);
+    }
     SimResult {
         total_dps: (st.totals.total_damage + st.totals.ignite_damage) / dur,
         ignite_dps: st.totals.ignite_damage / dur,
@@ -167,6 +261,20 @@ pub fn run_single<D: Decider>(params: &SimParams, decider: &mut D, seed: u64) ->
     }
 }
 
-pub fn run_many<D: Decider>(params: &SimParams, decider: &mut D, n: usize, seed: u64) -> Vec<SimResult> {
-    (0..n).map(|i| run_single(params, decider, seed + i as u64)).collect()
+pub fn run_many_with<D, F>(
+    params: &SimParams,
+    make_decider: F,
+    n: usize,
+    seed: u64,
+) -> Vec<SimResult>
+where
+    D: Decider,
+    F: Fn() -> D,
+{
+    (0..n)
+        .map(|i| {
+            let mut dec = make_decider();            // <-- fresh instance each iteration
+            run_single(params, &mut dec, seed, i as u64)
+        })
+        .collect()
 }

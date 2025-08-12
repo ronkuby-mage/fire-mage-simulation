@@ -12,6 +12,18 @@ use std::fmt;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Spell { Scorch = 0, Pyroblast = 1, Fireball = 2, FireBlast = 3, Frostbolt = 4 }
 
+impl fmt::Display for Spell {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Spell::Fireball => write!(f, "fireball  "),
+            Spell::Scorch => write!(f, "scorch    "),
+            Spell::Pyroblast => write!(f, "pyroblast "),
+            Spell::FireBlast => write!(f, "fire blast"),
+            Spell::Frostbolt => write!(f, "Frostbolt "),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Action {
     // Castable spells
@@ -62,15 +74,13 @@ impl Action {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Buff { Sapp = 0, Toep = 1, Zhc = 2, Mqg = 3, PowerInfusion = 4 }
 
-pub const LOG: bool = false;
+pub const LOG: bool = true;
 
 pub const NUM_SPELLS: usize = 5;          // Scorch, Pyro, Fireball, FireBlast, Frostbolt
 pub const NUM_ACTIONS: usize = 12;         // includes GCD + instants
-pub const NUM_BUFFS: usize = 5;            // Sapp, TOEP, ZHC, MQG, PI
-pub const NUM_DAMAGE_BUFFS: usize = 3;     // Sapp, TOEP, ZHC
 
 // --- Global mechanical constants (mostly invariant during a run) ---
 pub const GLOBAL_COOLDOWN: f64 = 1.5;
@@ -90,6 +100,8 @@ pub const FIRE_BLAST_COOLDOWN: f64 = 7.0;  // assumes 2 talent points
 pub const POWER_INFUSION: f64 = 0.20;
 pub const MQG_HASTE: f64 = 0.33;           // Mind Quickening Gem cast speed bonus
 
+pub const NUM_BUFFS: usize = 5;            // Sapp, TOEP, ZHC, MQG, PI
+pub const NUM_DAMAGE_BUFFS: usize = 3;     // Sapp, TOEP, ZHC
 pub const BUFF_DURATION: [f64; NUM_BUFFS] = [20.0, 15.0, 20.0, 20.0, 15.0];
 pub const BUFF_COOLDOWN: [f64; NUM_BUFFS] = [120.0, 90.0, 120.0, 300.0, 180.0];
 /// Flat damage added per spell hit while active (Sapp, TOEP, ZHC)
@@ -120,22 +132,6 @@ pub const NIGHTFALL_VULN: f64 = 0.15;      // +15% spell vulnerability
 pub const NIGHTFALL_DURATION: f64 = 5.0;
 
 pub const UDC_MOD: f64 = 0.02;
-
-/// Default string labels to mirror Python logs; index by Action as usize
-pub const LOG_SPELL: [&str; NUM_ACTIONS] = [
-    "scorch    ",
-    "pyroblast ",
-    "fireball  ",
-    "fire blast",
-    "frostbolt ",
-    "gcd       ",
-    "combustion",
-    "sapp      ",
-    "toep      ",
-    "zhc       ",
-    "mqg       ",
-    "power inf ",
-];
 
 /// How many opening Scorches are required by number of mages (index by num_mages)
 pub const SCORCHES_BY_MAGES: [i32; 13] = [9000, 6, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1];

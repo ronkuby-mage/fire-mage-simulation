@@ -32,8 +32,24 @@ pub struct Boss {
     pub scorch_count: u8,
     pub spell_vulnerability: f64,
     pub dragonling_start: f64,
+    pub nightfall: Vec<f64>,
 }
-impl Default for Boss { fn default() -> Self { Self { ignite_timer: 0.0, ignite_count: 0, ignite_value: 0.0, ignite_multiplier: 1.0, tick_timer: f64::INFINITY, scorch_timer: 0.0, scorch_count: 0, spell_vulnerability: 0.0, dragonling_start: -C::DRAGONLING_DURATION } } }
+impl Default for Boss {
+    fn default() -> Self {
+        Self {
+            ignite_timer: 0.0,
+            ignite_count: 0,
+            ignite_value: 0.0,
+            ignite_multiplier: 1.0,
+            tick_timer: f64::INFINITY,
+            scorch_timer: 0.0,
+            scorch_count: 0,
+            spell_vulnerability: 0.0,
+            dragonling_start: -C::DRAGONLING_DURATION,
+            nightfall: vec![],
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct MageLane {
@@ -55,7 +71,6 @@ pub struct MageLane {
     pub crit_chance: f64,
     pub spell_power: f64,
     pub cast_number: i32,
-    pub nightfall_timer: f64,
 }
 
 impl Default for MageLane {
@@ -79,7 +94,6 @@ impl Default for MageLane {
             crit_chance: 0.062,
             spell_power: 0.0,
             cast_number: -1,
-            nightfall_timer: f64::INFINITY,
         }
     }
 }
@@ -100,11 +114,19 @@ pub struct State {
     pub lanes: Vec<MageLane>,
     pub meta: PlayerMeta,
     pub totals: Totals,
+    pub log: bool,
 }
 
 impl State {
     pub fn new(duration: f64, num_mages: usize) -> Self {
-        Self { global: Global::new(duration), boss: Boss::default(), lanes: vec![MageLane::default(); num_mages], meta: PlayerMeta::default(), totals: Totals::default() }
+        Self {
+            global: Global::new(duration),
+            boss: Boss::default(),
+            lanes: vec![MageLane::default(); num_mages],
+            meta: PlayerMeta::default(),
+            totals: Totals::default(),
+            log: false,
+        }
     }
 
     // ---------- time & scheduling ----------
@@ -120,9 +142,11 @@ impl State {
             l.gcd_timer -= dt;
             l.comb_cooldown -= dt;
             l.fb_cooldown -= dt;
-            l.nightfall_timer -= dt;
             for t in &mut l.buff_timer { *t -= dt; }
             for c in &mut l.buff_cooldown { *c -= dt; }
+        }
+        for t in &mut self.boss.nightfall {
+            *t -= dt;
         }
     }
 
@@ -183,7 +207,9 @@ impl State {
         } else {
             l.gcd_timer = 0.0;
         }
-        //println!("  {:6.2} mage {} START {}", self.global.running_time, lane, action);
+        if self.log {
+            println!("  {:6.2} mage {} START {}", self.global.running_time, lane, action);
+        }
 
         // Block decisions until the event is handled (Python clears global decision flag)
         self.set_decision_gate(false);
@@ -284,8 +310,9 @@ impl State {
             let cn = self.lanes[lane].cast_number;
             self.lanes[lane].cast_number = cn.saturating_add(1);
         }
-
-        //println!("  {:6.2} mage {} END   {}", self.global.running_time, lane, action);
+        if self.log {
+            println!("  {:6.2} mage {} END   {}", self.global.running_time, lane, action);
+        }
 
     }
 
@@ -300,13 +327,14 @@ impl State {
 
         // grab lane fields you need for early checks
         let lane_hit = self.lanes[lane].hit_chance;
+        let spell_string = self.lanes[lane].spell_type;
         let spell_type = self.lanes[lane].spell_type as usize;
         let l = &mut self.lanes[lane];
         l.spell_timer = f64::INFINITY;
 
         // use the stashed values instead of reading through `l` where possible
         if rng.r#gen::<f64>() >= lane_hit {
-            if C::LOG {
+            if self.log {
                 println!("  {:6.2} mage {} misses", self.global.running_time, lane);
             }
             // ---- now take the mutable borrow of this lane ----
@@ -396,18 +424,24 @@ impl State {
                 if is_target { self.totals.player_damage += extra; }
             }
         }
-
-        if C::LOG {
-            if is_crit {
-                println!("  {:6.2} mage {} CRIT for {}", self.global.running_time, lane, spell_damage)
-            } else {
-                println!("  {:6.2} mage {} hit  for {}", self.global.running_time, lane, spell_damage)
+        if self.boss.scorch_timer <= 0.0 {
+            self.boss.scorch_count = 0     
+        }
+        if k.is_scorch[spell_type] {
+            if rng.r#gen::<f64>() < lane_hit {
+                self.boss.scorch_timer = C::SCORCH_TIME;
+                self.boss.scorch_count = (self.boss.scorch_count + 1).min(C::SCORCH_STACK);
             }
         }
-        
-
-        if k.is_scorch[spell_type] { self.boss.scorch_timer = C::SCORCH_TIME; self.boss.scorch_count = (self.boss.scorch_count + 1).min(C::SCORCH_STACK); }
         if is_fire { l.comb_stack = l.comb_stack.saturating_add(1); }
+
+        if self.log {
+            if is_crit {
+                println!("  {:6.2} mage {} spell {} CRIT for {}", self.global.running_time, lane, spell_string, spell_damage)
+            } else {
+                println!("  {:6.2} mage {} spell {} hit  for {}", self.global.running_time, lane, spell_string, spell_damage)
+            }
+        }
 
     }
 
@@ -433,35 +467,36 @@ impl State {
         let r: f64 = rng.r#gen();
         mult *= if r < C::RES_THRESH[1] { C::RES_AMOUNT[0] } else if r < C::RES_THRESH[2] { C::RES_AMOUNT[1] } else if r < C::RES_THRESH[3] { C::RES_AMOUNT[2] } else { C::RES_AMOUNT[3] };
         self.totals.ignite_damage += mult * self.boss.ignite_value;
-        if C::LOG {
+        if self.log {
             println!("  {:6.2} in ignite {} mult {}", self.global.running_time, mult * self.boss.ignite_value, mult);
         }
 
     }
 
     pub fn proc_nightfall<R: rand::Rng + ?Sized>(&mut self, _k: &Constants, rng: &mut R) {
-        // find index in its own scope so the immutable borrow ends
-        let idx_opt = {
-            self.lanes
-                .iter()
-                .enumerate()
-                .min_by(|a, b| a.1.nightfall_timer.total_cmp(&b.1.nightfall_timer))
-                .map(|(i, _)| i)
+        // 1) find soonest Nightfall check
+        let (idx, dt) = match self.boss.nightfall
+            .iter()
+            .enumerate()
+            .min_by(|a, b| a.1.total_cmp(b.1))
+        {
+            Some((i, &t)) if t.is_finite() => (i, t),
+            _ => return, // nothing scheduled
         };
 
-        if let Some(idx) = idx_opt {
-            let dt = self.lanes[idx].nightfall_timer; // read after borrow ended
-            self.subtime(dt);
+        // 2) advance time by dt (this also subtracts dt from all boss.nightfall_timers)
+        self.subtime(dt);
 
-            // now mutate
-            let period = self.meta.nightfall_period.get(idx).copied().unwrap_or(5.0);
-            self.lanes[idx].nightfall_timer = period;
-            if rng.r#gen::<f64>() < C::NIGHTFALL_PROC_PROB {
-                self.boss.spell_vulnerability = C::NIGHTFALL_DURATION;
-            }
+        // 3) reset this source's swing timer to its period
+        if let Some(period) = self.meta.nightfall_period.get(idx).copied() {
+            self.boss.nightfall[idx] = period;
+        }
+
+        // 4) roll Nightfall proc; if it hits, apply vulnerability window
+        if rng.r#gen::<f64>() < C::NIGHTFALL_PROC_PROB {
+            self.boss.spell_vulnerability = C::NIGHTFALL_DURATION;
         }
     }
-
 
     /// One discrete simulation step (faithful to mechanics._advance):
     /// choose the nearest event among: cast finish, spell land, ignite tick, nightfall proc
@@ -471,7 +506,7 @@ impl State {
         let cast_t  = self.lanes.iter().map(|l| l.cast_timer).fold(f64::INFINITY, f64::min);
         let spell_t = self.lanes.iter().map(|l| l.spell_timer).fold(f64::INFINITY, f64::min);
         let tick_t  = self.boss.tick_timer;
-        let proc_t  = self.lanes.iter().map(|l| l.nightfall_timer).fold(f64::INFINITY, f64::min);
+        let proc_t  = self.boss.nightfall.iter().copied().fold(f64::INFINITY, f64::min);
 
         // Short-circuit if nothing scheduled
         if !cast_t.is_finite() && !spell_t.is_finite() && !tick_t.is_finite() && !proc_t.is_finite() {

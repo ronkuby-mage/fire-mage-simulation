@@ -1,11 +1,10 @@
-use simulation::{
-    decisions::{Decider, FireballSpam},
-    orchestration::{run_many, Configuration, SimParams, Stats, Buffs, Timing},
-    constants::ConstantsConfig,
-};
+// in src/main.rs
+use std::collections::HashMap;
+use simulation::constants::{Action, ConstantsConfig, Buff};
+use simulation::decisions::{Decider, ScriptedDecider};
+use simulation::orchestration::{run_many_with, Configuration, SimParams, Stats, Buffs, Timing};
 
 fn main() {
-    // --- Minimal demo parameters (feel free to tweak) ---
     let num_mages = 3usize;
 
     // Base stats for each mage
@@ -40,30 +39,65 @@ fn main() {
         recast_delay: 0.05,
     };
 
+    let mut buff_assignments = HashMap::new();
+    buff_assignments.insert(Buff::Sapp, vec![]);
+    buff_assignments.insert(Buff::Toep, vec![0, 1]);
+    buff_assignments.insert(Buff::Zhc, vec![]);
+    buff_assignments.insert(Buff::Mqg, vec![]);
+    buff_assignments.insert(Buff::PowerInfusion, vec![0, 2]);
+
     let config = Configuration {
         num_mages,
-        udc: vec![],            // lane indices that can "clean" ignite
-        pi: vec![],             // lane indices that can receive PI windows
         target: (0..num_mages).collect(), // treat all as target for player_damage
+        buff_assignments,
+        udc: vec![1, 2],
+        nightfall: vec![1.77, 3.55],
+        dragonling: 20.0,
     };
 
     let consts_cfg = ConstantsConfig { ..Default::default() };
 
-    // Grab counts now, before `config` is moved
-    let m = num_mages as f64;
-    let targets = config.target.len() as f64;
-
     let params = SimParams { stats, buffs, timing, config, consts_cfg };
 
-    let mut decider = FireballSpam;
-    let results = run_many(&params, &mut decider, 50000, 9);
+    // Example: open with 3x Scorch then a Pyroblast, then default to Fireball
+    let initial_sequence = vec![
+        Action::Scorch,
+        Action::Scorch,
+        Action::Combustion,
+        Action::Toep,
+        Action::PowerInfusion,
+    ];
+    let default_action = Action::Fireball;
 
-    // --- summary ---
+    // Reaction-time sigmas (tweak to taste)
+    let initial_react = 0.05;     // e.g. slightly slower on openers
+    let continuing_react = 0.05;  // tighter after ramp
+
+    // If your AdvancedDecider::new takes (num_mages, …), capture it here as needed
+    let make_decider = || ScriptedDecider::new(
+        /* num_mages: */
+        params.config.num_mages,
+        initial_sequence.clone(),
+        default_action,
+        initial_react,
+        continuing_react,
+    );
+
+    let sims = 50000;
+    let seed = 42;
+    let results = run_many_with::<ScriptedDecider, _>(&params, make_decider, sims, seed);
+
+
+    // Per-mage / per-target summary (as we discussed earlier)
+    let m = params.config.num_mages as f64;
+    let target_count = params.config.target.len() as f64;
+
     let (mut total, mut ignite, mut player) = (0.0, 0.0, 0.0);
     for r in &results { total += r.total_dps; ignite += r.ignite_dps; player += r.player_dps; }
     let n = results.len() as f64;
+
     println!("Ran {} sims:", results.len());
     println!("  mean total dps per mage:    {:.1}", total / (n * m));
     println!("  mean ignite dps per mage:   {:.1}", ignite / (n * m));
-    println!("  mean player dps per target: {:.1}", player / (n * targets));
+    println!("  mean player dps per target: {:.1}", player / (n * target_count));
 }
