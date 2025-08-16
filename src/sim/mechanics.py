@@ -478,11 +478,11 @@ class Encounter():
                           self._config)
 
         # prep for first player to "move"
-        first_act = np.min(self._arrays['player']['cast_timer'], axis=1)
-        self._arrays['global']['duration'] += first_act
-        self._arrays['player']['cast_timer'] -= first_act[:, None]
-        next_hit = np.argmin(self._arrays['player']['cast_timer'], axis=1)
-        self._arrays['player']['cast_number'][np.arange(self._arrays['player']['cast_timer'].shape[0]), next_hit] += 1
+        #first_act = np.min(self._arrays['player']['cast_timer'], axis=1)
+        #self._arrays['global']['duration'] += first_act
+        #self._arrays['player']['cast_timer'] -= first_act[:, None]
+        #next_hit = np.argmin(self._arrays['player']['cast_timer'], axis=1)
+        #self._arrays['player']['cast_number'][np.arange(self._arrays['player']['cast_timer'].shape[0]), next_hit] += 1
 
         if C.log_sim >= 0:
             constants.log_message()
@@ -497,19 +497,25 @@ class Encounter():
             self._apply_decisions(still_going, decisions, next_hit)
             while self._advance():
                 still_going = np.where(self._arrays['global']['running_time'] < self._arrays['global']['duration'])[0]
-            if not over_time:
-                self._arrays['global']['total_damage'][still_going] += self._damage[still_going]
-                if not self._all:
-                    self._arrays['global']['player'][still_going] += self._player[still_going]
-                self._arrays['global']['crit'][still_going] += self._crit[still_going]
-                self._arrays['global']['ignite'][still_going] += self._ignite[still_going]
-            else:
-                if self._all:
-                    for sidx, stime in enumerate(self._arrays['global']['running_time']):
-                        self._arrays['global']['total_damage'][sidx].append((stime, self._damage[sidx], self._ignite[sidx]))
+                if not over_time:
+                    self._arrays['global']['total_damage'][still_going] += self._damage[still_going]
+                    if not self._all:
+                        self._arrays['global']['player'][still_going] += self._player[still_going]
+                    self._arrays['global']['crit'][still_going] += self._crit[still_going]
+                    self._arrays['global']['ignite'][still_going] += self._ignite[still_going]
                 else:
-                    for sidx, stime in enumerate(self._arrays['global']['running_time']):
-                        self._arrays['global']['total_damage'][sidx].append((stime, self._player[sidx], self._ignite[sidx]))
+                    if self._all:
+                        for sidx, stime in enumerate(self._arrays['global']['running_time']):
+                            self._arrays['global']['total_damage'][sidx].append((stime, self._damage[sidx], self._ignite[sidx]))
+                    else:
+                        for sidx, stime in enumerate(self._arrays['global']['running_time']):
+                            self._arrays['global']['total_damage'][sidx].append((stime, self._player[sidx], self._ignite[sidx]))
+                self._damage = np.zeros(self._arrays['global']['running_time'].size)
+                if not self._all:
+                    self._player = np.zeros(self._arrays['global']['running_time'].size)
+                self._crit = np.zeros(self._arrays['global']['running_time'].size)
+                self._ignite = np.zeros(self._arrays['global']['running_time'].size)
+
             progress = np.minimum(100*self._arrays['global']['running_time'].mean()/self._arrays['global']['duration'].mean(), 100.0)
             update_progress.emit((self._run_params["id"], progress))
             if not still_going.size:
