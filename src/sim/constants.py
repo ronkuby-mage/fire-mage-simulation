@@ -276,6 +276,7 @@ class ArrayGenerator():
         intellect = np.tile(np.array(self._params["stats"]["intellect"], dtype=np.float32)[None, :], (sim_size, 1))
         intellect += 31.0*float("arcane_intellect" in self._params["buffs"]["raid"])
         intellect += 1.35*12.0*float("improved_mark" in self._params["buffs"]["raid"])
+        intellect += 15.0*float("songflower_serenade" in self._params["buffs"]["world"])
         intellect += 30.0*float("stormwind_gift_of_friendship" in self._params["buffs"]["consumes"])
         intellect += 25.0*float("infallible_mind" in self._params["buffs"]["consumes"])
         intellect += 10.0*float("runn_tum_tuber_surprise" in self._params["buffs"]["consumes"])
